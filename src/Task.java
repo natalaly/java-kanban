@@ -2,7 +2,10 @@ public class Task {
   private String title;
   private String description;
   private Status status;
-  private long id;
+  private int id;
+
+  public Task() {
+  }
 
   public Task(String title, String description, Status status) {
     this.title = title;
@@ -34,11 +37,11 @@ public class Task {
     this.status = status;
   }
 
-  public long getId() {
+  public int getId() {
     return id;
   }
 
-  public void setId(long id) {
+  public void setId(int id) {
     this.id = id;
   }
 
@@ -47,20 +50,12 @@ public class Task {
     if (this == o) return true;
     if (!(o instanceof Task task)) return false;
 
-    if (getId() != task.getId()) return false;
-    if (getTitle() != null ? !getTitle().equals(task.getTitle()) : task.getTitle() != null) return false;
-    if (getDescription() != null ? !getDescription().equals(task.getDescription()) : task.getDescription() != null)
-      return false;
-    return getStatus() == task.getStatus();
+    return getId() == task.getId();
   }
 
   @Override
   public int hashCode() {
-    int result = getTitle() != null ? getTitle().hashCode() : 0;
-    result = 31 * result + (getDescription() != null ? getDescription().hashCode() : 0);
-    result = 31 * result + (getStatus() != null ? getStatus().hashCode() : 0);
-    result = 31 * result + (int) (getId() ^ (getId() >>> 32));
-    return result;
+    return getId();
   }
 
   @Override
