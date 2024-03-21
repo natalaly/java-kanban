@@ -46,8 +46,8 @@ public class TaskManager {
     return ++counter;
   }
 
-  public static Task updateTask(Task updatedTask, int id) {
-    if(!tasks.containsKey(id)){
+  public static Task updateTask(Task updatedTask) {
+    if(!tasks.containsKey(updatedTask.getId())){
       System.out.println("There is no such task.");
       return null;
     }
@@ -55,8 +55,8 @@ public class TaskManager {
       System.out.println("No update data received.");
       return null;
     }
-    tasks.put(id, updatedTask);
-    return getById(id);
+    tasks.put(updatedTask.getId(), updatedTask);
+    return getById(updatedTask.getId());
   }
 
   public static void deleteTaskById(int id) {

@@ -29,9 +29,9 @@ public class Main {
 
 //    testClearTasks();
 
-//    testUpdateTask();
+    testUpdateTask();
 
-    deleteTaskById();
+//    deleteTaskById();
 
 
 
@@ -100,17 +100,17 @@ public class Main {
     if(TaskManager.getAllTasks().size() == 0){
       System.out.println("2. While task2 in the tracker before updating: " + TaskManager.getById(2));
       System.out.println("3. Apply updateTask(task2,2), update task2 in the tracker:");
-      TaskManager.updateTask(task2,2);
-      System.out.println(TaskManager.updateTask(task2,2));
+      TaskManager.updateTask(task2);
+      System.out.println(TaskManager.updateTask(task2));
 
       System.out.println("Add some tasks and try again.");
       TaskManager.addTask(task1);
       TaskManager.addTask(task2);
       System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     }
-    System.out.println("3. Apply updateTask(task2,2), update task2 in the tracker:");
-    TaskManager.updateTask(task2,2);
-    System.out.println(TaskManager.updateTask(task2,2));
+    System.out.println("3. Apply updateTask(Task task), update task2 in the tracker:");
+    TaskManager.updateTask(task2);
+    System.out.println(TaskManager.updateTask(task2));
     System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
   }
 
