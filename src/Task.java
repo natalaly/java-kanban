@@ -1,16 +1,23 @@
-public class Task {
+public class Task implements Cloneable {
+  private int id;
   private String title;
   private String description;
   private Status status;
-  private int id;
+
 
   public Task() {
   }
 
-  public Task(String title, String description, Status status) {
+  public Task(String title, String description) {
+    this();
     this.title = title;
     this.description = description;
-    this.status = status;
+    this.status = Status.NEW;
+  }
+
+  private Task(String title, String description, int id) {
+    this(title, description);
+    this.id = id;
   }
 
   public String getTitle() {
@@ -45,6 +52,7 @@ public class Task {
     this.id = id;
   }
 
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -60,11 +68,21 @@ public class Task {
 
   @Override
   public String toString() {
-    return "Task{" +
-        "title='" + title + '\'' +
-        ", description='" + description + '\'' +
-        ", status=" + status +
-        ", id=" + id +
+    String result = "Task{" +
+        "id=" + id +
+        ", title='" + title + '\'';
+    if (description != null) {
+      result += ", description.length=" + description.length();
+    } else {
+      result += ", description=null";
+    }
+    result += ", status=" + status +
         '}';
+    return result;
+  }
+
+  @Override
+  protected Task clone() {
+    return new Task(this.getTitle(), this.getDescription(), this.id);
   }
 }
