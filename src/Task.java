@@ -1,9 +1,8 @@
 public class Task implements Cloneable {
-  private int id;
+  private  int id;
   private String title;
   private String description;
   private Status status;
-
 
   public Task() {
   }
@@ -15,9 +14,10 @@ public class Task implements Cloneable {
     this.status = Status.NEW;
   }
 
-  private Task(String title, String description, int id) {
+  private Task(int id, String title, String description, Status status) {
     this(title, description);
     this.id = id;
+    this.status = status;
   }
 
   public String getTitle() {
@@ -68,7 +68,8 @@ public class Task implements Cloneable {
 
   @Override
   public String toString() {
-    String result = "Task{" +
+    String result = this.getClass().getName() +
+        "{" +
         "id=" + id +
         ", title='" + title + '\'';
     if (description != null) {
@@ -83,6 +84,6 @@ public class Task implements Cloneable {
 
   @Override
   protected Task clone() {
-    return new Task(this.getTitle(), this.getDescription(), this.id);
+    return new Task(id, getTitle(), getDescription(), status);
   }
 }

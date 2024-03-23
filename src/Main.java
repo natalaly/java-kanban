@@ -10,16 +10,51 @@ import java.util.ArrayList;
 public class Main {
 
   //Test data
-  static Task task1 = new Task("task1","description task 1");
-  static Task task2 = new Task("task2","description task 2");
+  static Task task1 = new Task("Task 1","description task 1");
+  static Task task2 = new Task("Task 2","description task 2");
+  static Epic epic1 = new Epic("Epic 1", "Description For Epic 1");
+  static Subtask subtask11 = new Subtask("Subtask 1-epic 1", "description to subtask 1 ,epic 1");
+  static Subtask subtask12 = new Subtask("Subtask 2-epic 1", "description to subtask 2 ,epic 1");
+  static Epic epic2 = new Epic("Epic 2", "Description For Epic 2");
+  static Subtask subtask21 =  new Subtask("Subtask 1-epic 2", "description to subtask 1 ,epic 2");
 
   public static void main(String[] args) {
     System.out.println("Поехали!");
 
-    System.out.println();
-    System.out.println("We have:");
-    System.out.println(task1.getTitle() + task1);
-    System.out.println(task2.getTitle() + task2);
+    TaskManager.addTask(task1);
+    TaskManager.addTask(task2);
+    TaskManager.addEpic(epic1);
+    TaskManager.addEpic(epic2);
+
+    System.out.println("\"getAllTasks()\"");
+    ArrayList<Task> taskList = (ArrayList<Task>)TaskManager.getAllTasks();
+    System.out.println(taskList);
+
+    System.out.println("\"getAllEpics()\"");
+    ArrayList<Epic> epicList = (ArrayList<Epic>)TaskManager.getAllEpics();
+    System.out.println(epicList);
+
+    System.out.println("\"getById(int id)\" for Task");
+    System.out.println(TaskManager.getTaskById(1));
+
+    System.out.println("\"getById(int id)\" for Epic");
+    Epic e = TaskManager.getEpicById(3);
+    System.out.println(e);
+    e.setTitle("qwewe");
+    System.out.println(TaskManager.getAllEpics());
+    System.out.println(TaskManager.getAllTasks());
+
+
+
+
+
+
+
+
+//    System.out.println();
+//    System.out.println("We have:");
+//    System.out.println(task1.getTitle() + task1);
+//    System.out.println(task2.getTitle() + task2);
 
 //    testAddNewTask();
 
@@ -29,7 +64,7 @@ public class Main {
 
 //    testClearTasks();
 
-    testUpdateTask();
+//    testUpdateTask();
 
 //    deleteTaskById();
 
@@ -43,6 +78,11 @@ public class Main {
 
 
   }
+
+
+
+
+
 
   public static void testAddNewTask(){
     System.out.println();
@@ -58,7 +98,7 @@ public class Main {
   public static void testGetAllTasks(){
     System.out.println();
     System.out.println("Testing TaskManager.getAllTasks(): Get all tasks from the tracker:");
-    ArrayList<Task> taskList = TaskManager.getAllTasks();
+    ArrayList<Task> taskList = (ArrayList<Task>) TaskManager.getAllTasks();
     System.out.println(taskList);
   }
 
@@ -68,13 +108,13 @@ public class Main {
     System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     int id = 1;
     if(TaskManager.getAllTasks().size() == 0){
-      System.out.println(" TaskManager.getById(1) : " + TaskManager.getById(id));
+      System.out.println(" TaskManager.getById(1) : " + TaskManager.getTaskById(id));
       System.out.println("Add some tasks and try again.");
       TaskManager.addTask(task1);
       TaskManager.addTask(task2);
       System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     }
-    System.out.println(" TaskManager.getById(1) : " + TaskManager.getById(id));
+    System.out.println(" TaskManager.getById(1) : " + TaskManager.getTaskById(id));
 
   }
 
@@ -98,18 +138,19 @@ public class Main {
     task2.setStatus(Status.IN_PROGRESS);
     System.out.println(task2);
     if(TaskManager.getAllTasks().size() == 0){
-      System.out.println("2. While task2 in the tracker before updating: " + TaskManager.getById(2));
+      System.out.println("2. While task2 in the tracker before updating: " + TaskManager.getTaskById(2));
       System.out.println("3. Apply updateTask(task2,2), update task2 in the tracker:");
       TaskManager.updateTask(task2);
       System.out.println(TaskManager.updateTask(task2));
 
       System.out.println("Add some tasks and try again.");
+      task2.setStatus(Status.NEW);
       TaskManager.addTask(task1);
       TaskManager.addTask(task2);
       System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     }
+    task2.setStatus(Status.IN_PROGRESS);
     System.out.println("3. Apply updateTask(Task task), update task2 in the tracker:");
-    TaskManager.updateTask(task2);
     System.out.println(TaskManager.updateTask(task2));
     System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
   }
@@ -119,14 +160,14 @@ public class Main {
     System.out.println("Testing TaskManager.deleteTaskById(Id id): delete task with id 1: ");
     System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     if(TaskManager.getAllTasks().size() == 0){
-      TaskManager.deleteTaskById(1);
+      TaskManager.deleteById(1);
       System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
       System.out.println("Add some tasks and try again.");
       TaskManager.addTask(task1);
       TaskManager.addTask(task2);
       System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
     }
-    TaskManager.deleteTaskById(1);
+    TaskManager.deleteById(1);
     System.out.println("Tasks in the tracker: \n " + TaskManager.getAllTasksPretty());
   }
 
