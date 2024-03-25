@@ -1,4 +1,4 @@
-public class Task implements Cloneable {
+public class Task {
   private  int id;
   private String title;
   private String description;
@@ -12,12 +12,6 @@ public class Task implements Cloneable {
     this.title = title;
     this.description = description;
     this.status = Status.NEW;
-  }
-
-  private Task(int id, String title, String description, Status status) {
-    this(title, description);
-    this.id = id;
-    this.status = status;
   }
 
   public String getTitle() {
@@ -82,8 +76,4 @@ public class Task implements Cloneable {
     return result;
   }
 
-  @Override
-  protected Task clone() {
-    return new Task(id, getTitle(), getDescription(), status);
-  }
 }
