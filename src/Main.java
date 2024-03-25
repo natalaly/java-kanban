@@ -15,14 +15,16 @@ public class Main {
 
   public static void main(String[] args) {
 
-
-
-
-
-
-
-
-
+    testAddTask();
+    testAddEpic();
+    testAddEpicWithSubtasks();
+    testAddSubtask();
+    testChangingTaskStatus();
+    testChangeSubtaskStatus();
+    testUpdatingEpicAfterDeletingSubtask();
+    testDeleteTask();
+    testDeleteSubtask();
+    testDeleteEpic();
 
   }
 
@@ -30,9 +32,9 @@ public class Main {
     int tasksNumBeforeAdding = t.getAllTasks().size();
     Task task = t.addTask(task1);
     int taskNumAfterAdding = t.getAllTasks().size();
+    System.out.println("Task added: " + t.getTaskById(task.getId()));
     System.out.println("Test create new task on the tracker ( addTask() ): ");
     System.out.println(tasksNumBeforeAdding < taskNumAfterAdding ? "PASS" : "FAILED");
-    System.out.println("Task added: " + t.getTaskById(task.getId()));
     System.out.println();
   }
 
@@ -40,9 +42,9 @@ public class Main {
     int epicsNumBeforeAdding = t.getAllEpics().size();
     Epic epic = t.addEpic(epic1);
     int epicsNumAfterAdding = t.getAllEpics().size();
+    System.out.println("Epic added: " + t.getEpicById(epic.getId()));
     System.out.println("Test create new Epic on the tracker ( addEpic() ): ");
     System.out.println(epicsNumBeforeAdding < epicsNumAfterAdding ? "PASS" : "FAILED");
-    System.out.println("Epic added: " + t.getEpicById(epic.getId()));
     System.out.println();
   }
 
@@ -58,12 +60,13 @@ public class Main {
     Epic epic = t.addEpic(epicToAdd);
     int epicsNumAfterAdding = t.getAllEpics().size();
 
-    System.out.print("Test create new Epic with subtasks inside on the tracker: ");
-    System.out.println(epicsNumBeforeAdding < epicsNumAfterAdding ? "PASS" : "FAILED");
-    System.out.println("Epic added has status IN PROGRESS: \n" + (t.getEpicById(epic.getId()).getStatus() == Status.IN_PROGRESS ? "PASS" : "FAILED"));
     System.out.println("Added Epic: " + t.getEpicById(epic.getId()));
     System.out.println("Subtasks for this epic (getSubtasksOfEpic()) : " + t.getSubtasksOfEpic(epic.getId()));
     System.out.println("All subtasks in the tracker: " + t.getAllSubtasks());
+
+    System.out.print("Test create new Epic with subtasks inside on the tracker: ");
+    System.out.println(epicsNumBeforeAdding < epicsNumAfterAdding ? "PASS" : "FAILED");
+    System.out.println("Epic added has status IN PROGRESS: \n" + (t.getEpicById(epic.getId()).getStatus() == Status.IN_PROGRESS ? "PASS" : "FAILED"));
     System.out.println();
   }
 
@@ -73,10 +76,10 @@ public class Main {
     t.addSubtask(subtask11, epicId);
     int taskNumAfterAdding = t.getAllSubtasks().size();
 
-    System.out.println("Test create new subtask on the tracker: \n" + (subtasksNumBeforeAdding < taskNumAfterAdding ? "PASS" : "FAILED"));
     System.out.println("Subtask was  added to the epic: " + t.getEpicById(epicId));
     System.out.println("Subtasks for this epic: " + t.getSubtasksOfEpic(epicId));
     System.out.println("All subtasks in the tracker total: " + t.getAllSubtasks());
+    System.out.println("Test create new subtask on the tracker: \n" + (subtasksNumBeforeAdding < taskNumAfterAdding ? "PASS" : "FAILED"));
     System.out.println();
   }
 
@@ -126,66 +129,88 @@ public class Main {
 
   static void testUpdatingEpicAfterDeletingSubtask() {
     addAll();
+    printAll();
     Subtask subtask = new Subtask("Subtask To Delete", "Will be deleted soon");
-    subtask.setId(7);
-    subtask.setEpicId(4);
+    int subtaskIdToDelete = 29;
+    int epicIdToSave = 26;
+
+    subtask.setId(subtaskIdToDelete);
+    subtask.setEpicId(epicIdToSave);
     subtask.setStatus(Status.IN_PROGRESS);
     System.out.println(subtask);
     t.updateSubtask(subtask);
     int epicId = t.getSubtaskById(subtask.getId()).getEpicId();
+
     System.out.println("Subtask to delete : " + t.getSubtaskById(subtask.getId()));
     System.out.println("From epic: " + t.getEpicById(epicId));
 
     System.out.println("Deleting subtask with id 7..");
     t.deleteById(subtask.getId());
+
+    System.out.println("All subtasks left: " + t.getAllSubtasks());
+    System.out.println("Corresponding epic after:" + t.getEpicById(epicId));
     System.out.println("Subtask with id = 7 deleted: ");
     System.out.println(t.getSubtaskById(subtask.getId()) == null ? "PASS" : "FAIL");
     System.out.println("Status of the epic changed into NEW: ");
     System.out.println(t.getEpicById(epicId).getStatus() == Status.NEW ? "PASS" : "FAIL");
-    System.out.println("All subtasks left: " + t.getAllSubtasks());
-    System.out.println("Corresponding epic after:" + t.getEpicById(epicId));
     clearAll();
   }
 
   static void testDeleteTask() {
     addAll();
-    System.out.println("Deleting task with id 2..");
-    t.deleteById(2);
-    System.out.println("Task with id = 2 deleted : ");
-    System.out.println(t.getTaskById(2) == null ? "PASS" : "FAIL");
+    int idToDelete = 30;
+    System.out.println("Deleting task with id " + idToDelete + "..");
+    System.out.println("All tasks before: " + t.getAllTasks());
+    t.deleteById(idToDelete);
     System.out.println("All tasks left: " + t.getAllTasks());
+    System.out.println("Task with id = " + idToDelete + " deleted : ");
+    System.out.println(t.getTaskById(idToDelete) == null ? "PASS" : "FAIL");
     clearAll();
   }
 
   static void testDeleteSubtask() {
     addAll();
-    System.out.println("Deleting subtask with id 6..");
-    int epicId = t.getSubtaskById(6).getEpicId();
-    System.out.println("Corresponding epic before:" + t.getEpicById(epicId));
-    t.deleteById(6);
-    System.out.println("Subtask with id = 6 deleted: ");
-    System.out.println(t.getSubtaskById(6) == null ? "PASS" : "FAIL");
-    System.out.println("All subtasks left: " + t.getAllSubtasks());
-    System.out.println("Corresponding epic before:" + t.getEpicById(epicId));
+    int idToDelete = 42;
+    int epicId = t.getSubtaskById(idToDelete).getEpicId();//39
+    ArrayList<Subtask> subtasksBefore = t.getAllSubtasks();
+    Epic epicBefore = t.getEpicById(epicId);
+    System.out.println("Deleting subtask with id " + idToDelete + "..");
+
+    t.deleteById(idToDelete);
+    System.out.println("All subtasks before : " + subtasksBefore);
+    System.out.println("All subtasks after: " + t.getAllSubtasks());
+    System.out.println("Corresponding epic before:" + epicBefore);
+    System.out.println("Corresponding epic after:" + t.getEpicById(epicId));
+    System.out.println("Subtask with id = " + idToDelete + " deleted: ");
+    System.out.println(t.getSubtaskById(idToDelete) == null ? "PASS" : "FAIL");
     clearAll();
   }
 
   static void testDeleteEpic() {
     addAll();
+
     System.out.println("Test deleting epic with index 3...");
-    t.deleteById(3);
+    ArrayList<Epic> epicsBefore = t.getAllEpics();
+    ArrayList<Subtask> SubtasksBefore = t.getAllSubtasks();
+    int idToDelete = 46;
+    boolean wasDeletedEpic = t.deleteById(idToDelete);
     boolean deleted = true;
     for (Subtask subtask : t.getAllSubtasks()) {
       if (subtask.getEpicId() == 3) {
         deleted = false;
       }
     }
+    System.out.println("All epics before: " + epicsBefore);
+    System.out.println("All epics left: " + t.getAllEpics());
+    System.out.println("All subtasks before: " +epicsBefore);
+    System.out.println("All subtasks left: " + t.getAllSubtasks());
     System.out.println("Epic with id = 3 was deleted: ");
-    System.out.println(t.getEpicById(3) == null ? "PASS" : "FAIL");
+    System.out.println(wasDeletedEpic ? "PASS" : "FAIL");
     System.out.println("Corresponding subtasks were deleted from the tracker: ");
     System.out.println(deleted ? "PASS" : "FAIL");
-    System.out.println("All epics left: " + t.getAllEpics());
-    System.out.println("All subtasks left: " + t.getAllSubtasks());
+
+
+
     clearAll();
   }
 
