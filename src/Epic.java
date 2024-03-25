@@ -21,15 +21,24 @@ public class Epic extends Task{
 
   public void setSubtasks(ArrayList<Subtask> subtasks) {
     this.subtasks.addAll(subtasks);
+    updateStatus();
   }
 
   public boolean addSubtask(Subtask subtask) {
-    if (subtask == null) {
+    if (subtask == null ||subtasks.contains(subtask)) {
       return false;
     }
     this.subtasks.add(subtask);
     updateStatus();
     return true;
+  }
+
+  public void updateSubtask(Subtask subtask) {
+    if (subtask == null || !subtasks.contains(subtask)) {
+      return;
+    }
+    subtasks.set(subtasks.indexOf(subtask), subtask);
+    updateStatus();
   }
 
   public boolean removeSubtask(Subtask subtask){
@@ -78,6 +87,8 @@ public class Epic extends Task{
         ", subtasks.size=" + subtasks.size() +
         "}";
   }
+
+
 
 }
 

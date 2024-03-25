@@ -44,12 +44,34 @@ public class TaskManager {
     subtasks.clear();
   }
 
-  public void deleteSubtask(Subtask subtask){
-    if(subtask == null || !subtasks.containsKey(subtask.getId())){
+  public void deleteSubtask(Subtask subtask) {
+    if (subtask == null || !subtasks.containsKey(subtask.getId())) {
       return;
     }
     getEpicById(subtask.getEpicId()).removeSubtask(subtask);
     deleteById(subtask.getId());
+  }
+
+  public boolean deleteById(int id) {
+    if (tasks.containsKey(id)) {
+      tasks.remove(id);
+      return true;
+    }
+    if (epics.containsKey(id)) {
+      for (Subtask subtask :getSubtasksOfEpic(id) ) {
+        subtasks.remove(subtask.getId());
+      }
+      getSubtasksOfEpic(id).clear();
+      epics.remove(id);
+      return true;
+    }
+    if (subtasks.containsKey(id)) {
+      int epicId = getSubtaskById(id).getEpicId();
+      epics.get(epicId).removeSubtask(subtasks.get(id));
+      subtasks.remove(id);
+    }
+    return false;
+
   }
 
   public Task getTaskById(int id) {
@@ -79,10 +101,13 @@ public class TaskManager {
     }
     epic.setId(generateId());
     epics.put(epic.getId(), epic);
-    //  Adding subtasks to subtasks map for future reference
-    for (Subtask subtask : epic.getSubtasks()) {
-      addSubtask(subtask, epic.getId());
+
+    if (epic.getSubtasks().size() > 0) {
+      for (Subtask subtask : epic.getSubtasks()) {
+        addSubtask(subtask, epic.getId());
+      }
     }
+
     return epic;
   }
 
@@ -127,30 +152,10 @@ public class TaskManager {
       return false;
     }
     subtasks.put(subtask.getId(), subtask);
-    epics.get(subtask.getEpicId()).updateStatus();
+    epics.get(subtask.getEpicId()).updateSubtask(subtask);
 
     return true;
   }
-
-  public boolean deleteById(int id) {
-    if (tasks.containsKey(id)) {
-      tasks.remove(id);
-      return true;
-    }
-    if (epics.containsKey(id)) {
-      getSubtasksOfEpic(id).clear();
-      epics.remove(id);
-      return true;
-    }
-    if (subtasks.containsKey(id)) {
-      int epicId = getSubtaskById(id).getEpicId();
-      epics.get(epicId).removeSubtask(subtasks.get(id));
-      subtasks.remove(id);
-    }
-    return false;
-
-  }
-
 
   public ArrayList<Subtask> getSubtasksOfEpic(int id) {
     return new ArrayList<>(epics.get(id).getSubtasks());
