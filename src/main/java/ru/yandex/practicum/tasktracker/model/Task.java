@@ -1,14 +1,14 @@
+package main.java.ru.yandex.practicum.tasktracker.model;
+
+import java.util.Objects;
+
 public class Task {
   private  int id;
   private String title;
   private String description;
   private Status status;
 
-  public Task() {
-  }
-
   public Task(String title, String description) {
-    this();
     this.title = title;
     this.description = description;
     this.status = Status.NEW;
@@ -46,34 +46,29 @@ public class Task {
     this.id = id;
   }
 
-
   @Override
   public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof Task task)) return false;
-
+    if (this == o) {
+      return true;
+    }
+    if (!(o instanceof Task task)) {
+      return false;
+    }
     return getId() == task.getId();
   }
 
   @Override
   public int hashCode() {
-    return getId();
+    return Objects.hashCode(id);
   }
 
   @Override
   public String toString() {
-    String result = this.getClass().getName() +
-        "{" +
+    return "Task{" +
         "id=" + id +
-        ", title='" + title + '\'';
-    if (description != null) {
-      result += ", description.length=" + description.length();
-    } else {
-      result += ", description=null";
-    }
-    result += ", status=" + status +
+        ", title='" + title + '\'' +
+        ", description='" + description + '\'' +
+        ", status=" + status +
         '}';
-    return result;
   }
-
 }

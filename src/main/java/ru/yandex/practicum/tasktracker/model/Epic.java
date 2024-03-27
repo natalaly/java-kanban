@@ -1,36 +1,35 @@
+package main.java.ru.yandex.practicum.tasktracker.model;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class Epic extends Task{
+public class Epic extends Task {
   private final ArrayList<Subtask> subtasks = new ArrayList<>();
-
-  public Epic() {
-  }
 
   public Epic(String title, String description) {
     super(title, description);
   }
 
-  public void updateStatus() {
-    setStatus(calculateStatus());
+  @Override
+  public Status getStatus() {
+    Status status = calculateStatus();
+    setStatus(status);
+    return status;
   }
 
   public ArrayList<Subtask> getSubtasks() {
-    return  this.subtasks;
+    return subtasks;
   }
 
   public void setSubtasks(ArrayList<Subtask> subtasks) {
     this.subtasks.addAll(subtasks);
-    updateStatus();
   }
 
-  public boolean addSubtask(Subtask subtask) {
-    if (subtask == null ||subtasks.contains(subtask)) {
-      return false;
+  public void addSubtask(Subtask subtask) {
+    if (subtask == null || subtasks.contains(subtask)) {
+      return;
     }
-    this.subtasks.add(subtask);
-    updateStatus();
-    return true;
+    subtasks.add(subtask);
   }
 
   public void updateSubtask(Subtask subtask) {
@@ -38,28 +37,22 @@ public class Epic extends Task{
       return;
     }
     subtasks.set(subtasks.indexOf(subtask), subtask);
-    updateStatus();
   }
 
-  public boolean removeSubtask(Subtask subtask){
-    if (subtasks.remove(subtask)) {
-      updateStatus();
-      return true;
-    }
-    return false;
+  public void removeSubtask(Subtask subtask) {
+    subtasks.remove(subtask);
   }
 
-  public void clearSubtasks (){
-    this.subtasks.clear();
-    updateStatus();
+  public void clearSubtasks() {
+    subtasks.clear();
   }
 
   private Status calculateStatus() {
-    if(subtasks.size() == 0){
+    if (subtasks.size() == 0) {
       return Status.NEW;
     }
 
-    HashMap<Status,Integer> subtaskStatus = getSubtasksStatuses();
+    HashMap<Status, Integer> subtaskStatus = getSubtasksStatuses();
     if (subtaskStatus.getOrDefault(Status.NEW, 0) == subtasks.size()) {
       return Status.NEW;
     }
@@ -69,13 +62,13 @@ public class Epic extends Task{
     return Status.IN_PROGRESS;
   }
 
-  private HashMap<Status,Integer> getSubtasksStatuses() {
-    HashMap<Status,Integer> result = new HashMap<>();
+  private HashMap<Status, Integer> getSubtasksStatuses() {
+    HashMap<Status, Integer> result = new HashMap<>();
     for (Subtask subtask : subtasks) {
       if (!result.containsKey(subtask.getStatus())) {
-        result.put(subtask.getStatus(),1);
+        result.put(subtask.getStatus(), 1);
       } else {
-        result.put(subtask.getStatus(),result.get(subtask.getStatus()) + 1);
+        result.put(subtask.getStatus(), result.get(subtask.getStatus()) + 1);
       }
     }
     return result;
@@ -83,14 +76,8 @@ public class Epic extends Task{
 
   @Override
   public String toString() {
-    return super.toString().substring(0,super.toString().lastIndexOf("}")) +
+    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
         ", subtasks.size=" + subtasks.size() +
         "}";
   }
-
-
-
 }
-
-
-

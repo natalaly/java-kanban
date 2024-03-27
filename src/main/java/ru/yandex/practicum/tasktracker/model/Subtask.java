@@ -1,15 +1,14 @@
-public class Subtask extends Task{
-  private int epicId;
+package main.java.ru.yandex.practicum.tasktracker.model;
 
-  public Subtask() {
-  }
+public class Subtask extends Task {
+  private int epicId;
 
   public Subtask(String title, String description) {
     super(title, description);
   }
 
   public int getEpicId() {
-    return this.epicId;
+    return epicId;
   }
 
   public void setEpicId(int epicId) {
@@ -23,5 +22,4 @@ public class Subtask extends Task{
         '}';
     return result;
   }
-
 }
