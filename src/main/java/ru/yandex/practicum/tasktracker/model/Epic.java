@@ -6,15 +6,9 @@ import java.util.HashMap;
 public class Epic extends Task {
   private final ArrayList<Subtask> subtasks = new ArrayList<>();
 
-  public Epic(String title, String description) {
-    super(title, description);
-  }
-
   @Override
-  public Status getStatus() {
-    Status status = calculateStatus();
-    setStatus(status);
-    return status;
+  public TaskStatus getStatus() {
+    return calculateStatus();
   }
 
   public ArrayList<Subtask> getSubtasks() {
@@ -47,23 +41,23 @@ public class Epic extends Task {
     subtasks.clear();
   }
 
-  private Status calculateStatus() {
+  private TaskStatus calculateStatus() {
     if (subtasks.size() == 0) {
-      return Status.NEW;
+      return TaskStatus.NEW;
     }
 
-    HashMap<Status, Integer> subtaskStatus = getSubtasksStatuses();
-    if (subtaskStatus.getOrDefault(Status.NEW, 0) == subtasks.size()) {
-      return Status.NEW;
+    HashMap<TaskStatus, Integer> subtaskStatus = getSubtasksStatuses();
+    if (subtaskStatus.getOrDefault(TaskStatus.NEW, 0) == subtasks.size()) {
+      return TaskStatus.NEW;
     }
-    if (subtaskStatus.getOrDefault(Status.DONE, 0) == subtasks.size()) {
-      return Status.DONE;
+    if (subtaskStatus.getOrDefault(TaskStatus.DONE, 0) == subtasks.size()) {
+      return TaskStatus.DONE;
     }
-    return Status.IN_PROGRESS;
+    return TaskStatus.IN_PROGRESS;
   }
 
-  private HashMap<Status, Integer> getSubtasksStatuses() {
-    HashMap<Status, Integer> result = new HashMap<>();
+  private HashMap<TaskStatus, Integer> getSubtasksStatuses() {
+    HashMap<TaskStatus, Integer> result = new HashMap<>();
     for (Subtask subtask : subtasks) {
       if (!result.containsKey(subtask.getStatus())) {
         result.put(subtask.getStatus(), 1);

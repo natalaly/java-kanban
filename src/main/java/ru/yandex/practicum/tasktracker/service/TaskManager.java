@@ -64,7 +64,6 @@ public class TaskManager {
   }
 
   public Epic getEpicById(int id) {
-    epics.get(id).getStatus();
     return epics.get(id);
   }
 

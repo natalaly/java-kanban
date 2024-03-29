@@ -1,5 +1,5 @@
 import main.java.ru.yandex.practicum.tasktracker.model.Epic;
-import main.java.ru.yandex.practicum.tasktracker.model.Status;
+import main.java.ru.yandex.practicum.tasktracker.model.TaskStatus;
 import main.java.ru.yandex.practicum.tasktracker.model.Subtask;
 import main.java.ru.yandex.practicum.tasktracker.model.Task;
 import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
@@ -10,13 +10,13 @@ import java.util.List;
 
 public class Main {
   //Test data
-  static Task task1 = new Task("Task 1", "description task 1");
-  static Task task2 = new Task("Task 2", "description task 2");
-  static Epic epic1 = new Epic("Epic 1", "Description For Epic 1");
-  static Subtask subtask11 = new Subtask("Subtask 1-epic 1", "description to subtask 1 ,epic 1");
-  static Subtask subtask12 = new Subtask("Subtask 2-epic 1", "description to subtask 2 ,epic 1");
-  static Epic epic2 = new Epic("Epic 2", "Description For Epic 2");
-  static Subtask subtask21 = new Subtask("Subtask 1-epic 2", "description to subtask 1 ,epic 2");
+  static Task task1 = new Task();
+  static Task task2 = new Task();
+  static Epic epic1 = new Epic();
+  static Subtask subtask11 = new Subtask();
+  static Subtask subtask12 = new Subtask();
+  static Epic epic2 = new Epic();
+  static Subtask subtask21 = new Subtask();
   static TaskManager t = new TaskManager();
 
   public static void main(String[] args) {
@@ -56,16 +56,26 @@ public class Main {
     System.out.println("Test 3 : add new epic with subtasks in it  to the tracker.");
     System.out.println("---------------------------------------");
     int epicsNumBeforeAdding = t.getAllEpics().size();
-    Epic epicToAdd = new Epic("EpicWithSubtasks", "Has two subtasks with status DONE and NEW");
-    Subtask subtaskWithEpic = new Subtask("Subtask for EpicWithSubtasks", "Some Description");
-    subtaskWithEpic.setStatus(Status.DONE);
-    Subtask subtaskWithEpic2 = new Subtask("Subtask 2 for EpicWithSubtasks", "Some Description");
-    epicToAdd.setSubtasks(new ArrayList<>(List.of(subtaskWithEpic, subtaskWithEpic2)));
+
+    Epic epicToAdd = new Epic();
+    epicToAdd.setTitle("EpicWithSubtasks");
+    epicToAdd.setDescription("Has two subtasks with status DONE and NEW");
+
+    Subtask subtaskForEpic = new Subtask();
+    subtaskForEpic.setTitle("Subtask for EpicWithSubtasks");
+    subtaskForEpic.setDescription("Some Description");
+    subtaskForEpic.setStatus(TaskStatus.DONE);
+
+    Subtask subtaskForEpic2 = new Subtask();
+    subtaskForEpic2.setTitle("Subtask 2 for EpicWithSubtasks");
+    subtaskForEpic2.setDescription("Some Description");
+
+    epicToAdd.setSubtasks(new ArrayList<>(List.of(subtaskForEpic, subtaskForEpic2)));
 
     Epic epic = t.addEpic(epicToAdd);
     int epicsNumAfterAdding = t.getAllEpics().size();
     boolean isEpicAdded = epicsNumBeforeAdding < epicsNumAfterAdding;
-    boolean isEpicStatusExpected = t.getEpicById(epic.getId()).getStatus() == Status.IN_PROGRESS;
+    boolean isEpicStatusExpected = t.getEpicById(epic.getId()).getStatus() == TaskStatus.IN_PROGRESS;
     boolean areSubtasksAddedToEpic = !t.getSubtasksByEpicId(epic.getId()).isEmpty();
     boolean areSubtasksAddedToTracker = t.getAllSubtasks().containsAll(t.getSubtasksByEpicId(epic.getId()));
 
@@ -77,15 +87,19 @@ public class Main {
   static void test4AddSubtask() {
     System.out.println("Test 4 : add new subtask to the tracker.");
     System.out.println("---------------------------------------");
+    epic1.setTitle("Epic1");
+    epic1.setDescription("TODO Epic1");
     int epicId = epic1.getId();
-    int subtasksNumBeforeAdding = t.getAllSubtasks().size();
     subtask11.setEpicId(epicId);
+    subtask11.setTitle("Subtask1 to Epic1");
+    subtask11.setDescription("Some Description");
+    subtask11.setStatus(TaskStatus.NEW);
+    int subtasksNumBeforeAdding = t.getAllSubtasks().size();
     t.addSubtask(subtask11);
-    int addedSubtaskId = subtask11.getId();
     int taskNumAfterAdding = t.getAllSubtasks().size();
     boolean subtaskAddedToTracker = subtasksNumBeforeAdding < taskNumAfterAdding;
     boolean subtaskAddedToEpic = t.getSubtasksByEpicId(epicId).contains(subtask11);
-    boolean isEpicStatusCorrect = t.getEpicById(epicId).getStatus() == Status.NEW;
+    boolean isEpicStatusCorrect = t.getEpicById(epicId).getStatus() == TaskStatus.NEW;
     boolean result = subtaskAddedToTracker && subtaskAddedToEpic && isEpicStatusCorrect;
     System.out.println("Test result: \n" + (result ? "PASS" : "FAILED"));
     clearAll();
@@ -98,11 +112,13 @@ public class Main {
     addAll();
     boolean canNotUpdateWithNewTask = false;
     boolean isUpdatedTask = false;
-    Task someTask = new Task(task1.getTitle(), task1.getDescription());
-    someTask.setStatus(Status.DONE);
+    Task someTask = new Task();
+    someTask.setTitle(task1.getTitle());
+    someTask.setDescription(task1.getDescription());
+    someTask.setStatus(TaskStatus.DONE);
     t.updateTask(someTask);
     for (Task task : t.getAllTasks()) {
-      if (task.getId() == 0 && task.getStatus() == Status.DONE) {
+      if (task.getId() == 0 && task.getStatus() == TaskStatus.DONE) {
         canNotUpdateWithNewTask = false;
         break;
       }
@@ -110,7 +126,7 @@ public class Main {
     }
     someTask.setId(task1.getId());
     t.updateTask(someTask);
-    if (t.getTaskById(task1.getId()).getStatus() == Status.DONE) {
+    if (t.getTaskById(task1.getId()).getStatus() == TaskStatus.DONE) {
       isUpdatedTask = true;
     } else {
       isUpdatedTask = false;
@@ -127,15 +143,17 @@ public class Main {
     int idSubtaskToUpdate = subtask11.getId();
     int epicId = t.getSubtaskById(idSubtaskToUpdate).getEpicId();
 
-    Subtask updatingData = new Subtask(subtask11.getTitle(), subtask11.getDescription());
+    Subtask updatingData = new Subtask();
+    updatingData.setTitle(subtask11.getTitle());
+    updatingData.setDescription(subtask11.getDescription());
     updatingData.setId(t.getSubtaskById(idSubtaskToUpdate).getId());
     updatingData.setEpicId(epicId);
-    updatingData.setStatus(Status.DONE);
+    updatingData.setStatus(TaskStatus.DONE);
 
     t.updateSubtask(updatingData);
 
-    boolean isSubtaskStatusUpdated = t.getSubtaskById(idSubtaskToUpdate).getStatus() == Status.DONE;
-    boolean isEpicStatusUpdated = t.getEpicById(epicId).getStatus() == Status.IN_PROGRESS;
+    boolean isSubtaskStatusUpdated = t.getSubtaskById(idSubtaskToUpdate).getStatus() == TaskStatus.DONE;
+    boolean isEpicStatusUpdated = t.getEpicById(epicId).getStatus() == TaskStatus.IN_PROGRESS;
     System.out.println("Test result: ");
     System.out.println(isSubtaskStatusUpdated && isEpicStatusUpdated ? "PASS" : "FAIL");
     clearAll();
@@ -145,19 +163,21 @@ public class Main {
     System.out.println("Test 7 : auto updating epic status after subtask has been deleted.");
     System.out.println("---------------------------------------");
     addAll();
-    Subtask subtask = new Subtask("Subtask To Delete", "Will be deleted soon");
+    Subtask subtask = new Subtask();
+    subtask.setTitle("Subtask To Delete");
+    subtask.setDescription("Will be deleted soon");
     int subtaskIdToDelete = 25;
     int epicIdToUpdate = 23;
     subtask.setId(subtaskIdToDelete);
     subtask.setEpicId(epicIdToUpdate);
-    subtask.setStatus(Status.IN_PROGRESS);
+    subtask.setStatus(TaskStatus.IN_PROGRESS);
     t.updateSubtask(subtask);
     int epicId = t.getSubtaskById(subtask.getId()).getEpicId();
 
     t.deleteSubtask(subtask.getId());
 
     boolean isDeletedSubtask = t.getSubtaskById(subtask.getId()) == null;
-    boolean isEpicStatusUpdated = t.getEpicById(epicId).getStatus() == Status.NEW;
+    boolean isEpicStatusUpdated = t.getEpicById(epicId).getStatus() == TaskStatus.NEW;
     System.out.println("Test result: ");
     System.out.println(isDeletedSubtask && isEpicStatusUpdated ? "PASS" : "FAIL");
     clearAll();
@@ -211,19 +231,9 @@ public class Main {
     clearAll();
   }
 
-  static void printAllTestData() {
-    System.out.println("Our test Data: ");
-    System.out.println(task1);
-    System.out.println(task2);
-    System.out.println(epic1);
-    System.out.println(subtask11);
-    System.out.println(subtask12);
-    System.out.println(epic2);
-    System.out.println(subtask21);
-    System.out.println("##############################################################################");
-  }
-
   static void addAll() {
+    fillTasks();
+
     t.addTask(task1);
     t.addTask(task2);
     Epic epicAdded1 = t.addEpic(epic1);
@@ -236,6 +246,48 @@ public class Main {
     int epicId2 = epicAdded2.getId();
     subtask21.setEpicId(epicId2);
     t.addSubtask(subtask21);
+
+//  static Task task1 = new Task("Task 1", "description task 1");
+//  static Task task2 = new Task("Task 2", "description task 2");
+
+//  static Epic epic1 = new Epic("Epic 1", "Description For Epic 1");
+//  static Subtask subtask11 = new Subtask("Subtask 1-epic 1", "description to subtask 1 ,epic 1");
+//  static Subtask subtask12 = new Subtask("Subtask 2-epic 1", "description to subtask 2 ,epic 1");
+//  static Epic epic2 = new Epic("Epic 2", "Description For Epic 2");
+//  static Subtask subtask21 = new Subtask("Subtask 1-epic 2", "description to subtask 1 ,epic 2");
+
+  }
+
+  static void clearAll() {
+    t.clearTasks();
+    t.clearSubtasks();
+    t.clearEpics();
+    System.out.println();
+  }
+
+  static void fillTasks() {
+    task1.setTitle("Task 1");
+    task1.setDescription("description Task 1");
+    task1.setStatus(TaskStatus.NEW);
+
+    task2.setTitle("Task 2");
+    task2.setDescription("description Task 2");
+    task2.setStatus(TaskStatus.NEW);
+
+    epic1.setTitle("Epic 1");
+    epic1.setDescription("Description For Epic 1");
+    subtask11.setTitle("Subtask 1-epic 1");
+    subtask11.setDescription("Description to subtask 1 ,epic 1");
+    subtask11.setStatus(TaskStatus.NEW);
+    subtask12.setTitle("Subtask 2-epic 1");
+    subtask12.setDescription("Description to subtask 2 ,epic 1");
+    subtask12.setStatus(TaskStatus.NEW);
+
+    epic2.setTitle("Epic 2");
+    epic2.setDescription("Description For Epic 2");
+    subtask21.setTitle("Subtask 1-epic 2");
+    subtask21.setDescription("Description to subtask 1 ,epic 2");
+    subtask21.setStatus(TaskStatus.NEW);
   }
 
   static void printAll() {
@@ -247,11 +299,16 @@ public class Main {
     System.out.println(t.getAllSubtasks());
   }
 
-  static void clearAll() {
-    t.clearTasks();
-    t.clearSubtasks();
-    t.clearEpics();
-    System.out.println();
+  static void printAllTestData() {
+    System.out.println("Our test Data: ");
+    System.out.println(task1);
+    System.out.println(task2);
+    System.out.println(epic1);
+    System.out.println(subtask11);
+    System.out.println(subtask12);
+    System.out.println(epic2);
+    System.out.println(subtask21);
+    System.out.println("##############################################################################");
   }
 
   static public String getAllTasksPretty() {
@@ -261,4 +318,5 @@ public class Main {
     }
     return result;
   }
+
 }
