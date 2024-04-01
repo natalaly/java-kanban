@@ -15,10 +15,6 @@ public class Epic extends Task {
     return subtasks;
   }
 
-  public void setSubtasks(ArrayList<Subtask> subtasks) {
-    this.subtasks.addAll(subtasks);
-  }
-
   public void addSubtask(Subtask subtask) {
     if (subtask == null || subtasks.contains(subtask)) {
       return;

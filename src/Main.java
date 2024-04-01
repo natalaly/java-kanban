@@ -70,12 +70,15 @@ public class Main {
     subtaskForEpic2.setTitle("Subtask 2 for EpicWithSubtasks");
     subtaskForEpic2.setDescription("Some Description");
 
-    epicToAdd.setSubtasks(new ArrayList<>(List.of(subtaskForEpic, subtaskForEpic2)));
+    epicToAdd.addSubtask(subtaskForEpic);
+    epicToAdd.addSubtask(subtaskForEpic2);
+//    epicToAdd.setSubtasks(new ArrayList<>(List.of(subtaskForEpic, subtaskForEpic2)));
+
 
     Epic epic = t.addEpic(epicToAdd);
     int epicsNumAfterAdding = t.getAllEpics().size();
     boolean isEpicAdded = epicsNumBeforeAdding < epicsNumAfterAdding;
-    boolean isEpicStatusExpected = t.getEpicById(epic.getId()).getStatus() == TaskStatus.IN_PROGRESS;
+    boolean isEpicStatusExpected = t.getEpicById(epic.getId()).getStatus() == TaskStatus.DONE;
     boolean areSubtasksAddedToEpic = !t.getSubtasksByEpicId(epic.getId()).isEmpty();
     boolean areSubtasksAddedToTracker = t.getAllSubtasks().containsAll(t.getSubtasksByEpicId(epic.getId()));
 
