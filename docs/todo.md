@@ -13,4 +13,4 @@ But I'm not sure how to do it yet...
    this.setStatus(calculateStatus());
    }
 ```
-3. Learn how to use Generic, to the number of methods in main.java.ru.yandex.practicum.tasktracker.service.TaskManager will be reduced.
+3. Learn how to use Generic, to the number of methods in main.java.ru.yandex.practicum.tasktracker.service.InMemoryTaskManager will be reduced.

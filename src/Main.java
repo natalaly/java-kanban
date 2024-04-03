@@ -1,10 +1,11 @@
+import main.java.ru.yandex.practicum.tasktracker.service.Managers;
 import main.java.ru.yandex.practicum.tasktracker.model.Epic;
 import main.java.ru.yandex.practicum.tasktracker.model.TaskStatus;
 import main.java.ru.yandex.practicum.tasktracker.model.Subtask;
 import main.java.ru.yandex.practicum.tasktracker.model.Task;
+import main.java.ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -17,19 +18,73 @@ public class Main {
   static Subtask subtask12 = new Subtask();
   static Epic epic2 = new Epic();
   static Subtask subtask21 = new Subtask();
-  static TaskManager t = new TaskManager();
+  static TaskManager t ;
 
   public static void main(String[] args) {
-    test1AddTask();
-    test2AddEpic();
-    test3AddEpicWithSubtasks();
-    test4AddSubtask();
-    test5ChangingTaskStatus();
-    test6ChangeSubtaskStatus();
-    test7AutoUpdatingEpicAfterDeletingSubtask();
-    test8DeleteTask();
-    test9DeleteSubtask();
-    test10DeleteEpic();
+    t = Managers.getDefault(); //start task tracker
+
+    getReadyToAddAll(); //create all tasks, epics and subtasks with titles, descriptions, and statuses NEW
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+    addAll();
+    System.out.println("Apply addAll();....");
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+
+    System.out.println("All Tasks(should be 2): " + t.getAllTasks().size());
+    System.out.println("All Epics(should be 2): " + t.getAllEpics().size());
+    System.out.println("All SubTasks(should be 3): " + t.getAllSubtasks().size());
+    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+    System.out.println();
+
+//    t.getTaskById(1);
+    for (int i = 0; i < 10; i++) {
+      t.getTaskById(1);
+    }
+    System.out.println("t.getTaskById(1); X 10...");
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
+    System.out.println();
+
+//    //delete task that had been viewed before and check history
+//    t.deleteTask(1);
+//    System.out.println("Task View History: " + t.getHistory());
+    System.out.println();
+    //
+    System.out.println("t.getEpicById(3)....");
+    System.out.println(t.getEpicById(3));
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
+    System.out.println();
+    //create new subtask for Epic1 (id=3)
+    System.out.println("Add new subtask to the epic 1 (id = 3), update it with status IN_PROGRESS");
+    Subtask subtask = new Subtask();
+    subtask.setTitle("qwqwe");
+    subtask.setDescription("rer");
+    subtask.setStatus(TaskStatus.NEW);
+    subtask.setEpicId(3);
+    t.addSubtask(subtask);
+    subtask.setStatus(TaskStatus.IN_PROGRESS);
+    t.updateSubtask(subtask);
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
+    System.out.println("Task View History: " + t.getHistory());
+
+
+
+
+
+//    test1AddTask();
+//    test2AddEpic();
+//    test3AddEpicWithSubtasks();
+//    test4AddSubtask();
+//    test5ChangingTaskStatus();
+//    test6ChangeSubtaskStatus();
+//    test7AutoUpdatingEpicAfterDeletingSubtask();
+//    test8DeleteTask();
+//    test9DeleteSubtask();
+//    test10DeleteEpic();
+
+
   }
 
   static void test1AddTask() {
@@ -203,7 +258,7 @@ public class Main {
     addAll();
     int idToDelete = subtask21.getId();
     int epicId = t.getSubtaskById(idToDelete).getEpicId();//39
-    ArrayList<Subtask> subtasksBefore = t.getAllSubtasks();
+    List<Subtask> subtasksBefore = t.getAllSubtasks();
     Epic epicBefore = t.getEpicById(epicId);
     boolean isSubtaskDeleted = t.getSubtaskById(idToDelete) == null;
     boolean isSubtaskDeletedFromEpic = !t.getSubtasksByEpicId(epicId).contains(t.getSubtaskById(idToDelete));
@@ -235,29 +290,26 @@ public class Main {
   }
 
   static void addAll() {
-    fillTasks();
+    getReadyToAddAll();
 
     t.addTask(task1);
     t.addTask(task2);
+
     Epic epicAdded1 = t.addEpic(epic1);
     Epic epicAdded2 = t.addEpic(epic2);
+
     int epicId1 = epicAdded1.getId();
     subtask11.setEpicId(epicId1);
     subtask12.setEpicId(epicId1);
+
     t.addSubtask(subtask11);
     t.addSubtask(subtask12);
+
     int epicId2 = epicAdded2.getId();
     subtask21.setEpicId(epicId2);
     t.addSubtask(subtask21);
 
-//  static Task task1 = new Task("Task 1", "description task 1");
-//  static Task task2 = new Task("Task 2", "description task 2");
 
-//  static Epic epic1 = new Epic("Epic 1", "Description For Epic 1");
-//  static Subtask subtask11 = new Subtask("Subtask 1-epic 1", "description to subtask 1 ,epic 1");
-//  static Subtask subtask12 = new Subtask("Subtask 2-epic 1", "description to subtask 2 ,epic 1");
-//  static Epic epic2 = new Epic("Epic 2", "Description For Epic 2");
-//  static Subtask subtask21 = new Subtask("Subtask 1-epic 2", "description to subtask 1 ,epic 2");
 
   }
 
@@ -268,7 +320,7 @@ public class Main {
     System.out.println();
   }
 
-  static void fillTasks() {
+  static void getReadyToAddAll() {
     task1.setTitle("Task 1");
     task1.setDescription("description Task 1");
     task1.setStatus(TaskStatus.NEW);
