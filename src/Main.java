@@ -23,55 +23,7 @@ public class Main {
   public static void main(String[] args) {
     t = Managers.getDefault(); //start task tracker
 
-    getReadyToAddAll(); //create all tasks, epics and subtasks with titles, descriptions, and statuses NEW
-    System.out.println("Task View History:(Should be blank) " + t.getHistory());
-    addAll();
-    System.out.println("Apply addAll();....");
-    System.out.println("Task View History:(Should be blank) " + t.getHistory());
-
-    System.out.println("All Tasks(should be 2): " + t.getAllTasks().size());
-    System.out.println("All Epics(should be 2): " + t.getAllEpics().size());
-    System.out.println("All SubTasks(should be 3): " + t.getAllSubtasks().size());
-    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
-    System.out.println("Task View History:(Should be blank) " + t.getHistory());
-    System.out.println();
-
-//    t.getTaskById(1);
-    for (int i = 0; i < 10; i++) {
-      t.getTaskById(1);
-    }
-    System.out.println("t.getTaskById(1); X 10...");
-    System.out.println("Task View History: " + t.getHistory());
-    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
-    System.out.println();
-
-//    //delete task that had been viewed before and check history
-//    t.deleteTask(1);
-//    System.out.println("Task View History: " + t.getHistory());
-    System.out.println();
-    //
-    System.out.println("t.getEpicById(3)....");
-    System.out.println(t.getEpicById(3));
-    System.out.println("Task View History: " + t.getHistory());
-    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
-    System.out.println();
-    //create new subtask for Epic1 (id=3)
-    System.out.println("Add new subtask to the epic 1 (id = 3), update it with status IN_PROGRESS");
-    Subtask subtask = new Subtask();
-    subtask.setTitle("qwqwe");
-    subtask.setDescription("rer");
-    subtask.setStatus(TaskStatus.NEW);
-    subtask.setEpicId(3);
-    t.addSubtask(subtask);
-    subtask.setStatus(TaskStatus.IN_PROGRESS);
-    t.updateSubtask(subtask);
-    System.out.println("Task View History: " + t.getHistory());
-    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
-    System.out.println("Task View History: " + t.getHistory());
-
-
-
-
+    checkHowHistoryWorks();
 
 //    test1AddTask();
 //    test2AddEpic();
@@ -372,6 +324,54 @@ public class Main {
       result = result + task + "\n";
     }
     return result;
+  }
+
+  static void checkHowHistoryWorks() {
+    getReadyToAddAll(); //create all tasks, epics and subtasks with titles, descriptions, and statuses NEW
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+    addAll();
+    System.out.println("Apply addAll();....");
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+
+    System.out.println("All Tasks(should be 2): " + t.getAllTasks().size());
+    System.out.println("All Epics(should be 2): " + t.getAllEpics().size());
+    System.out.println("All SubTasks(should be 3): " + t.getAllSubtasks().size());
+    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
+    System.out.println("Task View History:(Should be blank) " + t.getHistory());
+    System.out.println();
+
+//    t.getTaskById(1);
+    for (int i = 0; i < 10; i++) {
+      t.getTaskById(1);
+    }
+    System.out.println("t.getTaskById(1); X 10...");
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
+    System.out.println();
+
+//    //delete task that had been viewed before and check history
+//    t.deleteTask(1);
+//    System.out.println("Task View History: " + t.getHistory());
+    System.out.println();
+    //
+    System.out.println("t.getEpicById(3)....");
+    System.out.println(t.getEpicById(3));
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Task View History size(should be 10): " + t.getHistory().size());
+    System.out.println();
+    //create new subtask for Epic1 (id=3)
+    System.out.println("Add new subtask to the epic 1 (id = 3), update it with status IN_PROGRESS");
+    Subtask subtask = new Subtask();
+    subtask.setTitle("qwqwe");
+    subtask.setDescription("rer");
+    subtask.setStatus(TaskStatus.NEW);
+    subtask.setEpicId(3);
+    t.addSubtask(subtask);
+    subtask.setStatus(TaskStatus.IN_PROGRESS);
+    t.updateSubtask(subtask);
+    System.out.println("Task View History: " + t.getHistory());
+    System.out.println("Subtasks in Epic 1 (id = 3): " + t.getSubtasksByEpicId(3));
+    System.out.println("Task View History: " + t.getHistory());
   }
 
 }
