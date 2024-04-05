@@ -8,6 +8,18 @@ public class Task {
   private String description;
   private TaskStatus status;
 
+  public Task() {
+    this.status = TaskStatus.NEW;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
   public String getTitle() {
     return title;
   }
@@ -30,14 +42,6 @@ public class Task {
 
   public void setStatus(TaskStatus taskStatus) {
     this.status = taskStatus;
-  }
-
-  public int getId() {
-    return id;
-  }
-
-  public void setId(int id) {
-    this.id = id;
   }
 
   @Override
