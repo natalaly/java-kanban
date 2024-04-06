@@ -4,7 +4,7 @@ import main.java.ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * Utility class
+ * Utility class fir tests
  */
 public class TestDataBuilder {
 
@@ -28,8 +28,24 @@ public class TestDataBuilder {
     return epic;
   }
 
+  public static Epic buildEpicWithId(int id,String title, String description) {
+    Epic epic = new Epic();
+    epic.setId(id);
+    epic.setTitle(title);
+    epic.setDescription(description);
+    return epic;
+  }
+
   static Subtask buildSubtask(String title, String description, int epicId) {
     Subtask subtask = new Subtask();
+    subtask.setTitle(title);
+    subtask.setDescription(description);
+    subtask.setEpicId(epicId);
+    return subtask;
+  }
+  public static Subtask buildSubtaskWithId(int id, String title, String description, int epicId) {
+    Subtask subtask = new Subtask();
+    subtask.setId(id);
     subtask.setTitle(title);
     subtask.setDescription(description);
     subtask.setEpicId(epicId);
