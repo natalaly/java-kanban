@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface HistoryManager {
 
-  void add(Task task); // Mark task as viewed
+  void add(Task task);
 
-  List<Task> getHistory(); // Return tasks that were viewed
+  List<Task> getHistory();
 }

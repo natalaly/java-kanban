@@ -1,3 +1,4 @@
+import main.java.ru.yandex.practicum.tasktracker.TestDataBuilderMain;
 import main.java.ru.yandex.practicum.tasktracker.service.Managers;
 import main.java.ru.yandex.practicum.tasktracker.model.Epic;
 import main.java.ru.yandex.practicum.tasktracker.model.TaskStatus;
@@ -23,25 +24,67 @@ public class Main {
   public static void main(String[] args) {
 
     t = new InMemoryTaskManager();
-    epic1 = new Epic();
-    epic1.setTitle("Epic");
-    epic1.setDescription("You know what you need.");
-    t.addEpic(epic1);
-    subtask11 = new Subtask();
-    subtask11.setTitle("Step1");
-    subtask11.setDescription("Start");
-    subtask11.setStatus(TaskStatus.NEW);
-    subtask11.setEpicId(epic1.getId());
-    subtask12 = new Subtask();
-    subtask12.setTitle("Step2");
-    subtask12.setDescription("Finish");
-    subtask12.setStatus(TaskStatus.NEW);
-    subtask12.setEpicId(epic1.getId());
 
-    t.addSubtask(subtask11);
-    t.addSubtask(subtask12);
 
-    System.out.println(t.getSubtasksByEpicId(1));
+    //add subtask as epic of itsel
+//    Epic epic = TestDataBuilderMain.buildEpic("Epic","d");//create new-new epic
+//    t.addEpic(epic); //add epic to the taskManager
+//    Task subtaskInTaskManager = TestDataBuilderMain.buildSubtask("Sb","D",epic.getId());//create new-new subtask for epic
+//    t.addSubtask((Subtask)subtaskInTaskManager);
+//    t.addEpic((Epic)subtaskInTaskManager);//ClassCastException
+
+//------
+    //add subtask to subtask
+//    Epic epic = TestDataBuilderMain.buildEpic("Epic","d");//create new-new epic
+//    t.addEpic(epic); //add epic to the taskManager
+//    Subtask subtaskInTaskManager =
+//        TestDataBuilderMain.buildSubtask("Sb","D",epic.getId());//create new-new subtask for epic
+//    t.addSubtask(subtaskInTaskManager); //add subtask to the taskManager
+//    System.out.println(t.getAllEpics());//get all epics --> one epic id=1
+//    System.out.println(t.getAllSubtasks());//get all subtasks --> one subtask id=2, epicId=1
+//    System.out.println(t.getSubtasksByEpicId(1)); //get all subtasks from epic(visualisation) --> one subtask id=2, epicId=1
+//    System.out.println();
+//
+//    Subtask subtaskTest = TestDataBuilderMain.buildCopySubtask(subtaskInTaskManager);//create subtask,total cope of first subtask
+//    subtaskTest.setEpicId(subtaskInTaskManager.getId());//set epic id = subtask in TM id  (id=2)
+//    System.out.println(subtaskTest); //--> subtask id=2, epicId=2
+//    t.addSubtask(subtaskTest); //attempt to add subtask to itself
+//    System.out.println(subtaskTest);
+////        System.out.println(t.getSubtasksByEpicId(subtaskTest.getId()));//thrown NullPointerException--> there is no such epic
+//    System.out.println(t.getAllEpics()); // there is no epic with id2
+//    System.out.println(t.getAllSubtasks());//there is no subtask with epicId=2
+
+
+
+//-------------------------------------------
+//    Adding Epic to Epic
+//    Task epic = new Epic();
+//    epic.setTitle("epic");
+//    epic.setDescription("d");
+//    t.addEpic((Epic)epic);
+//    System.out.println(t.getAllEpics());
+//    t.addSubtask((Subtask)epic);
+//    System.out.println(t.getAllSubtasks());
+
+//    epic1 = new Epic();
+//    epic1.setTitle("Epic");
+//    epic1.setDescription("You know what you need.");
+//    t.addEpic(epic1);
+//    subtask11 = new Subtask();
+//    subtask11.setTitle("Step1");
+//    subtask11.setDescription("Start");
+//    subtask11.setStatus(TaskStatus.NEW);
+//    subtask11.setEpicId(epic1.getId());
+//    subtask12 = new Subtask();
+//    subtask12.setTitle("Step2");
+//    subtask12.setDescription("Finish");
+//    subtask12.setStatus(TaskStatus.NEW);
+//    subtask12.setEpicId(epic1.getId());
+//
+//    t.addSubtask(subtask11);
+//    t.addSubtask(subtask12);
+//
+//    System.out.println(t.getSubtasksByEpicId(1));
 
 
 

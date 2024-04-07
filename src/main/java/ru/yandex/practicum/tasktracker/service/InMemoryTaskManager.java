@@ -15,7 +15,7 @@ public class InMemoryTaskManager implements TaskManager {
   private final Map<Integer, Epic> epics = new HashMap<>();
   private final Map<Integer, Subtask> subtasks = new HashMap<>();
   private final HistoryManager taskViewHistory = Managers.getDefaultHistory();
-  private static int counter = 0;
+  private  static int counter = 0;
 
   @Override
   public int generateId() {
@@ -122,14 +122,15 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public void addSubtask(Subtask subtask) {
+  public Subtask addSubtask(Subtask subtask) {
     int epicId = subtask.getEpicId();
     if (!epics.containsKey(epicId) ) {
-      return;
+      return null;
     }
     subtask.setId(generateId());
     epics.get(epicId).addSubtask(subtask);
     subtasks.put(subtask.getId(), subtask);
+    return subtask;
   }
 
   @Override
@@ -140,7 +141,6 @@ public class InMemoryTaskManager implements TaskManager {
     tasks.put(task.getId(), task);
   }
 
-//  TODO to look at it
   @Override
   public void updateEpic(Epic epic) {
     if (!epics.containsKey(epic.getId())) {
