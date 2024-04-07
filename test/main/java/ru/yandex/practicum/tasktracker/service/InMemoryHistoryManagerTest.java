@@ -17,7 +17,6 @@ class InMemoryHistoryManagerTest {
   private HistoryManager history;
   private static final int HISTORY_CAPACITY = 10;
 
-
   @BeforeEach
   void setUp() {
     history = new InMemoryHistoryManager();

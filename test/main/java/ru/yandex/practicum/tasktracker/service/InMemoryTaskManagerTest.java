@@ -130,7 +130,7 @@ class InMemoryTaskManagerTest {
 
     taskManager.clearTasks();
 
-    Assertions.assertEquals(List.of(), taskManager.getAllTasks(), "Tasks was not deleted.");
+    Assertions.assertEquals(List.of(), taskManager.getAllTasks(), "Tasks were not deleted.");
   }
 
   @Test
@@ -144,7 +144,7 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertAll(
         () -> Assertions.assertEquals(List.of(),taskManager.getAllEpics(), "Epics was not deleted."),
-        () -> Assertions.assertEquals(List.of(),taskManager.getAllSubtasks(), "Subtasks was not deleted.")
+        () -> Assertions.assertEquals(List.of(),taskManager.getAllSubtasks(), "Subtasks were not deleted.")
     );
   }
 
@@ -165,7 +165,59 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertAll(
         () -> Assertions.assertEquals(List.of(),taskManager.getAllSubtasks(), "Subtasks was not deleted."),
-        () -> Assertions.assertEquals(List.of(),subtasksFromEpics, "Subtasks was not deleted from Epics.")
+        () -> Assertions.assertEquals(List.of(),subtasksFromEpics, "Subtasks were not deleted from Epics.")
+    );
+  }
+
+  // delete..();
+  @Test
+  public void deleteTaskShouldDeleteTaskBiIdFromTheMemory() {
+    Task task1 = TestDataBuilder.buildTask("t1","d1");
+    Task task2 = TestDataBuilder.buildTask("t2","d2");
+    Task taskInMemory2 =taskManager.addTask(task2);
+
+    taskManager.deleteTask(taskInMemory2.getId());
+
+    Assertions.assertNull(taskManager.getTaskById(task2.getId()), "Task was not deleted.");
+  }
+
+  @Test
+  public void deleteEpicShouldDeleteEpicsByIdAndItsSubtasksFromTheMemory() {
+    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
+    Epic epic2 = TestDataBuilder.buildEpic("e2","d2");
+    Epic epicInMemory2 =taskManager.addEpic(epic2);
+
+    taskManager.deleteEpic(epicInMemory2.getId());
+    List<Subtask> subtaskFroDeletedEpic = new ArrayList<>();
+    for (Subtask st : taskManager.getAllSubtasks()) {
+      if (st.getEpicId() == epicInMemory2.getId()) {
+        subtaskFroDeletedEpic.add(st);
+      }
+    }
+
+    Assertions.assertAll(
+        () -> Assertions.assertNull(taskManager.getEpicById(epic2.getId()), "Epic was not deleted."),
+        () -> Assertions.assertEquals(List.of(),subtaskFroDeletedEpic, "Subtasks were not deleted.")
+    );
+  }
+
+  @Test
+  public void deleteSubtaskShouldDeleteSubtaskFromTheMemoryAndFromItsEpic() {
+    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
+    Epic correspondingEpic = taskManager.addEpic(epic1);
+    Subtask subtask1 = TestDataBuilder.buildSubtask("st1","d1", correspondingEpic.getId());
+    Subtask subtask2 = TestDataBuilder.buildSubtask("st2","d2",correspondingEpic.getId());
+    taskManager.addSubtask(subtask1);
+    int subtaskToDeleteId = taskManager.addSubtask(subtask2).getId();
+
+    taskManager.deleteSubtask(subtaskToDeleteId);
+    List<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(correspondingEpic.getId());
+    boolean isDeletedFromEpic =  subtasksFromEpic.stream().noneMatch((st) -> st.getId() == subtaskToDeleteId);
+
+
+    Assertions.assertAll(
+        () -> Assertions.assertNull(taskManager.getSubtaskById(subtaskToDeleteId), "Subtask was not deleted."),
+        () -> Assertions.assertTrue(isDeletedFromEpic, "Subtask was not deleted from Epic.")
     );
   }
 
@@ -304,7 +356,6 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertIterableEquals(expected, actual, " Null was added to the history.");
   }
-
 
   // addTask();
   @Test
@@ -549,6 +600,55 @@ class InMemoryTaskManagerTest {
     );
   }
 
+  // updateTask();
+  @Test
+  void updateTaskShouldChangeStatusInMemory() {
+    Task taskToAdd = TestDataBuilder.buildTask("task", "d");
+    Task task = taskManager.addTask(taskToAdd);
+    Task changes = TestDataBuilder.buildCopyTask(taskManager.getTaskById(task.getId()));
+    changes.setStatus(TaskStatus.DONE);
+
+    taskManager.updateTask(changes);
+    TaskStatus actual = taskManager.getTaskById(task.getId()).getStatus();
+
+    Assertions.assertEquals(TaskStatus.DONE, actual,"Status was not updated");
+  }
+
+  // updateEpic();
+  @Test
+  void updateEpicShouldNotChangeStatusInMemory() {
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
+    int epicInMemoryId = epicInMemory.getId();
+    TaskStatus expected = epicInMemory.getStatus();
+    Epic changes = TestDataBuilder.buildCopyEpic(taskManager.getEpicById(epicInMemoryId));
+    changes.setStatus(TaskStatus.DONE);
+
+    taskManager.updateEpic(changes);
+
+    Assertions.assertEquals(expected,taskManager.getEpicById(epicInMemoryId).getStatus(), "Status of epic was updated manually");
+  }
+
+  // updateSubtask():
+  @Test
+  void updateSubtaskShouldChangeItsStatusInMemory() {
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
+    int epicInMemoryId = epicInMemory.getId();
+    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("st1", "d",epicInMemoryId));
+    int subtaskInMemoryId = subtaskInMemory.getId();
+    Subtask changes = TestDataBuilder.buildCopySubtask(taskManager.getSubtaskById(subtaskInMemoryId));
+    changes.setStatus(TaskStatus.IN_PROGRESS);
+
+    taskManager.updateSubtask(changes);
+    List<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(epicInMemoryId);
+    TaskStatus actualInEpic = subtasksFromEpic.stream().filter((st) -> st.getId() == subtaskInMemoryId).findFirst().get().getStatus();
+
+    Assertions.assertAll(
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, taskManager.getSubtaskById(subtaskInMemoryId).getStatus()),
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualInEpic)
+    );
+
+  }
+
   // getHistory();
   @Test
   public void tasksInHistoryShouldKeepTheirStateAfterUpdatingThemInTaskManager() {
@@ -565,9 +665,5 @@ class InMemoryTaskManagerTest {
     Assertions.assertEquals(expected.getTitle(), actual.getTitle(), "Id is different");
     Assertions.assertEquals(expected.getDescription(), actual.getDescription(), "Description is different");
     Assertions.assertEquals(expected.getStatus(), actual.getStatus(), "Status is different");
-
   }
-
-
-
 }

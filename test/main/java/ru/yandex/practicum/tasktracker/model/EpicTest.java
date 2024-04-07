@@ -3,14 +3,12 @@ package main.java.ru.yandex.practicum.tasktracker.model;
 import main.java.ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
 import org.junit.jupiter.api.*;
-//TODO delete commented code
 
 class EpicTest {
   private TaskManager taskManager;
   private Epic epic;
   private Subtask subtask1;
   private Subtask subtask2;
-
 
   @BeforeEach
   void setUp() {
@@ -71,7 +69,6 @@ class EpicTest {
     Assertions.assertEquals(TaskStatus.DONE, actualStatus, "Incorrect status when all subtasks are done.");
   }
 
-
   void setUpEpicWithoutSubtasksInTaskManager() {
     epic = TestDataBuilder.buildEpic("Epic", "You know what you need.");
     taskManager.addEpic(epic);
@@ -83,6 +80,7 @@ class EpicTest {
     taskManager.addSubtask(subtask1);
     taskManager.addSubtask(subtask2);
   }
+
   void updateSubtasksWithStatus(TaskStatus status) {
     subtask1.setStatus(status);
     subtask2.setStatus(status);
