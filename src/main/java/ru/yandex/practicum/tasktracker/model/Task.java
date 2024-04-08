@@ -3,7 +3,8 @@ package main.java.ru.yandex.practicum.tasktracker.model;
 import java.util.Objects;
 
 public class Task {
-  private  int id;
+
+  private int id;
   private String title;
   private String description;
   private TaskStatus status;

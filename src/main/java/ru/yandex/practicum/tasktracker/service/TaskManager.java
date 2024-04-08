@@ -9,7 +9,6 @@ import java.util.List;
 
 public interface TaskManager {
 
-  int generateId();
   List<Task> getAllTasks();
 
   List<Epic> getAllEpics();

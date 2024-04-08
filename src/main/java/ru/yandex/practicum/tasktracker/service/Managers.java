@@ -1,4 +1,5 @@
 package main.java.ru.yandex.practicum.tasktracker.service;
+
 /**
  * Utility class
  */

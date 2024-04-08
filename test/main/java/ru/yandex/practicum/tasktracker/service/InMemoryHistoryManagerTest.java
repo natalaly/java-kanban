@@ -14,8 +14,9 @@ import java.util.Arrays;
 import java.util.List;
 
 class InMemoryHistoryManagerTest {
-  private HistoryManager history;
   private static final int HISTORY_CAPACITY = 10;
+  private HistoryManager history;
+
 
   @BeforeEach
   void setUp() {

@@ -1,19 +1,17 @@
 package main.java.ru.yandex.practicum.tasktracker.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Epic extends Task {
-  private final List<Subtask> subtasks = new ArrayList<>();
+
+  private final Set<Subtask> subtasks = new HashSet<>();
 
   @Override
   public TaskStatus getStatus() {
     return calculateStatus();
   }
 
-  public List<Subtask> getSubtasks() {
+  public Set<Subtask> getSubtasks() {
     return subtasks;
   }
 
@@ -28,7 +26,8 @@ public class Epic extends Task {
     if (subtask == null || !subtasks.contains(subtask)) {
       return;
     }
-    subtasks.set(subtasks.indexOf(subtask), subtask);
+    subtasks.remove(subtask);
+    subtasks.add(subtask);
   }
 
   public void removeSubtask(Subtask subtask) {
@@ -43,8 +42,8 @@ public class Epic extends Task {
     if (subtasks.size() == 0) {
       return TaskStatus.NEW;
     }
-
     Map<TaskStatus, Integer> subtaskStatus = getSubtasksStatuses();
+
     if (subtaskStatus.getOrDefault(TaskStatus.NEW, 0) == subtasks.size()) {
       return TaskStatus.NEW;
     }
@@ -56,6 +55,7 @@ public class Epic extends Task {
 
   private Map<TaskStatus, Integer> getSubtasksStatuses() {
     Map<TaskStatus, Integer> result = new HashMap<>();
+
     for (Subtask subtask : subtasks) {
       if (!result.containsKey(subtask.getStatus())) {
         result.put(subtask.getStatus(), 1);

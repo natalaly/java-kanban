@@ -5,13 +5,17 @@ import main.java.ru.yandex.practicum.tasktracker.model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InMemoryHistoryManager implements HistoryManager{
+public class InMemoryHistoryManager implements HistoryManager {
 
-  private  final List<Task> history = new ArrayList<>();
   private static final int HISTORY_CAPACITY = 10;
+  private final List<Task> history = new ArrayList<>();
+
 
   @Override
   public void add(Task task) {
+    if (task == null) {
+      return;
+    }
     if (history.size() >= HISTORY_CAPACITY) {
       history.remove(0);
     }

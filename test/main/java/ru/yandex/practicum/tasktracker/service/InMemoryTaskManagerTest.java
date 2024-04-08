@@ -643,8 +643,8 @@ class InMemoryTaskManagerTest {
     TaskStatus actualInEpic = subtasksFromEpic.stream().filter((st) -> st.getId() == subtaskInMemoryId).findFirst().get().getStatus();
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, taskManager.getSubtaskById(subtaskInMemoryId).getStatus()),
-        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualInEpic)
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, taskManager.getSubtaskById(subtaskInMemoryId).getStatus()),//,
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualInEpic, "Status inside Epic was not updated.")
     );
 
   }
