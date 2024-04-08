@@ -150,7 +150,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtask.setId(generateId());
         subtasks.put(subtask.getId(), subtask);
       } else {
-        subtasks.put(subtask.getId(),subtask);
+        subtasks.put(subtask.getId(), subtask);
         epics.get(subtask.getEpicId()).updateSubtask(subtask);
       }
     }
@@ -172,11 +172,11 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public List<Subtask> getSubtasksByEpicId(int id) {
+  public Set<Subtask> getSubtasksByEpicId(int id) {
     if (!epics.containsKey(id)) {
       return null;
     }
-    return new ArrayList<>(epics.get(id).getSubtasks());
+    return new HashSet<>(epics.get(id).getSubtasks());
   }
 
 }

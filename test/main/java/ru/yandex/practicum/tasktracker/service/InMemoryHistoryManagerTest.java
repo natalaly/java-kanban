@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 
 class InMemoryHistoryManagerTest {
+
   private static final int HISTORY_CAPACITY = 10;
   private HistoryManager history;
 
@@ -36,7 +37,8 @@ class InMemoryHistoryManagerTest {
 
     List<Task> actualHistory = history.getHistory();
 
-    Assertions.assertIterableEquals(expectedHistory, actualHistory, "Returned list should contain the same task.");
+    Assertions.assertIterableEquals(expectedHistory, actualHistory,
+        "Returned list should contain the same task.");
   }
 
   @Test

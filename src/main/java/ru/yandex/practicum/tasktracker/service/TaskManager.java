@@ -1,10 +1,10 @@
 package main.java.ru.yandex.practicum.tasktracker.service;
 
+import java.util.Set;
 import main.java.ru.yandex.practicum.tasktracker.model.Epic;
 import main.java.ru.yandex.practicum.tasktracker.model.Subtask;
 import main.java.ru.yandex.practicum.tasktracker.model.Task;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public interface TaskManager {
@@ -45,7 +45,7 @@ public interface TaskManager {
 
   void updateSubtask(Subtask subtask);
 
-  List<Subtask> getSubtasksByEpicId(int id);
+  Set<Subtask> getSubtasksByEpicId(int id);
 
   List<Task> getHistory();
 

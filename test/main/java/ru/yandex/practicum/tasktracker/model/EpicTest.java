@@ -5,6 +5,7 @@ import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
 import org.junit.jupiter.api.*;
 
 class EpicTest {
+
   private TaskManager taskManager;
   private Epic epic;
   private Subtask subtask1;
@@ -28,7 +29,8 @@ class EpicTest {
   void getStatusShouldReturnStatusNewWhenDoesNotHaveSubtasks() {
     TaskStatus actualStatus = epic.getStatus();
 
-    Assertions.assertEquals(TaskStatus.NEW, actualStatus, "Incorrect status when Epic without subtasks.");
+    Assertions.assertEquals(TaskStatus.NEW, actualStatus,
+        "Incorrect status when Epic without subtasks.");
   }
 
   @Test
@@ -37,7 +39,8 @@ class EpicTest {
 
     TaskStatus actualStatus = epic.getStatus();
 
-    Assertions.assertEquals(TaskStatus.NEW, actualStatus, "Incorrect status when all subtasks are new.");
+    Assertions.assertEquals(TaskStatus.NEW, actualStatus,
+        "Incorrect status when all subtasks are new.");
   }
 
   @Test
@@ -47,7 +50,8 @@ class EpicTest {
 
     TaskStatus actualStatus = epic.getStatus();
 
-    Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus, "Incorrect status when all subtasks are in progress.");
+    Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus,
+        "Incorrect status when all subtasks are in progress.");
   }
 
   @Test
@@ -58,7 +62,8 @@ class EpicTest {
 
     TaskStatus actualStatus = epic.getStatus();
 
-    Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus, "Incorrect status when only one of the subtasks has status Done.");
+    Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus,
+        "Incorrect status when only one of the subtasks has status Done.");
   }
 
   @Test
@@ -66,7 +71,8 @@ class EpicTest {
     addNewSubtasksToEpic();
     updateSubtasksWithStatus(TaskStatus.DONE);
     TaskStatus actualStatus = epic.getStatus();
-    Assertions.assertEquals(TaskStatus.DONE, actualStatus, "Incorrect status when all subtasks are done.");
+    Assertions.assertEquals(TaskStatus.DONE, actualStatus,
+        "Incorrect status when all subtasks are done.");
   }
 
   void setUpEpicWithoutSubtasksInTaskManager() {

@@ -11,7 +11,8 @@ class ManagersTest {
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(taskManager, "The object of TaskManager was not created."),
-        () -> Assertions.assertInstanceOf(InMemoryTaskManager.class, taskManager, "Created incorrect type of TaskManager")
+        () -> Assertions.assertInstanceOf(InMemoryTaskManager.class, taskManager,
+            "Created incorrect type of TaskManager")
     );
   }
 
@@ -20,8 +21,10 @@ class ManagersTest {
     HistoryManager historyManager = Managers.getDefaultHistory();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(historyManager, "The object of HistoryManager was not created."),
-        () -> Assertions.assertInstanceOf(InMemoryHistoryManager.class,historyManager ,"Created incorrect type of HistoryManager")
+        () -> Assertions.assertNotNull(historyManager,
+            "The object of HistoryManager was not created."),
+        () -> Assertions.assertInstanceOf(InMemoryHistoryManager.class, historyManager,
+            "Created incorrect type of HistoryManager")
     );
   }
 }

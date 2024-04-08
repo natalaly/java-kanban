@@ -1,5 +1,6 @@
 package main.java.ru.yandex.practicum.tasktracker.service;
 
+import java.util.Set;
 import main.java.ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import main.java.ru.yandex.practicum.tasktracker.model.*;
 import org.junit.jupiter.api.Assertions;
@@ -7,11 +8,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 class InMemoryTaskManagerTest {
+
   private TaskManager taskManager;
 
   @BeforeEach
@@ -22,8 +23,8 @@ class InMemoryTaskManagerTest {
   // getAllTasks();
   @Test
   public void getAllTaskShouldReturnList() {
-    Task task1 = TestDataBuilder.buildTask("t1","d1");
-    Task task2 = TestDataBuilder.buildTask("t2","d2");
+    Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    Task task2 = TestDataBuilder.buildTask("t2", "d2");
     taskManager.addTask(task1);
     taskManager.addTask(task2);
     List<Task> expected = new ArrayList<>(List.of(task1, task2));
@@ -55,8 +56,8 @@ class InMemoryTaskManagerTest {
   // getAllEpics();
   @Test
   public void getAllEpicsShouldReturnList() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
-    Epic epic2 = TestDataBuilder.buildEpic("e2","d2");
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
+    Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
     taskManager.addEpic(epic1);
     taskManager.addEpic(epic2);
     List<Epic> expected = new ArrayList<>(List.of(epic1, epic2));
@@ -88,10 +89,10 @@ class InMemoryTaskManagerTest {
   // getAllSubtasks();
   @Test
   public void getAllSubtasksShouldReturnList() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     taskManager.addEpic(epic1);
-    Subtask subtask1 = TestDataBuilder.buildSubtask("st1","d1", epic1.getId());
-    Subtask subtask2 = TestDataBuilder.buildSubtask("st2","d2",epic1.getId());
+    Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", epic1.getId());
+    Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", epic1.getId());
     taskManager.addSubtask(subtask1);
     taskManager.addSubtask(subtask2);
     List<Subtask> expected = new ArrayList<>(List.of(subtask1, subtask2));
@@ -123,8 +124,8 @@ class InMemoryTaskManagerTest {
   // clear...();
   @Test
   public void clearTaskShouldDeleteAllTasksFromTheMemory() {
-    Task task1 = TestDataBuilder.buildTask("t1","d1");
-    Task task2 = TestDataBuilder.buildTask("t2","d2");
+    Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    Task task2 = TestDataBuilder.buildTask("t2", "d2");
     taskManager.addTask(task1);
     taskManager.addTask(task2);
 
@@ -135,46 +136,51 @@ class InMemoryTaskManagerTest {
 
   @Test
   public void clearEpicsShouldDeleteAllEpicsAndSubtasksFromTheMemory() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
-    Epic epic2 = TestDataBuilder.buildEpic("e2","d2");
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
+    Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
     taskManager.addEpic(epic1);
     taskManager.addEpic(epic2);
 
     taskManager.clearEpics();
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(List.of(),taskManager.getAllEpics(), "Epics was not deleted."),
-        () -> Assertions.assertEquals(List.of(),taskManager.getAllSubtasks(), "Subtasks were not deleted.")
+        () -> Assertions.assertEquals(List.of(), taskManager.getAllEpics(),
+            "Epics was not deleted."),
+        () -> Assertions.assertEquals(List.of(), taskManager.getAllSubtasks(),
+            "Subtasks were not deleted.")
     );
   }
 
   @Test
   public void clearSubtasksShouldDeleteAllSubtasksFromTheMemoryAndFromEpics() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     taskManager.addEpic(epic1);
-    Subtask subtask1 = TestDataBuilder.buildSubtask("st1","d1", epic1.getId());
-    Subtask subtask2 = TestDataBuilder.buildSubtask("st2","d2",epic1.getId());
+    Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", epic1.getId());
+    Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", epic1.getId());
     taskManager.addSubtask(subtask1);
     taskManager.addSubtask(subtask2);
 
     taskManager.clearSubtasks();
     ArrayList<Subtask> subtasksFromEpics = new ArrayList<>();
-    for (Epic epic : taskManager.getAllEpics()) {;
+    for (Epic epic : taskManager.getAllEpics()) {
       subtasksFromEpics.addAll(taskManager.getSubtasksByEpicId(epic.getId()));
     }
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(List.of(),taskManager.getAllSubtasks(), "Subtasks was not deleted."),
-        () -> Assertions.assertEquals(List.of(),subtasksFromEpics, "Subtasks were not deleted from Epics.")
+        () -> Assertions.assertEquals(List.of(), taskManager.getAllSubtasks(),
+            "Subtasks was not deleted."),
+        () -> Assertions.assertEquals(List.of(), subtasksFromEpics,
+            "Subtasks were not deleted from Epics.")
     );
   }
 
   // delete..();
   @Test
   public void deleteTaskShouldDeleteTaskBiIdFromTheMemory() {
-    Task task1 = TestDataBuilder.buildTask("t1","d1");
-    Task task2 = TestDataBuilder.buildTask("t2","d2");
-    Task taskInMemory2 =taskManager.addTask(task2);
+    Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    Task task2 = TestDataBuilder.buildTask("t2", "d2");
+    taskManager.addTask(task1);
+    Task taskInMemory2 = taskManager.addTask(task2);
 
     taskManager.deleteTask(taskInMemory2.getId());
 
@@ -183,9 +189,10 @@ class InMemoryTaskManagerTest {
 
   @Test
   public void deleteEpicShouldDeleteEpicsByIdAndItsSubtasksFromTheMemory() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
-    Epic epic2 = TestDataBuilder.buildEpic("e2","d2");
-    Epic epicInMemory2 =taskManager.addEpic(epic2);
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
+    Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
+    taskManager.addEpic(epic1);
+    Epic epicInMemory2 = taskManager.addEpic(epic2);
 
     taskManager.deleteEpic(epicInMemory2.getId());
     List<Subtask> subtaskFroDeletedEpic = new ArrayList<>();
@@ -196,27 +203,30 @@ class InMemoryTaskManagerTest {
     }
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getEpicById(epic2.getId()), "Epic was not deleted."),
-        () -> Assertions.assertEquals(List.of(),subtaskFroDeletedEpic, "Subtasks were not deleted.")
+        () -> Assertions.assertNull(taskManager.getEpicById(epic2.getId()),
+            "Epic was not deleted."),
+        () -> Assertions.assertEquals(List.of(), subtaskFroDeletedEpic,
+            "Subtasks were not deleted.")
     );
   }
 
   @Test
   public void deleteSubtaskShouldDeleteSubtaskFromTheMemoryAndFromItsEpic() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1","d1");
+    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     Epic correspondingEpic = taskManager.addEpic(epic1);
-    Subtask subtask1 = TestDataBuilder.buildSubtask("st1","d1", correspondingEpic.getId());
-    Subtask subtask2 = TestDataBuilder.buildSubtask("st2","d2",correspondingEpic.getId());
+    Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", correspondingEpic.getId());
+    Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", correspondingEpic.getId());
     taskManager.addSubtask(subtask1);
     int subtaskToDeleteId = taskManager.addSubtask(subtask2).getId();
 
     taskManager.deleteSubtask(subtaskToDeleteId);
-    List<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(correspondingEpic.getId());
-    boolean isDeletedFromEpic =  subtasksFromEpic.stream().noneMatch((st) -> st.getId() == subtaskToDeleteId);
-
+    Set<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(correspondingEpic.getId());
+    boolean isDeletedFromEpic = subtasksFromEpic.stream()
+        .noneMatch((st) -> st.getId() == subtaskToDeleteId);
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getSubtaskById(subtaskToDeleteId), "Subtask was not deleted."),
+        () -> Assertions.assertNull(taskManager.getSubtaskById(subtaskToDeleteId),
+            "Subtask was not deleted."),
         () -> Assertions.assertTrue(isDeletedFromEpic, "Subtask was not deleted from Epic.")
     );
   }
@@ -224,14 +234,14 @@ class InMemoryTaskManagerTest {
   // getTaskById();
   @Test
   public void getTaskByIdShouldReturnTaskWhenIdIsValid() {
-    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t","d"));
+    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
     int taskInMemoryId = taskInMemory.getId();
 
     Task returnedTask = taskManager.getTaskById(taskInMemoryId);
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(returnedTask,"Task was not returned."),
-        () -> Assertions.assertEquals(taskInMemory,returnedTask, "Returned wrong task. ")
+        () -> Assertions.assertNotNull(returnedTask, "Task was not returned."),
+        () -> Assertions.assertEquals(taskInMemory, returnedTask, "Returned wrong task. ")
     );
   }
 
@@ -239,12 +249,12 @@ class InMemoryTaskManagerTest {
   public void getTaskByIdShouldReturnNullWhenIdIsNotValid() {
     Task returnedTask = taskManager.getTaskById(0);
 
-   Assertions.assertNull(returnedTask,"Task was not returned.");
+    Assertions.assertNull(returnedTask, "Task was not returned.");
   }
 
   @Test
   public void getTaskByIdShouldSaveTaskToHistory() {
-    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t","d"));
+    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
     int taskInMemoryId = taskInMemory.getId();
     List<Task> expected = List.of(taskInMemory);
 
@@ -268,14 +278,14 @@ class InMemoryTaskManagerTest {
   // getEpicById();
   @Test
   public void getEpicByIdShouldReturnEpicWhenIdIsValid() {
-    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e","d"));
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e", "d"));
     int epicInMemoryId = epicInMemory.getId();
 
     Epic returnedEpic = taskManager.getEpicById(epicInMemoryId);
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(returnedEpic,"Epic was not returned."),
-        () -> Assertions.assertEquals(epicInMemory,returnedEpic, "Returned wrong epic. ")
+        () -> Assertions.assertNotNull(returnedEpic, "Epic was not returned."),
+        () -> Assertions.assertEquals(epicInMemory, returnedEpic, "Returned wrong epic. ")
     );
   }
 
@@ -283,12 +293,12 @@ class InMemoryTaskManagerTest {
   public void getEpicByIdShouldReturnNullWhenIdIsNotValid() {
     Epic returnedEpic = taskManager.getEpicById(0);
 
-    Assertions.assertNull(returnedEpic,"Epic was not returned.");
+    Assertions.assertNull(returnedEpic, "Epic was not returned.");
   }
 
   @Test
   public void getEpicByIdShouldSaveEpicToHistory() {
-    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("t","d"));
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("t", "d"));
     int epicInMemoryId = epicInMemory.getId();
     List<Epic> expected = List.of(epicInMemory);
 
@@ -312,16 +322,17 @@ class InMemoryTaskManagerTest {
   // getSubtaskById();
   @Test
   public void getSubtaskByIdShouldReturnSubtaskWhenIdIsValid() {
-    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e","d"));
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e", "d"));
     int epicInMemoryId = epicInMemory.getId();
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("st","d", epicInMemoryId));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("st", "d", epicInMemoryId));
     int subtaskInMemoryId = subtaskInMemory.getId();
 
     Subtask returnedSubtask = taskManager.getSubtaskById(subtaskInMemoryId);
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(returnedSubtask,"Subtask was not returned."),
-        () -> Assertions.assertEquals(subtaskInMemory,returnedSubtask, "Returned wrong subtask. ")
+        () -> Assertions.assertNotNull(returnedSubtask, "Subtask was not returned."),
+        () -> Assertions.assertEquals(subtaskInMemory, returnedSubtask, "Returned wrong subtask. ")
     );
   }
 
@@ -329,14 +340,15 @@ class InMemoryTaskManagerTest {
   public void getSubtaskByIdShouldReturnNullWhenIdIsNotValid() {
     Subtask returnedSubtask = taskManager.getSubtaskById(0);
 
-    Assertions.assertNull(returnedSubtask,"Subbtask was not returned.");
+    Assertions.assertNull(returnedSubtask, "Subtask was not returned.");
   }
 
   @Test
   public void getSubtaskByIdShouldSaveSubtaskToHistory() {
-    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e","d"));
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e", "d"));
     int epicInMemoryId = epicInMemory.getId();
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("st","d", epicInMemoryId));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("st", "d", epicInMemoryId));
     int subtaskInMemoryId = subtaskInMemory.getId();
     List<Subtask> expected = List.of(subtaskInMemory);
 
@@ -367,9 +379,11 @@ class InMemoryTaskManagerTest {
     int actualNumberOfTasks = taskManager.getAllTasks().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(taskManager.getTaskById(task.getId()), "Task was not found."),
+        () -> Assertions.assertNotNull(taskManager.getTaskById(task.getId()),
+            "Task was not found."),
         () -> Assertions.assertNotNull(taskManager.getAllTasks(), "Tasks are not returned."),
-        () -> Assertions.assertEquals(expectedNumberOfTasks, actualNumberOfTasks, "Incorrect number of tasks.")
+        () -> Assertions.assertEquals(expectedNumberOfTasks, actualNumberOfTasks,
+            "Incorrect number of tasks.")
     );
   }
 
@@ -382,9 +396,12 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(taskSaved, "Task was not saved."),
-        () -> Assertions.assertEquals(taskToAdd.getTitle(), taskSaved.getTitle(), "Title was changed."),
-        () -> Assertions.assertEquals(taskToAdd.getDescription(), taskSaved.getDescription(), "Description was changed."),
-        () -> Assertions.assertEquals(taskToAdd.getStatus(), taskSaved.getStatus(), "Status was changed.")
+        () -> Assertions.assertEquals(taskToAdd.getTitle(), taskSaved.getTitle(),
+            "Title was changed."),
+        () -> Assertions.assertEquals(taskToAdd.getDescription(), taskSaved.getDescription(),
+            "Description was changed."),
+        () -> Assertions.assertEquals(taskToAdd.getStatus(), taskSaved.getStatus(),
+            "Status was changed.")
     );
   }
 
@@ -399,8 +416,10 @@ class InMemoryTaskManagerTest {
     int actualNumberOfTasks = taskManager.getAllTasks().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotEquals(taskInMemoryId,taskAdded.getId(),  "Id was not generated."),
-        () -> Assertions.assertEquals(expectedNumberOfTasks, actualNumberOfTasks, "New task was not added.")
+        () -> Assertions.assertNotEquals(taskInMemoryId, taskAdded.getId(),
+            "Id was not generated."),
+        () -> Assertions.assertEquals(expectedNumberOfTasks, actualNumberOfTasks,
+            "New task was not added.")
     );
   }
 
@@ -414,11 +433,14 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertAll(
         () -> Assertions.assertEquals(taskInMemory.getTitle(),
-            taskManager.getTaskById(taskInMemoryId).getTitle(), "Task title in memory was changed."),
+            taskManager.getTaskById(taskInMemoryId).getTitle(),
+            "Task title in memory was changed."),
         () -> Assertions.assertEquals(taskInMemory.getDescription(),
-            taskManager.getTaskById(taskInMemoryId).getDescription(), "Task description in memory was changed."),
+            taskManager.getTaskById(taskInMemoryId).getDescription(),
+            "Task description in memory was changed."),
         () -> Assertions.assertEquals(taskInMemory.getStatus(),
-            taskManager.getTaskById(taskInMemoryId).getStatus(), "Task status in memory was changed.")
+            taskManager.getTaskById(taskInMemoryId).getStatus(),
+            "Task status in memory was changed.")
     );
 
 
@@ -434,9 +456,11 @@ class InMemoryTaskManagerTest {
     int actualNumberOfEpics = taskManager.getAllEpics().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(taskManager.getEpicById(epic.getId()), "Epic was not found."),
+        () -> Assertions.assertNotNull(taskManager.getEpicById(epic.getId()),
+            "Epic was not found."),
         () -> Assertions.assertNotNull(taskManager.getAllEpics(), "Epics are not returned."),
-        () -> Assertions.assertEquals(expectedNumberOfEpic, actualNumberOfEpics, "Incorrect number of epics.")
+        () -> Assertions.assertEquals(expectedNumberOfEpic, actualNumberOfEpics,
+            "Incorrect number of epics.")
     );
   }
 
@@ -449,7 +473,8 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(epicSaved, "Epic was not saved"),
-        () -> Assertions.assertEquals(epicToAdd.getTitle(), epicSaved.getTitle(), "Title was changed."),
+        () -> Assertions.assertEquals(epicToAdd.getTitle(), epicSaved.getTitle(),
+            "Title was changed."),
         () -> Assertions.assertEquals(epicToAdd.getDescription(),
             epicSaved.getDescription(), "Description was changed.")
     );
@@ -466,8 +491,10 @@ class InMemoryTaskManagerTest {
     int actualNumberOfEpics = taskManager.getAllEpics().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotEquals(epicInMemoryId,epicAdded.getId(),  "Id was not generated."),
-        () -> Assertions.assertEquals(expectedNumberOfEpics, actualNumberOfEpics, "New epic was not added.")
+        () -> Assertions.assertNotEquals(epicInMemoryId, epicAdded.getId(),
+            "Id was not generated."),
+        () -> Assertions.assertEquals(expectedNumberOfEpics, actualNumberOfEpics,
+            "New epic was not added.")
     );
   }
 
@@ -481,9 +508,15 @@ class InMemoryTaskManagerTest {
     taskManager.addEpic(epicToAdd);
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(epicInMemory.getTitle(), taskManager.getEpicById(epicInMemoryId).getTitle(), "Task title in memory was changed."),
-        () -> Assertions.assertEquals(epicInMemory.getDescription(), taskManager.getEpicById(epicInMemoryId).getDescription(), "Task description in memory was changed."),
-        () -> Assertions.assertEquals(epicInMemoryStatus, taskManager.getEpicById(epicInMemoryId).getStatus(), "Task status in memory was changed.")
+        () -> Assertions.assertEquals(epicInMemory.getTitle(),
+            taskManager.getEpicById(epicInMemoryId).getTitle(),
+            "Task title in memory was changed."),
+        () -> Assertions.assertEquals(epicInMemory.getDescription(),
+            taskManager.getEpicById(epicInMemoryId).getDescription(),
+            "Task description in memory was changed."),
+        () -> Assertions.assertEquals(epicInMemoryStatus,
+            taskManager.getEpicById(epicInMemoryId).getStatus(),
+            "Task status in memory was changed.")
     );
   }
 
@@ -507,12 +540,14 @@ class InMemoryTaskManagerTest {
 
     Subtask savedSubtask = taskManager.addSubtask(subtaskToAdd);
     int actualNumberOfSubtasks = taskManager.getAllSubtasks().size();
-    boolean subtaskExistInEpic = taskManager.getSubtasksByEpicId(savedSubtask.getEpicId()).contains(savedSubtask);
+    boolean subtaskExistInEpic = taskManager.getSubtasksByEpicId(savedSubtask.getEpicId())
+        .contains(savedSubtask);
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(savedSubtask, "Subtask was not found."),
         () -> Assertions.assertNotNull(taskManager.getAllSubtasks(), "Subtasks are not returned."),
-        () -> Assertions.assertEquals(expectedNumberOfSubtasks, actualNumberOfSubtasks, "Incorrect number of tasks."),
+        () -> Assertions.assertEquals(expectedNumberOfSubtasks, actualNumberOfSubtasks,
+            "Incorrect number of tasks."),
         () -> Assertions.assertTrue(subtaskExistInEpic, "Subtask was not saved inside epic.")
     );
   }
@@ -520,73 +555,95 @@ class InMemoryTaskManagerTest {
   @Test
   void addedSubtaskRemainsUnchangedWhenAddedToTheTaskManager() {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
-    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("task", "d",epicInMemory.getId());
+    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("task", "d", epicInMemory.getId());
 
     taskManager.addSubtask(subtaskToAdd);
     Subtask savedSubtask = taskManager.getSubtaskById(subtaskToAdd.getId());
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(savedSubtask, "Subtask was not saved."),
-        () -> Assertions.assertEquals(subtaskToAdd.getTitle(), savedSubtask.getTitle(), "Title was changed."),
-        () -> Assertions.assertEquals(subtaskToAdd.getDescription(), savedSubtask.getDescription(), "Description was changed."),
-        () -> Assertions.assertEquals(subtaskToAdd.getStatus(), savedSubtask.getStatus(), "Status was changed."),
-        () -> Assertions.assertEquals(subtaskToAdd.getEpicId(),savedSubtask.getEpicId(),"Corresponding epic was changed.")
+        () -> Assertions.assertEquals(subtaskToAdd.getTitle(), savedSubtask.getTitle(),
+            "Title was changed."),
+        () -> Assertions.assertEquals(subtaskToAdd.getDescription(), savedSubtask.getDescription(),
+            "Description was changed."),
+        () -> Assertions.assertEquals(subtaskToAdd.getStatus(), savedSubtask.getStatus(),
+            "Status was changed."),
+        () -> Assertions.assertEquals(subtaskToAdd.getEpicId(), savedSubtask.getEpicId(),
+            "Corresponding epic was changed.")
     );
   }
 
   @Test
   void addSubtaskShouldGenerateNewIdWhenSavingInTaskManagerSubtaskWithId() {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("t1", "d",epicInMemory.getId()));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("t1", "d", epicInMemory.getId()));
     int subtaskInMemoryId = subtaskInMemory.getId();
-    Subtask subtaskToAdd = TestDataBuilder.buildSubtask(subtaskInMemoryId, "t2", "d", subtaskInMemory.getEpicId());
+    Subtask subtaskToAdd = TestDataBuilder.buildSubtask(subtaskInMemoryId, "t2", "d",
+        subtaskInMemory.getEpicId());
     int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size() + 1;
 
     Subtask subtaskAdded = taskManager.addSubtask(subtaskToAdd);
     int actualNumberOfTasks = taskManager.getAllSubtasks().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotEquals(subtaskInMemoryId,subtaskAdded.getId(),"Id was not generated"),
-        () -> Assertions.assertEquals(expectedNumberOfSubtasks, actualNumberOfTasks, "New subtask was not added.")
+        () -> Assertions.assertNotEquals(subtaskInMemoryId, subtaskAdded.getId(),
+            "Id was not generated"),
+        () -> Assertions.assertEquals(expectedNumberOfSubtasks, actualNumberOfTasks,
+            "New subtask was not added.")
     );
   }
 
   @Test
   void addSubtaskWithExistedInTaskManagerIdShouldNotUpdateSubtaskInMemory() {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("st1", "d",epicInMemory.getId()));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("st1", "d", epicInMemory.getId()));
     int subtaskInMemoryId = subtaskInMemory.getId();
-    int expectedNumberSubtasksInEpic = taskManager.getSubtasksByEpicId(epicInMemory.getId()).size() + 1;
-    Subtask subtaskToAdd = TestDataBuilder.buildSubtask(subtaskInMemoryId, "st2", "d", epicInMemory.getId());
+    int expectedNumberSubtasksInEpic =
+        taskManager.getSubtasksByEpicId(epicInMemory.getId()).size() + 1;
+    Subtask subtaskToAdd = TestDataBuilder.buildSubtask(subtaskInMemoryId, "st2", "d",
+        epicInMemory.getId());
 
     Subtask subtaskAdded = taskManager.addSubtask(subtaskToAdd);
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(taskManager.getSubtaskById(subtaskAdded.getId()),"Subtask was not found."),
-        () -> Assertions.assertEquals(subtaskInMemory.getTitle(), taskManager.getSubtaskById(subtaskInMemoryId).getTitle(), "Subtask title in memory was changed."),
-        () -> Assertions.assertEquals(subtaskInMemory.getDescription(), taskManager.getSubtaskById(subtaskInMemoryId).getDescription(), "Subtask description in memory was changed."),
-        () -> Assertions.assertEquals(subtaskInMemory.getStatus(), taskManager.getSubtaskById(subtaskInMemoryId).getStatus(), "Subtask status in memory was changed."),
-        () -> Assertions.assertEquals(expectedNumberSubtasksInEpic, taskManager.getSubtasksByEpicId(epicInMemory.getId()).size(), "Subtask wasn't found in epic.")
+        () -> Assertions.assertNotNull(taskManager.getSubtaskById(subtaskAdded.getId()),
+            "Subtask was not found."),
+        () -> Assertions.assertEquals(subtaskInMemory.getTitle(),
+            taskManager.getSubtaskById(subtaskInMemoryId).getTitle(),
+            "Subtask title in memory was changed."),
+        () -> Assertions.assertEquals(subtaskInMemory.getDescription(),
+            taskManager.getSubtaskById(subtaskInMemoryId).getDescription(),
+            "Subtask description in memory was changed."),
+        () -> Assertions.assertEquals(subtaskInMemory.getStatus(),
+            taskManager.getSubtaskById(subtaskInMemoryId).getStatus(),
+            "Subtask status in memory was changed."),
+        () -> Assertions.assertEquals(expectedNumberSubtasksInEpic,
+            taskManager.getSubtasksByEpicId(epicInMemory.getId()).size(),
+            "Subtask wasn't found in epic.")
     );
   }
 
   @Test
   void addSubtaskShouldNotAddSubtaskWithIncorrectEpicId() {
-    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1","d",1);
+    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1", "d", 1);
     int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size();
 
     Subtask subtaskAdded = taskManager.addSubtask(subtaskToAdd);
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(subtaskAdded,"Subtask added."),
-        () -> Assertions.assertEquals(expectedNumberOfSubtasks,taskManager.getAllSubtasks().size(),"Subtask added.")
+        () -> Assertions.assertNull(subtaskAdded, "Subtask added."),
+        () -> Assertions.assertEquals(expectedNumberOfSubtasks, taskManager.getAllSubtasks().size(),
+            "Subtask added.")
     );
   }
 
   @Test
   void subtaskShouldNotBeAbleBecomeItsOwnSubtask() {
-    Epic epicInMemory =taskManager.addEpic( TestDataBuilder.buildEpic("Epic", "d"));
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("Sb", "D", epicInMemory.getId()));
+    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("Epic", "d"));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("Sb", "D", epicInMemory.getId()));
     Subtask subtaskToAdd = TestDataBuilder.buildCopySubtask(subtaskInMemory);
     subtaskToAdd.setEpicId(subtaskInMemory.getId());
 
@@ -611,7 +668,7 @@ class InMemoryTaskManagerTest {
     taskManager.updateTask(changes);
     TaskStatus actual = taskManager.getTaskById(task.getId()).getStatus();
 
-    Assertions.assertEquals(TaskStatus.DONE, actual,"Status was not updated");
+    Assertions.assertEquals(TaskStatus.DONE, actual, "Status was not updated");
   }
 
   // updateEpic();
@@ -625,7 +682,8 @@ class InMemoryTaskManagerTest {
 
     taskManager.updateEpic(changes);
 
-    Assertions.assertEquals(expected,taskManager.getEpicById(epicInMemoryId).getStatus(), "Status of epic was updated manually");
+    Assertions.assertEquals(expected, taskManager.getEpicById(epicInMemoryId).getStatus(),
+        "Status of epic was updated manually");
   }
 
   // updateSubtask():
@@ -633,18 +691,23 @@ class InMemoryTaskManagerTest {
   void updateSubtaskShouldChangeItsStatusInMemory() {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
     int epicInMemoryId = epicInMemory.getId();
-    Subtask subtaskInMemory = taskManager.addSubtask(TestDataBuilder.buildSubtask("st1", "d",epicInMemoryId));
+    Subtask subtaskInMemory = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("st1", "d", epicInMemoryId));
     int subtaskInMemoryId = subtaskInMemory.getId();
-    Subtask changes = TestDataBuilder.buildCopySubtask(taskManager.getSubtaskById(subtaskInMemoryId));
+    Subtask changes = TestDataBuilder.buildCopySubtask(
+        taskManager.getSubtaskById(subtaskInMemoryId));
     changes.setStatus(TaskStatus.IN_PROGRESS);
 
     taskManager.updateSubtask(changes);
-    List<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(epicInMemoryId);
-    TaskStatus actualInEpic = subtasksFromEpic.stream().filter((st) -> st.getId() == subtaskInMemoryId).findFirst().get().getStatus();
+    Set<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(epicInMemoryId);
+    TaskStatus actualInEpic = subtasksFromEpic.stream()
+        .filter((st) -> st.getId() == subtaskInMemoryId).findFirst().get().getStatus();
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, taskManager.getSubtaskById(subtaskInMemoryId).getStatus()),//,
-        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualInEpic, "Status inside Epic was not updated.")
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS,
+            taskManager.getSubtaskById(subtaskInMemoryId).getStatus()),//,
+        () -> Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualInEpic,
+            "Status inside Epic was not updated.")
     );
 
   }
@@ -652,7 +715,7 @@ class InMemoryTaskManagerTest {
   // getHistory();
   @Test
   public void tasksInHistoryShouldKeepTheirStateAfterUpdatingThemInTaskManager() {
-    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t","d"));
+    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
     int taskInMemoryId = taskInMemory.getId();
     taskManager.getTaskById(taskInMemoryId);
     Task expected = taskManager.getHistory().get(taskManager.getHistory().size() - 1);
@@ -663,7 +726,8 @@ class InMemoryTaskManagerTest {
 
     Assertions.assertEquals(expected, actual, "Id is different");
     Assertions.assertEquals(expected.getTitle(), actual.getTitle(), "Id is different");
-    Assertions.assertEquals(expected.getDescription(), actual.getDescription(), "Description is different");
+    Assertions.assertEquals(expected.getDescription(), actual.getDescription(),
+        "Description is different");
     Assertions.assertEquals(expected.getStatus(), actual.getStatus(), "Status is different");
   }
 }
