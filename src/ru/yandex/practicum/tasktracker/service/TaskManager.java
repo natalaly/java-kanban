@@ -1,9 +1,9 @@
-package main.java.ru.yandex.practicum.tasktracker.service;
+package ru.yandex.practicum.tasktracker.service;
 
 import java.util.Set;
-import main.java.ru.yandex.practicum.tasktracker.model.Epic;
-import main.java.ru.yandex.practicum.tasktracker.model.Subtask;
-import main.java.ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.Epic;
+import ru.yandex.practicum.tasktracker.model.Subtask;
+import ru.yandex.practicum.tasktracker.model.Task;
 
 import java.util.List;
 

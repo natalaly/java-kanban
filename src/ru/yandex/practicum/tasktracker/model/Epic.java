@@ -1,6 +1,10 @@
-package main.java.ru.yandex.practicum.tasktracker.model;
+package ru.yandex.practicum.tasktracker.model;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class Epic extends Task {
 
@@ -11,8 +15,9 @@ public class Epic extends Task {
     return calculateStatus();
   }
 
+  // TODO Верни копию или неизменяемый сет (Collections.unmodifiableSet(subtasks))
   public Set<Subtask> getSubtasks() {
-    return subtasks;
+    return Collections.unmodifiableSet(subtasks);
   }
 
   public void addSubtask(Subtask subtask) {

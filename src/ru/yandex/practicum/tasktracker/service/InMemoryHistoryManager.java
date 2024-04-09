@@ -1,6 +1,7 @@
-package main.java.ru.yandex.practicum.tasktracker.service;
+package ru.yandex.practicum.tasktracker.service;
 
-import main.java.ru.yandex.practicum.tasktracker.model.Task;
+import java.util.Collections;
+import ru.yandex.practicum.tasktracker.model.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,9 @@ public class InMemoryHistoryManager implements HistoryManager {
     history.add(task);
   }
 
+  // TODO Лучше верни копию списка
   @Override
   public List<Task> getHistory() {
-    return this.history;
+    return Collections.unmodifiableList(history);
   }
 }

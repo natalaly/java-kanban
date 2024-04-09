@@ -1,4 +1,4 @@
-package main.java.ru.yandex.practicum.tasktracker.service;
+package ru.yandex.practicum.tasktracker.service;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

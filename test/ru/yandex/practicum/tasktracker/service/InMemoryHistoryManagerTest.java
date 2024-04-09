@@ -1,7 +1,6 @@
-package main.java.ru.yandex.practicum.tasktracker.service;
+package ru.yandex.practicum.tasktracker.service;
 
-import main.java.ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import main.java.ru.yandex.practicum.tasktracker.model.*;
+import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +11,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import ru.yandex.practicum.tasktracker.model.Epic;
+import ru.yandex.practicum.tasktracker.model.Subtask;
+import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskStatus;
 
 class InMemoryHistoryManagerTest {
 

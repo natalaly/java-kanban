@@ -1,4 +1,4 @@
-package main.java.ru.yandex.practicum.tasktracker.model;
+package ru.yandex.practicum.tasktracker.model;
 
 public class Subtask extends Task {
 

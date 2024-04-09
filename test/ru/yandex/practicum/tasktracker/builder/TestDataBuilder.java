@@ -1,11 +1,11 @@
-package main.java.ru.yandex.practicum.tasktracker.builder;
+package ru.yandex.practicum.tasktracker.builder;
 
-import main.java.ru.yandex.practicum.tasktracker.model.Epic;
-import main.java.ru.yandex.practicum.tasktracker.model.Subtask;
-import main.java.ru.yandex.practicum.tasktracker.model.Task;
-import main.java.ru.yandex.practicum.tasktracker.model.TaskStatus;
-import main.java.ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
-import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
+import ru.yandex.practicum.tasktracker.model.Epic;
+import ru.yandex.practicum.tasktracker.model.Subtask;
+import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskStatus;
+import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
+import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
  * Utility class for preparing test data

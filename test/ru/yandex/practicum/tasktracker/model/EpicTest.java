@@ -1,7 +1,7 @@
-package main.java.ru.yandex.practicum.tasktracker.model;
+package ru.yandex.practicum.tasktracker.model;
 
-import main.java.ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import main.java.ru.yandex.practicum.tasktracker.service.TaskManager;
+import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
+import ru.yandex.practicum.tasktracker.service.TaskManager;
 import org.junit.jupiter.api.*;
 
 class EpicTest {
