@@ -44,25 +44,25 @@ class InMemoryHistoryManagerTest {
         "Returned list should contain the same task.");
   }
 
-  @Test
-  void addShouldRemoveOldestTaskToAddNewTaskToTheEndWhenCapacityIsReached() {
-    for (int i = 0; i < HISTORY_CAPACITY; i++) {
-      Task task = TestDataBuilder.buildTask(i + 1, "task", "d", TaskStatus.NEW);
-      history.add(task);
-    }
-    Epic epic = TestDataBuilder.buildEpic(13, "epic", "description");
-
-    history.add(epic);
-
-    Assertions.assertAll(
-        () -> Assertions.assertEquals(HISTORY_CAPACITY, history.getHistory().size(),
-            "History List should not exceed " + HISTORY_CAPACITY + " items."),
-        () -> Assertions.assertEquals(2, history.getHistory().get(0).getId(),
-            "First task doesn't have id = 2 (second element before)."),
-        () -> Assertions.assertEquals(epic, history.getHistory().get(HISTORY_CAPACITY - 1),
-            "Last element is not epic.")
-    );
-  }
+//  @Test
+//  void addShouldRemoveOldestTaskToAddNewTaskToTheEndWhenCapacityIsReached() {
+//    for (int i = 0; i < HISTORY_CAPACITY; i++) {
+//      Task task = TestDataBuilder.buildTask(i + 1, "task", "d", TaskStatus.NEW);
+//      history.add(task);
+//    }
+//    Epic epic = TestDataBuilder.buildEpic(13, "epic", "description");
+//
+//    history.add(epic);
+//
+//    Assertions.assertAll(
+//        () -> Assertions.assertEquals(HISTORY_CAPACITY, history.getHistory().size(),
+//            "History List should not exceed " + HISTORY_CAPACITY + " items."),
+//        () -> Assertions.assertEquals(2, history.getHistory().get(0).getId(),
+//            "First task doesn't have id = 2 (second element before)."),
+//        () -> Assertions.assertEquals(epic, history.getHistory().get(HISTORY_CAPACITY - 1),
+//            "Last element is not epic.")
+//    );
+//  }
 
   private static List<Task> provideTasks() {
     Task task = TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW);

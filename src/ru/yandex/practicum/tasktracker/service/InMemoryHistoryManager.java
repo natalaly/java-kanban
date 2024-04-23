@@ -1,6 +1,7 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import ru.yandex.practicum.tasktracker.model.Task;
 
 import java.util.ArrayList;
@@ -8,8 +9,11 @@ import java.util.List;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
-  private static final int HISTORY_CAPACITY = 10;
   private final List<Task> history = new ArrayList<>();
+
+  private final Map<Integer, Node> nodes = new HashMap<>();
+  private Node head;
+  private Node tail;
 
 
   @Override
@@ -17,15 +21,76 @@ public class InMemoryHistoryManager implements HistoryManager {
     if (task == null) {
       return;
     }
-    if (history.size() >= HISTORY_CAPACITY) {
-      history.remove(0);
-    }
-    history.add(task);
+    remove(task.getId());
+    linkLast(task);
   }
 
-  // TODO Лучше верни копию списка
+  @Override
+  public void remove(int id) {
+    Node nodeToRemove = nodes.remove(id);
+    removeNode(nodeToRemove);
+  }
+
   @Override
   public List<Task> getHistory() {
-    return Collections.unmodifiableList(history);
+    return getTasks();
+  }
+
+  private void linkLast(Task task) {
+    final Node oldTail = tail;
+    final Node newNode = new Node(oldTail, task, null);
+    tail = newNode;
+    if (oldTail == null) {
+      head = newNode;
+    } else {
+      oldTail.next = newNode;
+    }
+    nodes.put(task.getId(), newNode);
+  }
+
+  private List<Task> getTasks() {
+    final List<Task> history = new ArrayList<>();
+    Node current = head;
+    while (current != null) {
+      history.add(current.data);
+      current = current.next;
+    }
+    return history;
+  }
+
+  private void removeNode(Node node) {
+    if (node == null) {
+      return;
+    }
+
+    final Node nodeAfter = node.next;
+    final Node nodeBefore = node.prev;
+
+    if (nodeBefore == null) {
+      head = nodeAfter;
+    } else {
+      nodeBefore.next = nodeAfter;
+      node.prev = null;
+    }
+
+    if (nodeAfter == null) {
+      tail = nodeBefore;
+    } else {
+      nodeAfter.prev = nodeBefore;
+      node.next = null;
+    }
+  }
+}
+
+class Node {
+
+  public Task data;
+  public Node next;
+  public Node prev;
+
+  public Node(Node prev, Task data, Node next) {
+    this.data = data;
+    this.next = next;
+    this.prev = prev;
   }
 }
