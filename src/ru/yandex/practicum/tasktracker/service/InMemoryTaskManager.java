@@ -37,6 +37,7 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void clearTasks() {
+
     tasks.clear();
   }
 
