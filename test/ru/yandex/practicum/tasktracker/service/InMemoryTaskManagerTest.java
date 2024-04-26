@@ -1,6 +1,7 @@
 package ru.yandex.practicum.tasktracker.service;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,115 +26,129 @@ class InMemoryTaskManagerTest {
   // getAllTasks();
   @Test
   public void getAllTaskShouldReturnList() {
-    Task task1 = TestDataBuilder.buildTask("t1", "d1");
-    Task task2 = TestDataBuilder.buildTask("t2", "d2");
+    final Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    final Task task2 = TestDataBuilder.buildTask("t2", "d2");
     taskManager.addTask(task1);
     taskManager.addTask(task2);
-    List<Task> expected = new ArrayList<>(List.of(task1, task2));
+    final List<Task> expected = new ArrayList<>(List.of(task1, task2));
     expected.sort(Comparator.comparing(Task::getId));
 
-    List<Task> actual = taskManager.getAllTasks();
+    final List<Task> actual = taskManager.getAllTasks();
     actual.sort(Comparator.comparing(Task::getId));
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List was not returned."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   @Test
   public void getAllTaskShouldReturnEmptyListWhenThereIsNoTasks() {
-    List<Task> expected = List.of();
+    final List<Task> expected = List.of();
 
-    List<Task> actual = taskManager.getAllTasks();
+    final List<Task> actual = taskManager.getAllTasks();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   // getAllEpics();
   @Test
   public void getAllEpicsShouldReturnList() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
-    Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
+    final Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
+    final Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
     taskManager.addEpic(epic1);
     taskManager.addEpic(epic2);
-    List<Epic> expected = new ArrayList<>(List.of(epic1, epic2));
+    final List<Epic> expected = new ArrayList<>(List.of(epic1, epic2));
     expected.sort(Comparator.comparing(Epic::getId));
 
-    List<Epic> actual = taskManager.getAllEpics();
+    final List<Epic> actual = taskManager.getAllEpics();
     actual.sort(Comparator.comparing(Epic::getId));
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List was not returned."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   @Test
   public void getAllEpicShouldReturnEmptyListWhenThereIsNoEpic() {
-    List<Epic> expected = List.of();
+    final List<Epic> expected = List.of();
 
-    List<Epic> actual = taskManager.getAllEpics();
+    final List<Epic> actual = taskManager.getAllEpics();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   // getAllSubtasks();
   @Test
   public void getAllSubtasksShouldReturnList() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
+    final Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     taskManager.addEpic(epic1);
-    Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", epic1.getId());
-    Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", epic1.getId());
+    final Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", epic1.getId());
+    final Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", epic1.getId());
     taskManager.addSubtask(subtask1);
     taskManager.addSubtask(subtask2);
-    List<Subtask> expected = new ArrayList<>(List.of(subtask1, subtask2));
+    final List<Subtask> expected = new ArrayList<>(List.of(subtask1, subtask2));
     expected.sort(Comparator.comparing(Subtask::getId));
 
-    List<Subtask> actual = taskManager.getAllSubtasks();
+    final List<Subtask> actual = taskManager.getAllSubtasks();
     actual.sort(Comparator.comparing(Subtask::getId));
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List was not returned."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   @Test
   public void getAllSubtasksShouldReturnEmptyListWhenThereIsNoSubtasks() {
-    List<Subtask> expected = List.of();
+    final List<Subtask> expected = List.of();
 
-    List<Subtask> actual = taskManager.getAllSubtasks();
+    final List<Subtask> actual = taskManager.getAllSubtasks();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
         () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
     );
-
   }
 
   // clear...();
   @Test
   public void clearTaskShouldDeleteAllTasksFromTheMemory() {
-    Task task1 = TestDataBuilder.buildTask("t1", "d1");
-    Task task2 = TestDataBuilder.buildTask("t2", "d2");
+    final Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    final Task task2 = TestDataBuilder.buildTask("t2", "d2");
     taskManager.addTask(task1);
     taskManager.addTask(task2);
 
     taskManager.clearTasks();
 
     Assertions.assertEquals(List.of(), taskManager.getAllTasks(), "Tasks were not deleted.");
+  }
+
+  @Test
+  public void clearTaskShouldDeleteAllTasksFromTheHistory() {
+    getHistoryReady();
+    final List<Integer> taskIdsInMemory = taskManager.getAllTasks().stream().map(Task::getId)
+        .toList();
+    final List<Task> historyBeforeClear = taskManager.getHistory();
+
+    taskManager.clearTasks();
+    final List<Task> historyAfterClear = taskManager.getHistory();
+    final List<Task> actualTasksInHistory = historyAfterClear.stream()
+        .filter(t -> taskIdsInMemory.contains(t.getId())).toList();
+
+    Assertions.assertAll(
+        () -> Assertions.assertTrue(historyAfterClear.size() < historyBeforeClear.size(),
+            "History should be reduced"),
+        () -> Assertions.assertEquals(0, actualTasksInHistory.size(),
+            "Deleted tasks should not remain in the history")
+    );
   }
 
   @Test
@@ -150,6 +165,32 @@ class InMemoryTaskManagerTest {
             "Epics was not deleted."),
         () -> Assertions.assertEquals(List.of(), taskManager.getAllSubtasks(),
             "Subtasks were not deleted.")
+    );
+  }
+
+  @Test
+  public void clearEpicShouldDeleteAllEpicsAndSubtasksFromTheHistory() {
+    getHistoryReady();
+    final List<Integer> epicsIdsInMemory = taskManager.getAllEpics().stream().map(Epic::getId)
+        .toList();
+    final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
+        .map(Subtask::getId).toList();
+    final List<Task> historyBeforeClear = taskManager.getHistory();
+
+    taskManager.clearEpics();
+    final List<Task> historyAfterClear = taskManager.getHistory();
+    final List<Task> actualEpicsInHistory = historyAfterClear.stream()
+        .filter(t -> epicsIdsInMemory.contains(t.getId())).toList();
+    final List<Task> actualSubtasksInHistory = historyAfterClear.stream()
+        .filter(t -> subtasksIdsInMemory.contains(t.getId())).toList();
+
+    Assertions.assertAll(
+        () -> Assertions.assertTrue(historyAfterClear.size() < historyBeforeClear.size(),
+            "History should be reduced"),
+        () -> Assertions.assertEquals(0, actualEpicsInHistory.size(),
+            "Deleted epics should not remain in the history"),
+        () -> Assertions.assertEquals(0, actualSubtasksInHistory.size(),
+            "Deleted subtasks should not remain in the history")
     );
   }
 
@@ -176,60 +217,107 @@ class InMemoryTaskManagerTest {
     );
   }
 
-  // delete..();
   @Test
-  public void deleteTaskShouldDeleteTaskBiIdFromTheMemory() {
-    Task task1 = TestDataBuilder.buildTask("t1", "d1");
-    Task task2 = TestDataBuilder.buildTask("t2", "d2");
-    taskManager.addTask(task1);
-    Task taskInMemory2 = taskManager.addTask(task2);
-
-    taskManager.deleteTask(taskInMemory2.getId());
-
-    Assertions.assertNull(taskManager.getTaskById(task2.getId()), "Task was not deleted.");
+  public void clearSubtasksShouldDeleteAllSubtasksFromTheHistory() {
+    getHistoryReady();
+    //given
+    final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
+        .map(Subtask::getId).toList(); // size = 2, [3,5]
+    final List<Task> historyBeforeClear = taskManager.getHistory();
+    //when
+    taskManager.clearEpics();
+    final List<Task> historyAfterClear = taskManager.getHistory();
+    final List<Task> actualSubtasksInHistory = historyAfterClear.stream()
+        .filter(t -> subtasksIdsInMemory.contains(t.getId())).toList();
+    //then
+    Assertions.assertAll(
+        () -> Assertions.assertTrue(historyAfterClear.size() < historyBeforeClear.size(),
+            "History should be reduced"),
+        () -> Assertions.assertEquals(0, actualSubtasksInHistory.size(),
+            "Deleted subtasks should not remain in the history")
+    );
   }
 
+  // delete..();
   @Test
-  public void deleteEpicShouldDeleteEpicsByIdAndItsSubtasksFromTheMemory() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
-    Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
-    taskManager.addEpic(epic1);
-    Epic epicInMemory2 = taskManager.addEpic(epic2);
+  public void deleteTaskShouldDeleteTaskBiIdFromTheMemoryAndHistory() {
+    final Task task1 = TestDataBuilder.buildTask("t1", "d1");
+    final Task task2 = TestDataBuilder.buildTask("t2", "d2");
+    taskManager.addTask(task1);
+    final Task taskToDelete = taskManager.addTask(task2);
+    final int idToDelete = taskToDelete.getId();
+    taskManager.getTaskById(idToDelete);
+    final int historySizeBefore = taskManager.getHistory().size();
 
-    taskManager.deleteEpic(epicInMemory2.getId());
-    List<Subtask> subtaskFroDeletedEpic = new ArrayList<>();
-    for (Subtask st : taskManager.getAllSubtasks()) {
-      if (st.getEpicId() == epicInMemory2.getId()) {
-        subtaskFroDeletedEpic.add(st);
-      }
-    }
+    taskManager.deleteTask(taskToDelete.getId());
+    final boolean isDeletedFromHistory = !taskManager.getHistory().contains(taskToDelete);
+    final int actualHistorySize = taskManager.getHistory().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getEpicById(epic2.getId()),
-            "Epic was not deleted."),
-        () -> Assertions.assertEquals(List.of(), subtaskFroDeletedEpic,
-            "Subtasks were not deleted.")
+        () -> Assertions.assertNull(taskManager.getTaskById(task2.getId()),
+            "Task was not deleted."),
+        () -> Assertions.assertTrue(isDeletedFromHistory, "Task was not deleted from the history."),
+        () -> Assertions.assertTrue(actualHistorySize < historySizeBefore,
+            "THistory should reduce its size.")
     );
   }
 
   @Test
-  public void deleteSubtaskShouldDeleteSubtaskFromTheMemoryAndFromItsEpic() {
-    Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
-    Epic correspondingEpic = taskManager.addEpic(epic1);
-    Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", correspondingEpic.getId());
-    Subtask subtask2 = TestDataBuilder.buildSubtask("st2", "d2", correspondingEpic.getId());
-    taskManager.addSubtask(subtask1);
-    int subtaskToDeleteId = taskManager.addSubtask(subtask2).getId();
+  public void deleteEpicShouldDeleteEpicsByIdAndItsSubtasksFromTheMemoryAndHistory() {
+    taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d1"));
+    final Epic epicToDelete = taskManager.addEpic(TestDataBuilder.buildEpic("e2", "d2"));
+    final Subtask sbToDelete = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("sb1", "d", epicToDelete.getId()));
+    taskManager.getEpicById(epicToDelete.getId());
+    taskManager.getSubtaskById(sbToDelete.getId());
+    final List<Task> historyBeforeDeleting = taskManager.getHistory();
 
-    taskManager.deleteSubtask(subtaskToDeleteId);
-    Set<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(correspondingEpic.getId());
-    boolean isDeletedFromEpic = subtasksFromEpic.stream()
-        .noneMatch((st) -> st.getId() == subtaskToDeleteId);
+    taskManager.deleteEpic(epicToDelete.getId());
+    final List<Task> actualHistory = taskManager.getHistory();
+    final Epic actualEpicInMemory = taskManager.getEpicById(epicToDelete.getId());
+    final List<Subtask> actualSubtasksInMemory = taskManager.getAllSubtasks().stream()
+        .filter(st -> st.getEpicId() == epicToDelete.getId()).toList();
+    final boolean isEpicDeletedFromHistory = !actualHistory.contains(epicToDelete);
+    final boolean isSubtaskDeletedFromHistory = !actualHistory.contains(sbToDelete);
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getSubtaskById(subtaskToDeleteId),
+        () -> Assertions.assertNull(actualEpicInMemory, "Epic was not deleted."),
+        () -> Assertions.assertEquals(List.of(), actualSubtasksInMemory,
+            "Subtasks were not deleted."),
+        () -> Assertions.assertTrue(actualHistory.size() < historyBeforeDeleting.size(),
+            "History had not reduced it's size."),
+        () -> Assertions.assertTrue(isEpicDeletedFromHistory,
+            "Epic was not deleted from the history."),
+        () -> Assertions.assertTrue(isSubtaskDeletedFromHistory,
+            "Corresponding subtask was not deleted from the history.")
+    );
+  }
+
+  @Test
+  public void deleteSubtaskShouldDeleteSubtaskFromTheMemoryFromItsEpicAndFromTheHistory() {
+    final Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d1"));
+    taskManager.addSubtask(TestDataBuilder.buildSubtask("st1", "d1", epicInMemory.getId()));
+    final Subtask subtaskToDelete = taskManager.addSubtask(
+        TestDataBuilder.buildSubtask("st2", "d2", epicInMemory.getId()));
+    final int idSubtaskToDelete = subtaskToDelete.getId();
+    taskManager.getSubtaskById(idSubtaskToDelete);
+    final List<Task> historyBeforeDeleting = taskManager.getHistory();
+
+    taskManager.deleteSubtask(idSubtaskToDelete);
+    final List<Task> actualHistory = taskManager.getHistory();
+    final Set<Subtask> subtasksFromEpic = taskManager.getSubtasksByEpicId(epicInMemory.getId());
+    boolean isDeletedFromEpic = subtasksFromEpic.stream()
+        .noneMatch((st) -> st.getId() == idSubtaskToDelete);
+    boolean isDeletedFromTheHistory = !actualHistory.contains(idSubtaskToDelete);
+
+    Assertions.assertAll(
+        () -> Assertions.assertNull(taskManager.getSubtaskById(idSubtaskToDelete),
             "Subtask was not deleted."),
-        () -> Assertions.assertTrue(isDeletedFromEpic, "Subtask was not deleted from Epic.")
+        () -> Assertions.assertTrue(isDeletedFromEpic, "Subtask was not deleted from Epic."),
+        () -> Assertions.assertTrue(actualHistory.size() < historyBeforeDeleting.size(),
+            "History had not reduced it's size."),
+        () -> Assertions.assertTrue(isDeletedFromTheHistory,
+            "Subtask was not deleted from the history.")
     );
   }
 
@@ -731,5 +819,27 @@ class InMemoryTaskManagerTest {
     Assertions.assertEquals(expected.getDescription(), actual.getDescription(),
         "Description is different");
     Assertions.assertEquals(expected.getStatus(), actual.getStatus(), "Status is different");
+  }
+
+  private void getHistoryReady() {
+    final List<Task> tasks = TestDataBuilder.buildTasks();
+    for (Task t : tasks) {
+      if (t instanceof Epic) {
+        taskManager.addEpic((Epic) t);
+      } else if (t instanceof Subtask) {
+        taskManager.addSubtask((Subtask) t);
+      } else {
+        taskManager.addTask(t);
+      }
+    }
+    for (Task t : tasks) {
+      if (t instanceof Epic) {
+        taskManager.getEpicById(t.getId());
+      } else if (t instanceof Subtask) {
+        taskManager.getSubtaskById(t.getId());
+      } else {
+        taskManager.getTaskById(t.getId());
+      }
+    }
   }
 }

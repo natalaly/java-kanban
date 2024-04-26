@@ -1,5 +1,7 @@
 package ru.yandex.practicum.tasktracker.builder;
 
+import java.util.LinkedList;
+import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
@@ -88,6 +90,15 @@ public class TestDataBuilder {
     result.setStatus(subtask.getStatus());
     result.setEpicId(subtask.getEpicId());
     return result;
+  }
+
+  public static List<Task> buildTasks() {
+    return new LinkedList<>(
+        List.of(buildEpic(1, "epic1", "description"),
+            buildTask(2, "task1", "d", TaskStatus.NEW),
+            buildSubtask(3, "subtask1", "notes", 1),
+            buildEpic(4, "epic1", "description"),
+            buildSubtask(5, "subtask2", "notes", 1)));
   }
 
 }

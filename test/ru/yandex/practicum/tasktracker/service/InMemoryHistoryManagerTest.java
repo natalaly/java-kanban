@@ -1,6 +1,5 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import java.util.LinkedList;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import org.junit.jupiter.api.AfterEach;
@@ -19,7 +18,6 @@ import ru.yandex.practicum.tasktracker.model.TaskStatus;
 class InMemoryHistoryManagerTest {
 
   private HistoryManager historyManager;
-
 
   @BeforeEach
   void setUp() {
@@ -57,7 +55,7 @@ class InMemoryHistoryManagerTest {
 
   @Test
   void shouldKeepViewingTaskOrderFromOldToNew() {
-    List<Task> expectedTasks = buildTasks();
+    List<Task> expectedTasks = TestDataBuilder.buildTasks();
     for (Task task : expectedTasks) {
       historyManager.add(task);
     }
@@ -69,7 +67,7 @@ class InMemoryHistoryManagerTest {
 
   @Test
   void addShouldReplaceExistedTaskWithANewVersionAndMoveItToTheEndOfTheList() {
-    fillHistoryManager();
+    fillUpHistoryManager();
     int expectedHistorySize = historyManager.getHistory().size();
     int expectedPosition = historyManager.getHistory().size() - 1;
     Task taskToAdd = TestDataBuilder.buildCopyTask(historyManager.getHistory().get(1));
@@ -96,7 +94,7 @@ class InMemoryHistoryManagerTest {
   @MethodSource("provideDeletionPositions")
   void removeShouldDeleteTaskFromDifferentPositionsOfTheHistoryList(int positionToDelete,
       int shiftForExpected, int shiftForActual, String deletionPosition) {
-    fillHistoryManager();
+    fillUpHistoryManager();
     int expectedHistorySize = historyManager.getHistory().size() - 1;
     final Task taskToDelete = historyManager.getHistory().get(positionToDelete);
     final Task expectedMiddleElement = historyManager.getHistory()
@@ -119,10 +117,10 @@ class InMemoryHistoryManagerTest {
 
   @Test
   void removeShouldDoNothingWhenIdIsNotExistInTheHistory() {
-    fillHistoryManager();
+    fillUpHistoryManager();
     int expectedHistorySize = historyManager.getHistory().size();
     int idToDelete = 187;
-    final Task taskToDelete = TestDataBuilder.buildTask(idToDelete, "t","d",TaskStatus.NEW);
+    final Task taskToDelete = TestDataBuilder.buildTask(idToDelete, "t", "d", TaskStatus.NEW);
     boolean isNotValidId = !historyManager.getHistory().contains(taskToDelete);
 
     historyManager.remove(idToDelete);
@@ -130,8 +128,10 @@ class InMemoryHistoryManagerTest {
     int actualHistorySize = historyManager.getHistory().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(expectedHistorySize,actualHistorySize, "History size should not change."),
-        () -> Assertions.assertEquals(isNotValidId, isNotSavedInHistory, "Remove should mot save tasks.")
+        () -> Assertions.assertEquals(expectedHistorySize, actualHistorySize,
+            "History size should not change."),
+        () -> Assertions.assertEquals(isNotValidId, isNotSavedInHistory,
+            "Remove should mot save tasks.")
     );
   }
 
@@ -146,10 +146,11 @@ class InMemoryHistoryManagerTest {
   }
 
   private static Object[][] provideDeletionPositions() {
+    List<Task> tasks = TestDataBuilder.buildTasks();
     return new Object[][]{
         {0, 1, 0, "beginning"},
-        {2, 1, 0, "middle"},
-        {4, -1, -1, "end"}
+        {(tasks.size() - 1) / 2, 1, 0, "middle"},
+        {tasks.size() - 1, -1, -1, "end"}
     };
   }
 
@@ -160,19 +161,10 @@ class InMemoryHistoryManagerTest {
     return new ArrayList<>(Arrays.asList(task, epic, subtask));
   }
 
-  private void fillHistoryManager() {
-    List<Task> tasks = buildTasks();
+  private void fillUpHistoryManager() {
+    List<Task> tasks = TestDataBuilder.buildTasks();
     for (Task task : tasks) {
       historyManager.add(task);
     }
-  }
-
-  private List<Task> buildTasks() {
-    return new LinkedList<>(
-        List.of(TestDataBuilder.buildEpic(1, "epic1", "description"),
-            TestDataBuilder.buildTask(2, "task1", "d", TaskStatus.NEW),
-            TestDataBuilder.buildSubtask(3, "subtask1", "notes", 1),
-            TestDataBuilder.buildEpic(4, "epic1", "description"),
-            TestDataBuilder.buildSubtask(5, "subtask2", "notes", 1)));
   }
 }

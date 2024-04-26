@@ -1,7 +1,6 @@
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import ru.yandex.practicum.tasktracker.model.TaskStatus;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
@@ -39,18 +38,6 @@ public class Main {
     deleteTaskAndCheckHistory();
 
     deleteEpicWithSubtaskAndCheckHistory();
-
-    System.out.println();
-    System.out.println("Task2 in history:");
-    System.out.println(tm.getHistory().get(1));
-
-    System.out.println("Apply new Status for task2");
-    Task t = tm.getTaskById(task2.getId());
-    t.setStatus(TaskStatus.DONE);
-    tm.updateTask(task2);
-
-    System.out.println("This task in history:");
-    System.out.println(tm.getHistory().get(1));
 
   }
   private static void deleteEpicWithSubtaskAndCheckHistory() {

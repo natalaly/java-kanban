@@ -34,7 +34,6 @@ public class InMemoryTaskManager implements TaskManager {
     return new ArrayList<>(subtasks.values());
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void clearTasks() {
     for (Task task : tasks.values()) {
@@ -43,7 +42,6 @@ public class InMemoryTaskManager implements TaskManager {
     tasks.clear();
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void clearEpics() {
     for (Subtask subtask : subtasks.values()) {
@@ -56,7 +54,6 @@ public class InMemoryTaskManager implements TaskManager {
     epics.clear();
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void clearSubtasks() {
     for (Epic epic : epics.values()) {
@@ -68,7 +65,6 @@ public class InMemoryTaskManager implements TaskManager {
     subtasks.clear();
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void deleteTask(int id) {
     final Task task = tasks.remove(id);
@@ -77,7 +73,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void deleteEpic(int id) {
     final Epic epic = epics.remove(id);
@@ -90,7 +85,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
   }
 
-  //  TODO add test - removed from the history
   @Override
   public void deleteSubtask(int id) {
     final Subtask subtask = subtasks.remove(id);
@@ -205,5 +199,4 @@ public class InMemoryTaskManager implements TaskManager {
   private int generateId() {
     return ++counter;
   }
-
 }
