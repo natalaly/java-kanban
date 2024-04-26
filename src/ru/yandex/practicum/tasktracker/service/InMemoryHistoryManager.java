@@ -12,7 +12,6 @@ public class InMemoryHistoryManager implements HistoryManager {
   private Node head;
   private Node tail;
 
-
   @Override
   public void add(Task task) {
     if (task == null) {
@@ -77,17 +76,19 @@ public class InMemoryHistoryManager implements HistoryManager {
       node.next = null;
     }
   }
-}
 
-class Node {
+  private static class Node {
 
-  public Task data;
-  public Node next;
-  public Node prev;
+    public Task data;
+    public Node next;
+    public Node prev;
 
-  public Node(Node prev, Task data, Node next) {
-    this.data = data;
-    this.next = next;
-    this.prev = prev;
+    public Node(Node prev, Task data, Node next) {
+      this.data = data;
+      this.next = next;
+      this.prev = prev;
+    }
   }
 }
+
+
