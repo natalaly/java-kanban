@@ -5,14 +5,11 @@ import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * Use Case
- * 1. Create: Two tasks; Epic with three subtasks; Epic without subtask.
- * 2. Request (GET) the created tasks multiple times in different orders.
- * 3. Display the history view  and ensure that there are no duplicates.
- * 4. Delete: a task that exists in the history;
- *    Verify: it does not appear when printing history of viewing.
- * 5. Delete: epic with three subtasks;
- *    Verify: both the epic itself and all its subtasks are removed from the history.
+ * Use Case 1. Create: Two tasks; Epic with three subtasks; Epic without subtask. 2. Request (GET)
+ * the created tasks multiple times in different orders. 3. Display the history view  and ensure
+ * that there are no duplicates. 4. Delete: a task that exists in the history; Verify: it does not
+ * appear when printing history of viewing. 5. Delete: epic with three subtasks; Verify: both the
+ * epic itself and all its subtasks are removed from the history.
  */
 public class Main {
 
@@ -24,7 +21,6 @@ public class Main {
   private static Subtask sb2;
   private static Subtask sb3;
   private static Epic epic2;
-
 
   public static void main(String[] args) {
     tm = new InMemoryTaskManager();
@@ -40,9 +36,10 @@ public class Main {
     deleteEpicWithSubtaskAndCheckHistory();
 
   }
+
   private static void deleteEpicWithSubtaskAndCheckHistory() {
     System.out.println();
-    System.out.println("Deleting Epic1: ..." );
+    System.out.println("Deleting Epic1: ...");
     tm.deleteEpic(epic1.getId());
     System.out.println("Should be in the following order:");
     System.out.println("Epic2 - Task2");
@@ -53,7 +50,7 @@ public class Main {
 
   private static void deleteTaskAndCheckHistory() {
     System.out.println();
-    System.out.println("Deleting Task1: ..." );
+    System.out.println("Deleting Task1: ...");
     tm.deleteTask(task1.getId());
     System.out.println("Should be in the following order:");
     System.out.println("Epic1 - Subtask2 - Epic2 - Subtask3 - Task2");
@@ -112,7 +109,7 @@ public class Main {
     System.out.println();
   }
 
-  private static void prepareTestData(){
+  private static void prepareTestData() {
     task1 = new Task();
     task1.setTitle("Task1");
     task1.setDescription("Do Task1");
