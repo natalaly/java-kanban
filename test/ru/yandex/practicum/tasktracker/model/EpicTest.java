@@ -1,8 +1,11 @@
 package ru.yandex.practicum.tasktracker.model;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
-import org.junit.jupiter.api.*;
 
 class EpicTest {
 

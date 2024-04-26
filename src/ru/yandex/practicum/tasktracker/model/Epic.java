@@ -15,7 +15,6 @@ public class Epic extends Task {
     return calculateStatus();
   }
 
-  // TODO Верни копию или неизменяемый сет (Collections.unmodifiableSet(subtasks))
   public Set<Subtask> getSubtasks() {
     return Collections.unmodifiableSet(subtasks);
   }

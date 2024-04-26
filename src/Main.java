@@ -1,6 +1,7 @@
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskStatus;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
@@ -30,9 +31,6 @@ public class Main {
     tm = new InMemoryTaskManager();
 
     createTasksInTaskManager();
-    System.out.println(tm.getAllTasks());
-    System.out.println(tm.getAllEpics());
-    System.out.println(tm.getAllSubtasks());
 
     getTasksInDifferentOrder();
 
@@ -42,10 +40,17 @@ public class Main {
 
     deleteEpicWithSubtaskAndCheckHistory();
 
+    System.out.println();
+    System.out.println("Task2 in history:");
+    System.out.println(tm.getHistory().get(1));
 
+    System.out.println("Apply new Status for task2");
+    Task t = tm.getTaskById(task2.getId());
+    t.setStatus(TaskStatus.DONE);
+    tm.updateTask(task2);
 
-
-
+    System.out.println("This task in history:");
+    System.out.println(tm.getHistory().get(1));
 
   }
   private static void deleteEpicWithSubtaskAndCheckHistory() {
@@ -82,16 +87,16 @@ public class Main {
   }
 
   private static void getTasksInDifferentOrder() {
-    System.out.println("Get Task2:" + tm.getTaskById(task2.getId()));
-    System.out.println("Get Epic1:" + tm.getEpicById(epic1.getId()));
-    System.out.println("Get Task1:" + tm.getTaskById(task1.getId()));
-    System.out.println("Get Epic1:" + tm.getEpicById(epic1.getId()));
-    System.out.println("Get Subtask2:" + tm.getSubtaskById(sb2.getId()));
-    System.out.println("Get Task2:" + tm.getTaskById(task2.getId()));
-    System.out.println("Get Epic2:" + tm.getEpicById(epic2.getId()));
-    System.out.println("Get Subtask3:" + tm.getSubtaskById(sb3.getId()));
-    System.out.println("Get Task2:" + tm.getTaskById(task2.getId()));
-    System.out.println("Get Task2:" + tm.getTaskById(task2.getId()));
+    System.out.println("Get Task2:    " + tm.getTaskById(task2.getId()));
+    System.out.println("Get Epic1:    " + tm.getEpicById(epic1.getId()));
+    System.out.println("Get Task1:    " + tm.getTaskById(task1.getId()));
+    System.out.println("Get Epic1:    " + tm.getEpicById(epic1.getId()));
+    System.out.println("Get Subtask2: " + tm.getSubtaskById(sb2.getId()));
+    System.out.println("Get Task2:    " + tm.getTaskById(task2.getId()));
+    System.out.println("Get Epic2:    " + tm.getEpicById(epic2.getId()));
+    System.out.println("Get Subtask3: " + tm.getSubtaskById(sb3.getId()));
+    System.out.println("Get Task2:    " + tm.getTaskById(task2.getId()));
+    System.out.println("Get Task2:    " + tm.getTaskById(task2.getId()));
     System.out.println();
   }
 
@@ -110,6 +115,14 @@ public class Main {
     tm.addSubtask(sb3);
 
     tm.addEpic(epic2);
+
+    System.out.println("Tasks: ");
+    System.out.println(tm.getAllTasks());
+    System.out.println("Epics: ");
+    System.out.println(tm.getAllEpics());
+    System.out.println("Subtasks:");
+    System.out.println(tm.getAllSubtasks());
+    System.out.println();
   }
 
   private static void prepareTestData(){
