@@ -1,8 +1,9 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,11 +25,6 @@ class InMemoryHistoryManagerTest {
     historyManager = new InMemoryHistoryManager();
   }
 
-  @AfterEach
-  void tearDown() {
-    historyManager = null;
-  }
-
   @ParameterizedTest
   @MethodSource("provideDifferentTypesTasks")
   <T extends Task> void addShouldAcceptTaskEpicSubtaskTypesForSaving(T task) {
@@ -42,7 +38,7 @@ class InMemoryHistoryManagerTest {
   }
 
   @Test
-  void addShouldNotSaveNullToTheHistory() {
+  void addShouldNotSaveNullToTheHistoryWhenTaskIsNull() {
     Task nullTask = null;
     final int expectedHistorySize = historyManager.getHistory().size();
 
@@ -145,13 +141,13 @@ class InMemoryHistoryManagerTest {
     Assertions.assertEquals(expectedHistorySize, actualHistorySize, "Should be empty list.");
   }
 
-  private static Object[][] provideDeletionPositions() {
+  private static Stream<Arguments> provideDeletionPositions() {
     List<Task> tasks = TestDataBuilder.buildTasks();
-    return new Object[][]{
-        {0, 1, 0, "beginning"},
-        {(tasks.size() - 1) / 2, 1, 0, "middle"},
-        {tasks.size() - 1, -1, -1, "end"}
-    };
+    return Stream.of(
+        Arguments.of(0, 1, 0, "beginning"),
+        Arguments.of((tasks.size() - 1) / 2, 1, 0, "middle"),
+        Arguments.of(tasks.size() - 1, -1, -1, "end")
+    );
   }
 
   private static List<Task> provideDifferentTypesTasks() {

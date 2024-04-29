@@ -32,16 +32,16 @@ public class InMemoryHistoryManager implements HistoryManager {
     return getTasks();
   }
 
-  private void linkLast(Task task) {
-    final Node oldTail = tail;
-    final Node newNode = new Node(oldTail, task, null);
-    tail = newNode;
-    if (oldTail == null) {
+  private void linkLast(Task taskToAdd) {
+    final Node newNode = new Node(taskToAdd);
+    if (tail == null) {
       head = newNode;
     } else {
-      oldTail.next = newNode;
+      tail.next = newNode;
+      newNode.prev = tail;
     }
-    nodes.put(task.getId(), newNode);
+    tail = newNode;
+    nodes.put(taskToAdd.getId(), newNode);
   }
 
   private List<Task> getTasks() {
@@ -54,26 +54,26 @@ public class InMemoryHistoryManager implements HistoryManager {
     return history;
   }
 
-  private void removeNode(Node node) {
-    if (node == null) {
+  private void removeNode(Node nodeToRemove) {
+    if (nodeToRemove == null) {
       return;
     }
 
-    final Node nodeAfter = node.next;
-    final Node nodeBefore = node.prev;
+    final Node nodeAfter = nodeToRemove.next;
+    final Node nodeBefore = nodeToRemove.prev;
 
     if (nodeBefore == null) {
       head = nodeAfter;
     } else {
       nodeBefore.next = nodeAfter;
-      node.prev = null;
+      nodeToRemove.prev = null;
     }
 
     if (nodeAfter == null) {
       tail = nodeBefore;
     } else {
       nodeAfter.prev = nodeBefore;
-      node.next = null;
+      nodeToRemove.next = null;
     }
   }
 
@@ -83,10 +83,10 @@ public class InMemoryHistoryManager implements HistoryManager {
     public Node next;
     public Node prev;
 
-    public Node(Node prev, Task data, Node next) {
-      this.data = data;
-      this.next = next;
-      this.prev = prev;
+    public Node(Task task) {
+      this.data = task;
+      this.next = null;
+      this.prev = null;
     }
   }
 }

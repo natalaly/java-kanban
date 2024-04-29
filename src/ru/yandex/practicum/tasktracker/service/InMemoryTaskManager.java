@@ -36,32 +36,22 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void clearTasks() {
-    for (Task task : tasks.values()) {
-      historyManager.remove(task.getId());
-    }
+    tasks.values().forEach(t -> historyManager.remove(t.getId()));
     tasks.clear();
   }
 
   @Override
   public void clearEpics() {
-    for (Subtask subtask : subtasks.values()) {
-      historyManager.remove(subtask.getId());
-    }
-    for (Epic epic : epics.values()) {
-      historyManager.remove(epic.getId());
-    }
+    subtasks.values().forEach(st -> historyManager.remove(st.getId()));
+    epics.values().forEach(e -> historyManager.remove(e.getId()));
     subtasks.clear();
     epics.clear();
   }
 
   @Override
   public void clearSubtasks() {
-    for (Epic epic : epics.values()) {
-      epic.clearSubtasks();
-    }
-    for (Subtask subtask : subtasks.values()) {
-      historyManager.remove(subtask.getId());
-    }
+    epics.values().forEach(Epic::clearSubtasks);
+    subtasks.values().forEach(st -> historyManager.remove(st.getId()));
     subtasks.clear();
   }
 
