@@ -1,13 +1,13 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.stream.Stream;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.provider.Arguments;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,56 +18,149 @@ import ru.yandex.practicum.tasktracker.model.TaskStatus;
 
 class InMemoryHistoryManagerTest {
 
-  private static final int HISTORY_CAPACITY = 10;
-  private HistoryManager history;
-
+  private HistoryManager historyManager;
 
   @BeforeEach
   void setUp() {
-    history = new InMemoryHistoryManager();
-  }
-
-  @AfterEach
-  void tearDown() {
-    history = null;
+    historyManager = new InMemoryHistoryManager();
   }
 
   @ParameterizedTest
-  @MethodSource("provideTasks")
+  @MethodSource("provideDifferentTypesTasks")
   <T extends Task> void addShouldAcceptTaskEpicSubtaskTypesForSaving(T task) {
-    List<Task> expectedHistory = new ArrayList<>(Arrays.asList(task));
-    history.add(task);
+    final List<Task> expectedHistory = new ArrayList<>(Arrays.asList(task));
+    historyManager.add(task);
 
-    List<Task> actualHistory = history.getHistory();
+    final List<Task> actualHistory = historyManager.getHistory();
 
     Assertions.assertIterableEquals(expectedHistory, actualHistory,
         "Returned list should contain the same task.");
   }
 
   @Test
-  void addShouldRemoveOldestTaskToAddNewTaskToTheEndWhenCapacityIsReached() {
-    for (int i = 0; i < HISTORY_CAPACITY; i++) {
-      Task task = TestDataBuilder.buildTask(i + 1, "task", "d", TaskStatus.NEW);
-      history.add(task);
-    }
-    Epic epic = TestDataBuilder.buildEpic(13, "epic", "description");
+  void addShouldNotSaveNullToTheHistoryWhenTaskIsNull() {
+    Task nullTask = null;
+    final int expectedHistorySize = historyManager.getHistory().size();
 
-    history.add(epic);
+    historyManager.add(nullTask);
+    final int actualHistorySize = historyManager.getHistory().size();
+
+    Assertions.assertEquals(expectedHistorySize, actualHistorySize,
+        "Should not save null to the history");
+  }
+
+  @Test
+  void shouldKeepViewingTaskOrderFromOldToNew() {
+    List<Task> expectedTasks = TestDataBuilder.buildTasks();
+    for (Task task : expectedTasks) {
+      historyManager.add(task);
+    }
+
+    final List<Task> actual = historyManager.getHistory();
+
+    Assertions.assertIterableEquals(expectedTasks, actual, "Order of elements should be same.");
+  }
+
+  @Test
+  void addShouldReplaceExistedTaskWithANewVersionAndMoveItToTheEndOfTheList() {
+    fillUpHistoryManager();
+    int expectedHistorySize = historyManager.getHistory().size();
+    int expectedPosition = historyManager.getHistory().size() - 1;
+    Task taskToAdd = TestDataBuilder.buildCopyTask(historyManager.getHistory().get(1));
+    taskToAdd.setStatus(TaskStatus.DONE);
+
+    historyManager.add(taskToAdd);
+    int actualHistorySize = historyManager.getHistory().size();
+    final Task actualTask = historyManager.getHistory().get(expectedPosition);
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(HISTORY_CAPACITY, history.getHistory().size(),
-            "History List should not exceed " + HISTORY_CAPACITY + " items."),
-        () -> Assertions.assertEquals(2, history.getHistory().get(0).getId(),
-            "First task doesn't have id = 2 (second element before)."),
-        () -> Assertions.assertEquals(epic, history.getHistory().get(HISTORY_CAPACITY - 1),
-            "Last element is not epic.")
+        () -> Assertions.assertEquals(expectedHistorySize, actualHistorySize,
+            "Size of history should not expand."),
+        () -> Assertions.assertEquals(taskToAdd, actualTask, "Tasks should be same"),
+        () -> Assertions.assertEquals(taskToAdd.getTitle(), actualTask.getTitle(),
+            "Titles should be same."),
+        () -> Assertions.assertEquals(taskToAdd.getDescription(), actualTask.getDescription(),
+            "Descriptions should be same."),
+        () -> Assertions.assertEquals(taskToAdd.getStatus(), actualTask.getStatus(),
+            "Statuses should be same.")
     );
   }
 
-  private static List<Task> provideTasks() {
+  @ParameterizedTest
+  @MethodSource("provideDeletionPositions")
+  void removeShouldDeleteTaskFromDifferentPositionsOfTheHistoryList(int positionToDelete,
+      int shiftForExpected, int shiftForActual, String deletionPosition) {
+    fillUpHistoryManager();
+    int expectedHistorySize = historyManager.getHistory().size() - 1;
+    final Task taskToDelete = historyManager.getHistory().get(positionToDelete);
+    final Task expectedMiddleElement = historyManager.getHistory()
+        .get(positionToDelete + shiftForExpected);
+
+    historyManager.remove(taskToDelete.getId());
+    final Task actualMiddleElement = historyManager.getHistory()
+        .get(positionToDelete + shiftForActual);
+    int actualHistorySize = historyManager.getHistory().size();
+    boolean isDeleted = !historyManager.getHistory().contains(taskToDelete);
+
+    Assertions.assertAll(
+        () -> Assertions.assertTrue(isDeleted, "Task was not removed."),
+        () -> Assertions.assertEquals(expectedHistorySize, actualHistorySize,
+            "History size should reduce by 1."),
+        () -> Assertions.assertEquals(expectedMiddleElement, actualMiddleElement,
+            "Incorrect " + deletionPosition + " element in the history.")
+    );
+  }
+
+  @Test
+  void removeShouldDoNothingWhenIdIsNotExistInTheHistory() {
+    fillUpHistoryManager();
+    int expectedHistorySize = historyManager.getHistory().size();
+    int idToDelete = 187;
+    final Task taskToDelete = TestDataBuilder.buildTask(idToDelete, "t", "d", TaskStatus.NEW);
+    boolean isNotValidId = !historyManager.getHistory().contains(taskToDelete);
+
+    historyManager.remove(idToDelete);
+    boolean isNotSavedInHistory = !historyManager.getHistory().contains(taskToDelete);
+    int actualHistorySize = historyManager.getHistory().size();
+
+    Assertions.assertAll(
+        () -> Assertions.assertEquals(expectedHistorySize, actualHistorySize,
+            "History size should not change."),
+        () -> Assertions.assertEquals(isNotValidId, isNotSavedInHistory,
+            "Remove should mot save tasks.")
+    );
+  }
+
+  @Test
+  void shouldReturnEmptyList() {
+    int expectedHistorySize = 0;
+
+    final List<Task> actualHistory = historyManager.getHistory();
+    int actualHistorySize = actualHistory.size();
+
+    Assertions.assertEquals(expectedHistorySize, actualHistorySize, "Should be empty list.");
+  }
+
+  private static Stream<Arguments> provideDeletionPositions() {
+    List<Task> tasks = TestDataBuilder.buildTasks();
+    return Stream.of(
+        Arguments.of(0, 1, 0, "beginning"),
+        Arguments.of((tasks.size() - 1) / 2, 1, 0, "middle"),
+        Arguments.of(tasks.size() - 1, -1, -1, "end")
+    );
+  }
+
+  private static List<Task> provideDifferentTypesTasks() {
     Task task = TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW);
     Epic epic = TestDataBuilder.buildEpic(2, "epic", "description");
     Subtask subtask = TestDataBuilder.buildSubtask(3, "subtask", "notes", 2);
     return new ArrayList<>(Arrays.asList(task, epic, subtask));
+  }
+
+  private void fillUpHistoryManager() {
+    List<Task> tasks = TestDataBuilder.buildTasks();
+    for (Task task : tasks) {
+      historyManager.add(task);
+    }
   }
 }
