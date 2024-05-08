@@ -2,7 +2,7 @@ package ru.yandex.practicum.tasktracker.model;
 
 import java.util.Objects;
 
-public class Task {
+public class Task implements Cloneable {
 
   private int id;
   private String title;
@@ -70,4 +70,16 @@ public class Task {
         ", status=" + getStatus() +
         '}';
   }
+
+  public Task clone() {
+    Task task = new Task();
+    task.setId(this.id);
+    task.setTitle(this.title);
+    task.setDescription(this.description);
+    task.setStatus(TaskStatus.valueOf(this.status.name()));
+    return task;
+  }
+
+
+
 }

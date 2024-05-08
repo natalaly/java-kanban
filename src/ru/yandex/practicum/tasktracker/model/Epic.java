@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class Epic extends Task {
 
-  private final Set<Subtask> subtasks = new HashSet<>();
+  private  Set<Subtask> subtasks = new HashSet<>();
 
   @Override
   public TaskStatus getStatus() {
@@ -75,5 +75,20 @@ public class Epic extends Task {
     return super.toString().substring(0, super.toString().lastIndexOf("}")) +
         ", subtasks.size=" + subtasks.size() +
         "}";
+  }
+
+  @Override
+  public Epic clone() {
+//    Epic epic = (Epic)super.clone();
+    Epic epic = new Epic();
+    epic.setId(this.getId());
+    epic.setTitle(this.getTitle());
+    epic.setDescription(this.getDescription());
+    epic.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+//    this.subtasks.forEach(s -> epic.addSubtask(s));
+    Set<Subtask> clonedSubtasks = new HashSet<>();
+    this.subtasks.forEach(s -> clonedSubtasks.add(s.clone()));
+    epic.subtasks = clonedSubtasks;
+    return epic;
   }
 }

@@ -38,7 +38,7 @@ class EpicTest {
 
   @Test
   void getStatusShouldReturnStatusNewWhenAllSubtasksHaveStatusNew() {
-    addNewSubtasksToEpic();
+    addNewSubtasksToTheEpic();
 
     TaskStatus actualStatus = epic.getStatus();
 
@@ -48,10 +48,10 @@ class EpicTest {
 
   @Test
   void getStatusShouldReturnInProgressWhenAllSubtasksHasStatusInProgress() {
-    addNewSubtasksToEpic();
+    addNewSubtasksToTheEpic();
     updateSubtasksWithStatus(TaskStatus.IN_PROGRESS);
 
-    TaskStatus actualStatus = epic.getStatus();
+    TaskStatus actualStatus = taskManager.getEpicById(epic.getId()).getStatus();
 
     Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus,
         "Incorrect status when all subtasks are in progress.");
@@ -59,11 +59,11 @@ class EpicTest {
 
   @Test
   void getStatusShouldReturnStatusInProgressWhenOnlyOneSubtaskHasStatusDone() {
-    addNewSubtasksToEpic();
+    addNewSubtasksToTheEpic();
     subtask2.setStatus(TaskStatus.DONE);
-    taskManager.updateTask(subtask2);
+    taskManager.updateSubtask(subtask2);
 
-    TaskStatus actualStatus = epic.getStatus();
+    TaskStatus actualStatus = taskManager.getEpicById(epic.getId()).getStatus();
 
     Assertions.assertEquals(TaskStatus.IN_PROGRESS, actualStatus,
         "Incorrect status when only one of the subtasks has status Done.");
@@ -71,9 +71,11 @@ class EpicTest {
 
   @Test
   void getStatusShouldReturnDoneWhenAllSubtasksHasStatusDone() {
-    addNewSubtasksToEpic();
+    TaskStatus epicStatusAtStart = taskManager.getEpicById(epic.getId()).getStatus();
+    addNewSubtasksToTheEpic();
     updateSubtasksWithStatus(TaskStatus.DONE);
-    TaskStatus actualStatus = epic.getStatus();
+    TaskStatus actualStatus = taskManager.getEpicById(epic.getId()).getStatus();
+    Assertions.assertNotEquals(epicStatusAtStart,actualStatus, "Status should be other than it was before updating.");
     Assertions.assertEquals(TaskStatus.DONE, actualStatus,
         "Incorrect status when all subtasks are done.");
   }
@@ -83,7 +85,7 @@ class EpicTest {
     taskManager.addEpic(epic);
   }
 
-  void addNewSubtasksToEpic() {
+  void addNewSubtasksToTheEpic() {
     subtask1 = TestDataBuilder.buildSubtask("Step1", "Start", epic.getId());
     subtask2 = TestDataBuilder.buildSubtask("Step2", "Finish", epic.getId());
     taskManager.addSubtask(subtask1);
@@ -93,8 +95,8 @@ class EpicTest {
   void updateSubtasksWithStatus(TaskStatus status) {
     subtask1.setStatus(status);
     subtask2.setStatus(status);
-    taskManager.updateTask(subtask1);
-    taskManager.updateTask(subtask2);
+    taskManager.updateSubtask(subtask1);
+    taskManager.updateSubtask(subtask2);
   }
 
 }

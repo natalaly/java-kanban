@@ -4,7 +4,6 @@ import java.util.Set;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-
 import java.util.List;
 
 public interface TaskManager {
