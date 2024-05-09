@@ -10,6 +10,26 @@ import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * The {@code InMemoryTaskManager} class implements the {@link TaskManager} interface and provides
+ * an in-memory storage solution for managing tasks, epics, and subtasks.
+ * <p>
+ * This class maintains three maps to store tasks, epics, and subtasks respectively. It also
+ * utilizes a {@link HistoryManager} to keep track of the history of viewing operations performed on
+ * tasks.
+ * <p>
+ * Operations such as adding, updating, and deleting tasks, epics, and subtasks are supported.
+ * Additionally, methods are provided to retrieve all tasks, epics, and subtasks, clear all tasks,
+ * epics, and subtasks, retrieve tasks, epics, and subtasks by their IDs, retrieve subtasks
+ * associated with a specific epic ID, and retrieve the history of viewing operations performed on
+ * tasks.
+ *
+ * @see TaskManager
+ * @see Task
+ * @see Epic
+ * @see Subtask
+ * @see HistoryManager
+ */
 public class InMemoryTaskManager implements TaskManager {
 
   private static int counter = 0;
@@ -147,7 +167,7 @@ public class InMemoryTaskManager implements TaskManager {
     tasks.put(task.getId(), task.clone());
   }
 
-// updateEpic() allows update title, description only.
+  // updateEpic() allows update title, description only.
 // It is not allowed to change the status manually, as it is calculated and depends on Subtasks statuses
 //  to change any states of Subtasks - use updateSubtask()
   @Override
