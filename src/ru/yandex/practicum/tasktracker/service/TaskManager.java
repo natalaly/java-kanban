@@ -38,31 +38,31 @@ public interface TaskManager {
 
   void clearSubtasks();
 
-  void deleteTask(int id);
+  void deleteTask(final int id);
 
-  void deleteEpic(int id);
+  void deleteEpic(final int id);
 
-  void deleteSubtask(int id);
+  void deleteSubtask(final int id);
 
-  Task getTaskById(int id);
+  Task getTaskById(final int id);
 
-  Epic getEpicById(int id);
+  Epic getEpicById(final int id);
 
-  Subtask getSubtaskById(int id);
+  Subtask getSubtaskById(final int id);
 
-  Task addTask(Task task);
+  Task addTask(final Task task);
 
-  Epic addEpic(Epic epic);
+  Epic addEpic(final Epic epic);
 
-  Subtask addSubtask(Subtask subtask);
+  Subtask addSubtask(final Subtask subtask);
 
-  void updateTask(Task task);
+  void updateTask(final Task task);
 
-  void updateEpic(Epic epic);
+  void updateEpic(final Epic epic);
 
-  void updateSubtask(Subtask subtask);
+  void updateSubtask(final Subtask subtask);
 
-  Set<Subtask> getSubtasksByEpicId(int id);
+  Set<Subtask> getSubtasksByEpicId(final int id);
 
   List<Task> getHistory();
 

@@ -79,13 +79,11 @@ public class Epic extends Task {
 
   @Override
   public Epic clone() {
-//    Epic epic = (Epic)super.clone();
     Epic epic = new Epic();
     epic.setId(this.getId());
     epic.setTitle(this.getTitle());
     epic.setDescription(this.getDescription());
     epic.setStatus(TaskStatus.valueOf(this.getStatus().name()));
-//    this.subtasks.forEach(s -> epic.addSubtask(s));
     Set<Subtask> clonedSubtasks = new HashSet<>();
     this.subtasks.forEach(s -> clonedSubtasks.add(s.clone()));
     epic.subtasks = clonedSubtasks;

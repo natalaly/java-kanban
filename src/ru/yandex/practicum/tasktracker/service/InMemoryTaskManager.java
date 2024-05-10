@@ -167,25 +167,19 @@ public class InMemoryTaskManager implements TaskManager {
     tasks.put(task.getId(), task.clone());
   }
 
-  // updateEpic() allows update title, description only.
-// It is not allowed to change the status manually, as it is calculated and depends on Subtasks statuses
-//  to change any states of Subtasks - use updateSubtask()
+  /**
+   * Method {@code updateEpic(Epic)} allows update title, description only.
+   * <p>
+   * It is not allowed to change the status manually, as it is calculated and depends on its
+   * Subtasks statuses.
+   * <p>
+   * To make any changes in its Subtasks - use {@link #updateSubtask(Subtask)}.
+   */
   @Override
   public void updateEpic(final Epic epic) {
-    if (!epics.containsKey(epic.getId())) { // if there is no such  epic in TM memory
+    if (!epics.containsKey(epic.getId())) {
       return;
     }
-//    final Epic updatedEpic = epic.clone();
-//    epics.put(epic.getId(), updatedEpic); // put cloned entered epic instead of existed in TM before updating
-//    for (Subtask subtask : updatedEpic.getSubtasks()) { // if updated epic has subtasks in it:
-//      if (!subtasks.containsKey(subtask.getId())) { // when subtask id new for TM but existed in the updated
-//        subtask.setId(generateId());
-//        subtasks.put(subtask.getId(), subtask);
-//      } else {
-//        subtasks.put(subtask.getId(), subtask);
-//        epics.get(subtask.getEpicId()).updateSubtask(subtask);
-//      }
-//    }
     final Epic updatedEpic = epics.get(epic.getId());
     updatedEpic.setTitle(epic.getTitle());
     updatedEpic.setDescription(epic.getDescription());

@@ -7,18 +7,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import ru.yandex.practicum.tasktracker.exception.ManagerSaveException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
@@ -40,35 +34,28 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
  * This class is an implementation of the {@link TaskManager} interface, which manages tasks of
  * different types including {@link Task}, {@link Epic}, and {@link Subtask}. It provides
  * functionalities for storing, retrieving, updating, and deleting tasks.
- * <p>
  *
  * @see InMemoryTaskManager
  * @see TaskManager
  * @see Task
  * @see Epic
  * @see Subtask
- * <p>
- * <p>
- * Менеджер получает файл для автосохранения в своём конструкторе и сохраняет его в поле. Метод
- * {@code save()} — сохраняет текущее состояние менеджера в указанный файл после каждой
- * модифицирующей операции. Кроме метода сохранения, есть статический метод
- * {@code static FileBackedTaskManager loadFromFile(File file)}, который  восстанавливает данные
- * менеджера из файла при каждом запуске программы.
  */
+
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private static final String TASKS_HEADER = "id,type,name,status,description,epic";
   private static final String HISTORY_HEADER = "history";
   private final String formatReg = "^(([^,\\\"\\'\\n]+),){5}([^,\\\"\\'\\n]+)$";
   private static final File DEFAULT_FILE = Path.of("tasksBackup.csv").toFile();
-  private  File file;
+  private File file;
 
   public FileBackedTaskManager() {
     super();
     this.file = DEFAULT_FILE;
   }
 
-  public FileBackedTaskManager(File file) {
+  public FileBackedTaskManager(final File file) {
     this();
     this.file = file;
   }
@@ -79,31 +66,31 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
       fileWriter.write(TASKS_HEADER + System.lineSeparator());
       for (Task task : getAllTasks()) {
-        fileWriter.write(taskToCSV(task));
+        fileWriter.write(taskToCsvString(task));
       }
       for (Epic epic : getAllEpics()) {
-        fileWriter.write(taskToCSV(epic));
+        fileWriter.write(taskToCsvString(epic));
       }
       for (Subtask subtask : getAllSubtasks()) {
-        fileWriter.write(taskToCSV(subtask));
+        fileWriter.write(taskToCsvString(subtask));
       }
       // save history
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
       for (Task historyTask : getHistory()) {
-        fileWriter.write(taskToCSV(historyTask));
+        fileWriter.write(taskToCsvString(historyTask));
       }
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
     }
   }
 
-  //  TODO restore TaskManager data from  the file when start the app,  reseating id
-  private static FileBackedTaskManager loadFromFile(File file) {
-    FileBackedTaskManager fb = new FileBackedTaskManager();
-    List<String> taskLines = new ArrayList<>();
-    List<String> historyLines = new ArrayList<>();
+  //  TODO restore TaskManager data from  the file when start the app
+  public static FileBackedTaskManager loadFromFile(final File file) {
+    final FileBackedTaskManager fb = new FileBackedTaskManager();
+    final List<String> taskLines = new ArrayList<>();
+    final List<String> historyLines = new ArrayList<>();
     List<String> destination = taskLines;
-    try (BufferedReader br = new BufferedReader(
+    try (final BufferedReader br = new BufferedReader(
         new FileReader(file.toPath().toFile(), StandardCharsets.UTF_8))) {
       while (br.ready()) {
         String line = br.readLine();
@@ -115,71 +102,63 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     } catch (IOException e) {
       throw new RuntimeException("An Error occurred during reading the file", e);
     }
-    System.out.println("Read from file:");
-    System.out.println(taskLines.size());
-    System.out.println(historyLines.size());
+
     if (taskLines.size() != 0) {
       /* restore all tasks to the maps */
       fb.restoreAll(taskLines, TASKS_HEADER);
-      System.out.println("restoring tasks:");
-      System.out.println(fb.tasks);
     }
-    if (historyLines.size() != 0 ) {
+    if (historyLines.size() != 0) {
       /* restore history */
       fb.restoreAll(historyLines, HISTORY_HEADER);
     }
-
-    /* reseating counter */
-    Set<Integer> allIds = new HashSet<>(fb.tasks.keySet());
+    /* reseating the counter */
+    final Set<Integer> allIds = new HashSet<>(fb.tasks.keySet());
     allIds.addAll(fb.epics.keySet());
     allIds.addAll(fb.subtasks.keySet());
-    Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
+    final Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
     counter = maxId;
     return fb;
   }
 
-  private void restoreAll(List<String> tasks, String header) {
+  private void restoreAll(final List<String> tasks, final String header) {
     switch (header) {
       case TASKS_HEADER -> restoreTasks(tasks);
       case HISTORY_HEADER -> restoreHistory(tasks);
     }
   }
 
-  private void restoreTasks(List<String> tasks) {
-    for (String line : tasks) {
-      if (line.equals(TASKS_HEADER)) {
+  private void restoreTasks(final List<String> tasks) {
+    for (String eachLine : tasks) {
+      if (eachLine.equals(TASKS_HEADER) || eachLine.isBlank()) {
         continue;
       }
-      Task taskFromFile = this.fromString(line);
-      if (taskFromFile == null) {
-        continue;
-      }
-      TaskType typeFromFile = TaskType.getType(taskFromFile);
-        switch (typeFromFile) {
-          case TASK -> {
-            this.tasks.put(taskFromFile.getId(), taskFromFile);
-            break;
-          }
-          case EPIC -> {
-            this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
-            break;
-          }
-          case SUBTASK -> {
-            this.subtasks.put(taskFromFile.getId(), (Subtask) taskFromFile);
-            int epicId = ((Subtask) taskFromFile).getEpicId();
-            this.epics.get(epicId).addSubtask((Subtask) taskFromFile);
-            break;
-          }
+      final Task taskFromFile = this.fromString(eachLine);
+      final TaskType typeFromFile = TaskType.getType(taskFromFile);
+      switch (typeFromFile) {
+        case TASK -> {
+          this.tasks.put(taskFromFile.getId(), taskFromFile);
+          break;
         }
+        case EPIC -> {
+          this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
+          break;
+        }
+        case SUBTASK -> {
+          this.subtasks.put(taskFromFile.getId(), (Subtask) taskFromFile);
+          int epicId = ((Subtask) taskFromFile).getEpicId();
+          this.epics.get(epicId).addSubtask((Subtask) taskFromFile);
+          break;
+        }
+      }
     }
   }
 
-  private void restoreHistory(List<String> tasksLines) {
-    for (String line : tasksLines) {
-      if (line.equals(HISTORY_HEADER)) {
+  private void restoreHistory(final List<String> tasksLines) {
+    for (String eachLine : tasksLines) {
+      if (eachLine.equals(HISTORY_HEADER) || eachLine.isBlank()) {
         continue;
       }
-      Task taskToRestore = this.fromString(line);
+      Task taskToRestore = this.fromString(eachLine);
       if (TaskType.EPIC.equals(TaskType.getType(taskToRestore))) {
         taskToRestore = epics.get(taskToRestore.getId());
       }
@@ -187,9 +166,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
   }
 
-
   //  TODO NullPointerException - for now toStringCSV is used only in save() where task is never null
-  private String taskToCSV(final Task task) {
+  private String taskToCsvString(final Task task) {
     return String.format("%s,%s,%s,%s,%s,%s" + System.lineSeparator(),
         task.getId(),
         TaskType.getType(task),
@@ -198,7 +176,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         task.getDescription(),
         (TaskType.getType(task) == TaskType.SUBTASK) ? ((Subtask) task).getEpicId() : " ");
   }
-
 
   public Task fromString(final String stringCSV) {
     if (stringCSV == null || stringCSV.isBlank() || !stringCSV.matches(formatReg)) {
@@ -214,7 +191,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         (taskData[5] == null || taskData[5].isBlank()) ? 0 : Integer.parseInt(taskData[5]);
     switch (type) {
       case TASK -> {
-        Task task = new Task();
+        final Task task = new Task();
         task.setId(id);
         task.setTitle(title);
         task.setDescription(description);
@@ -222,7 +199,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return task;
       }
       case EPIC -> {
-        Epic epic = new Epic();
+        final Epic epic = new Epic();
         epic.setId(id);
         epic.setTitle(title);
         epic.setDescription(description);
@@ -230,7 +207,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return epic;
       }
       case SUBTASK -> {
-        Subtask subtask = new Subtask();
+        final Subtask subtask = new Subtask();
         subtask.setId(id);
         subtask.setTitle(title);
         subtask.setDescription(description);
@@ -261,79 +238,79 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   }
 
   @Override
-  public void deleteTask(int id) {
+  public void deleteTask(final int id) {
     super.deleteTask(id);
     save();
   }
 
   @Override
-  public void deleteEpic(int id) {
+  public void deleteEpic(final int id) {
     super.deleteEpic(id);
     save();
   }
 
   @Override
-  public void deleteSubtask(int id) {
+  public void deleteSubtask(final int id) {
     super.deleteSubtask(id);
     save();
   }
 
   @Override
-  public Task getTaskById(int id) {
+  public Task getTaskById(final int id) {
     Task task = super.getTaskById(id);
     save();
     return task;
   }
 
   @Override
-  public Epic getEpicById(int id) {
+  public Epic getEpicById(final int id) {
     Epic epic = super.getEpicById(id);
     save();
     return epic;
   }
 
   @Override
-  public Subtask getSubtaskById(int id) {
-    Subtask subtask =  super.getSubtaskById(id);
+  public Subtask getSubtaskById(final int id) {
+    Subtask subtask = super.getSubtaskById(id);
     save();
     return subtask;
   }
 
   @Override
-  public Task addTask(Task task) {
+  public Task addTask(final Task task) {
     Task t = super.addTask(task);
     save();
     return t;
   }
 
   @Override
-  public Epic addEpic(Epic epic) {
-    Epic e = super.addEpic(epic);
+  public Epic addEpic(final Epic epic) {
+    final Epic e = super.addEpic(epic);
     save();
     return e;
   }
 
   @Override
-  public Subtask addSubtask(Subtask subtask) {
-    Subtask st = super.addSubtask(subtask);
+  public Subtask addSubtask(final Subtask subtask) {
+    final Subtask st = super.addSubtask(subtask);
     save();
     return st;
   }
 
   @Override
-  public void updateTask(Task task) {
+  public void updateTask(final Task task) {
     super.updateTask(task);
     save();
   }
 
   @Override
-  public void updateEpic(Epic epic) {
+  public void updateEpic(final Epic epic) {
     super.updateEpic(epic);
     save();
   }
 
   @Override
-  public void updateSubtask(Subtask subtask) {
+  public void updateSubtask(final Subtask subtask) {
     super.updateSubtask(subtask);
     save();
   }
@@ -399,7 +376,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     System.out.println("f.getHistory(): " + f.getHistory());
     f.addTask(t); //8
     f.getTaskById(1);
-    f.clearTasks();
+//    f.clearTasks();
 
 
   }
