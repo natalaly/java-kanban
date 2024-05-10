@@ -68,6 +68,8 @@ public class Main {
     System.out.println("Saved history:");
     tm.getHistory().forEach(t -> System.out.print(t.getTitle() + " - "));
     System.out.println();
+    System.out.println(tm.getHistory());
+    System.out.println();
   }
 
   private static void getTasksInDifferentOrder() {

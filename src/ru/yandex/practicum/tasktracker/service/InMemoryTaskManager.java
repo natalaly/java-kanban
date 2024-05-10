@@ -32,11 +32,11 @@ import java.util.Set;
  */
 public class InMemoryTaskManager implements TaskManager {
 
-  private static int counter = 0;
-  private final Map<Integer, Task> tasks = new HashMap<>();
-  private final Map<Integer, Epic> epics = new HashMap<>();
-  private final Map<Integer, Subtask> subtasks = new HashMap<>();
-  private final HistoryManager historyManager = Managers.getDefaultHistory();
+  protected static int counter = 0;
+  protected final Map<Integer, Task> tasks = new HashMap<>();
+  protected final Map<Integer, Epic> epics = new HashMap<>();
+  protected final Map<Integer, Subtask> subtasks = new HashMap<>();
+  protected final HistoryManager historyManager = Managers.getDefaultHistory();
 
 
   @Override
