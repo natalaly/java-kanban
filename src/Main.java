@@ -5,11 +5,16 @@ import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * Use Case 1. Create: Two tasks; Epic with three subtasks; Epic without subtask. 2. Request (GET)
- * the created tasks multiple times in different orders. 3. Display the history view  and ensure
- * that there are no duplicates. 4. Delete: a task that exists in the history; Verify: it does not
- * appear when printing history of viewing. 5. Delete: epic with three subtasks; Verify: both the
- * epic itself and all its subtasks are removed from the history.
+ * <h2>Use Case 1 - {@link #useCase1()}</h2>
+ * <ol>
+ *   <li>Create: Two tasks; Epic with three subtasks; Epic without subtask.</li>
+ *   <li>Request ({@code .get...()} methods)the created tasks multiple times in different order.</li>
+ *   <li>Display the history view  and ensure that there are no duplicates.</li>
+ *   <li>Delete: a task that exists in the history; Verify: it does not appear when printing history of viewing.</li>
+ *   <li>Delete: epic with three subtasks; Verify: both the epic itself and all its subtasks are removed from the history.</li>
+ * </ol>
+ * <p>
+ *
  */
 public class Main {
 
@@ -23,18 +28,16 @@ public class Main {
   private static Epic epic2;
 
   public static void main(String[] args) {
+    useCase1();
+
+  }
+  static void useCase1() {
     tm = new InMemoryTaskManager();
-
     createTasksInTaskManager();
-
     getTasksInDifferentOrder();
-
     printWholeHistory();
-
     deleteTaskAndCheckHistory();
-
     deleteEpicWithSubtaskAndCheckHistory();
-
   }
 
   private static void deleteEpicWithSubtaskAndCheckHistory() {

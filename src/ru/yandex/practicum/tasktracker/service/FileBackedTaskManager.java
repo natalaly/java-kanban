@@ -46,9 +46,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private static final String TASKS_HEADER = "id,type,name,status,description,epic";
   private static final String HISTORY_HEADER = "history";
-  private final String formatReg = "^(([^,\\\"\\'\\n]+),){5}([^,\\\"\\'\\n]+)$";
   private static final File DEFAULT_FILE = Path.of("tasksBackup.csv").toFile();
   private File file;
+  private final String formatReg = "^(([^,\\\"\\'\\n]+),){5}([^,\\\"\\'\\n]+)$";
 
   public FileBackedTaskManager() {
     super();
@@ -315,69 +315,65 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     save();
   }
 
+  /**
+   * <h2>Use Case File</h2>
+   * <ol>
+   *   <li> GIVEN: A {@code FileBackedTaskManager oldManager} that has  3 Tasks, 2 Epics, and 2 Subtasks for one of the Epic.</li>
+   *   <li> WHEN: A new {@code FileBackedTaskManager newManager} was created from the file of the oldManager.</li>
+   *   <li> THEN: This new manager has all same  Tasks, Epics , and Subtasks in it. </li>
+   * </ol>
+   *
+   */
   public static void main(String[] args) {
-    /* fromString(): */
-//    Task tt = f.fromString("1,TASK,t,DONE,tt, ");
-//    Epic ee = (Epic)f.fromString("4,EPIC,ep,DONE,descr, ");
-//    Subtask ss = (Subtask) f.fromString("6,SUBTASK,sbt,DONE,descre,4");
-//    System.out.println(tt);
-//    System.out.println(ee);
-//    System.out.println(ss);
-
+    /* GIVEN */
     /* Create tasks data: */
     Task t = new Task();
-    t.setId(0);
-    t.setTitle("t");
-    t.setDescription("tt");
-    t.setStatus(TaskStatus.DONE);
+    t.setTitle("task");
+    t.setDescription("t description");
 
     Epic e = new Epic();
-    e.setId(2);
-    e.setTitle("ep");
-    e.setDescription("descr");
+    e.setTitle("epic");
+    e.setDescription("e description");
 
     Subtask sb = new Subtask();
-    sb.setId(1);
-    sb.setTitle("sbt");
-    sb.setDescription("descre");
+    sb.setTitle("sbtask");
+    sb.setDescription("st description");
+
+    Path path = Path.of("useCaseFile.csv");
+    FileBackedTaskManager oldManager = new FileBackedTaskManager(path.toFile());
+    oldManager.addTask(t); // add task
+    oldManager.addEpic(e); // add epic
+    sb.setEpicId(2);
+    oldManager.addSubtask(sb); // add subtask to epic
+    e.setTitle("epic2");
+    oldManager.addEpic(e); // add epic2
+    sb.setTitle("sbtask2");
+    oldManager.addSubtask(sb); // add subtask2 to epic
+    t.setTitle("task2");
+    oldManager.addTask(t); // add task2
+    t.setTitle("task3");
+    oldManager.addTask(t); // add task3
     sb.setStatus(TaskStatus.DONE);
-    sb.setEpicId(4);
+    oldManager.updateSubtask(sb); // update subtask2 of epic
+    oldManager.getEpicById(2);
 
-    /*   save(); */
-//    FileBackedTaskManager f = new FileBackedTaskManager();
-//    f.addTask(t); //1
-//    f.addTask(t); //2
-//    f.addTask(t); //3
-//    f.addEpic(e); //4
-//    f.addEpic(e); //5
-//    f.addSubtask(sb);//6 -4
-//    f.getEpicById(4);
-//    f.getTaskById(2);
-//    f.deleteTask(2);
-//    f.getTaskById(3);
-//    f.addTask(t);
-//    f.getEpicById(5);
-//    f.getEpicById(4);
-//    f.deleteEpic(4);
-//    f.save();
+    /* WHEN */
+    FileBackedTaskManager newManage = FileBackedTaskManager.loadFromFile(path.toFile());
+    List<Integer> taskIds = new ArrayList<>();
+    newManage.getAllTasks().forEach(a ->taskIds.add(a.getId()));
+    List<Integer> epicIds = new ArrayList<>();
+    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
+    List<Integer> subtaskIds = new ArrayList<>();
+    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
 
-    FileBackedTaskManager f = new FileBackedTaskManager();
-    System.out.println("At the start:");
-    System.out.println("f.getAllTasks(): " + f.getAllTasks());
-    System.out.println("f.getAllEpics(): " + f.getAllEpics());
-    System.out.println("f.getAllSubtasks(): " + f.getAllSubtasks());
-    System.out.println("f.getHistory(): " + f.getHistory());
-//    f.addTask(t); //8
-    System.out.println("After loading");
-    f = FileBackedTaskManager.loadFromFile(DEFAULT_FILE);
-    System.out.println("f.getAllTasks(): " + f.getAllTasks());
-    System.out.println("f.getAllEpics(): " + f.getAllEpics());
-    System.out.println("f.getAllSubtasks(): " + f.getAllSubtasks());
-    System.out.println("f.getHistory(): " + f.getHistory());
-    f.addTask(t); //8
-    f.getTaskById(1);
-//    f.clearTasks();
-
+    /* THEN */
+    System.out.println("newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
+    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
+    System.out.println("newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
+    System.out.println("Epics ids should be 2, 4 : " + epicIds);
+    System.out.println("newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
+    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
+    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
 
   }
 }
