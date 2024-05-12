@@ -1,21 +1,17 @@
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskStatus;
+import ru.yandex.practicum.tasktracker.service.FileBackedTaskManager;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
-/**
- * <h2>Use Case 1 - {@link #useCase1()}</h2>
- * <ol>
- *   <li>Create: Two tasks; Epic with three subtasks; Epic without subtask.</li>
- *   <li>Request ({@code .get...()} methods)the created tasks multiple times in different order.</li>
- *   <li>Display the history view  and ensure that there are no duplicates.</li>
- *   <li>Delete: a task that exists in the history; Verify: it does not appear when printing history of viewing.</li>
- *   <li>Delete: epic with three subtasks; Verify: both the epic itself and all its subtasks are removed from the history.</li>
- * </ol>
- * <p>
- *
- */
+
 public class Main {
 
   private static TaskManager tm;
@@ -28,9 +24,94 @@ public class Main {
   private static Epic epic2;
 
   public static void main(String[] args) {
-    useCase1();
+
+    int choice = 2;
+
+    switch (choice) {
+      case 1 -> useCase1(); /* History Saving */
+      case 2 -> useCaseFile(); /* File saving / restoring */
+    }
+
 
   }
+
+  /**
+   * <h2>Use Case 2 - {@link #useCaseFile()}</h2>
+   * <ol>
+   *   <li> GIVEN: A {@code FileBackedTaskManager oldManager} that has  3 Tasks, 2 Epics, and 2 Subtasks for one of the Epic.</li>
+   *   <li> WHEN: A new {@code FileBackedTaskManager newManager} was created from the file of the oldManager.</li>
+   *   <li> THEN: This new manager has all same  Tasks, Epics , and Subtasks in it. </li>
+   * </ol>
+   */
+  static void useCaseFile() {
+    /* GIVEN */
+    /* Create tasks data: */
+    Task t = new Task();
+    t.setTitle("task");
+    t.setDescription("t description");
+
+    Epic e = new Epic();
+    e.setTitle("epic");
+    e.setDescription("e description");
+
+    Subtask sb = new Subtask();
+    sb.setTitle("sbtask");
+    sb.setDescription("st description");
+
+    Path path = Path.of("resources/test/useCaseFile.csv");
+    File temp = path.toFile();
+    TaskManager oldManager = FileBackedTaskManager.loadFromFile(temp);
+    oldManager.addTask(t); // add task
+    oldManager.addEpic(e); // add epic
+    sb.setEpicId(2);
+    oldManager.addSubtask(sb); // add subtask to epic
+    e.setTitle("epic2");
+    oldManager.addEpic(e); // add epic2
+    sb.setTitle("sbtask2");
+    oldManager.addSubtask(sb); // add subtask2 to epic
+    t.setTitle("task2");
+    oldManager.addTask(t); // add task2
+    t.setTitle("task3");
+    oldManager.addTask(t); // add task3
+    sb.setStatus(TaskStatus.DONE);
+    oldManager.updateSubtask(sb); // update subtask2 of epic
+    oldManager.getEpicById(2);
+
+    /* WHEN */
+    TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
+    List<Integer> taskIds = new ArrayList<>();
+    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
+    List<Integer> epicIds = new ArrayList<>();
+    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
+    List<Integer> subtaskIds = new ArrayList<>();
+    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
+
+    /* THEN */
+    System.out.println(
+        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
+    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
+    System.out.println(
+        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
+    System.out.println("Epics ids should be 2, 4 : " + epicIds);
+    System.out.println(
+        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
+    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
+    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
+
+
+  }
+
+  /**
+   * <h2>Use Case 1 - {@link #useCase1()}</h2>
+   * <ol>
+   *   <li>Create: Two tasks; Epic with three subtasks; Epic without subtask.</li>
+   *   <li>Request ({@code .get...()} methods)the created tasks multiple times in different order.</li>
+   *   <li>Display the history view  and ensure that there are no duplicates.</li>
+   *   <li>Delete: a task that exists in the history; Verify: it does not appear when printing history of viewing.</li>
+   *   <li>Delete: epic with three subtasks; Verify: both the epic itself and all its subtasks are removed from the history.</li>
+   * </ol>
+   * <p>
+   */
   static void useCase1() {
     tm = new InMemoryTaskManager();
     createTasksInTaskManager();

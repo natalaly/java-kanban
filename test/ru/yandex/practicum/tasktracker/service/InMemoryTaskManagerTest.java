@@ -1,7 +1,6 @@
 package ru.yandex.practicum.tasktracker.service;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

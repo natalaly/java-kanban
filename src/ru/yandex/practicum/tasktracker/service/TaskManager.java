@@ -20,9 +20,9 @@ import java.util.List;
  * <p>
  * The interface also provides a method to retrieve the history of operations performed on tasks.
  *
- *  @see Task
- *  @see Epic
- *  @see Subtask
+ * @see Task
+ * @see Epic
+ * @see Subtask
  */
 public interface TaskManager {
 

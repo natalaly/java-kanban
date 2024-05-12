@@ -8,7 +8,7 @@ import java.util.Set;
 
 public class Epic extends Task {
 
-  private  Set<Subtask> subtasks = new HashSet<>();
+  private Set<Subtask> subtasks = new HashSet<>();
 
   @Override
   public TaskStatus getStatus() {

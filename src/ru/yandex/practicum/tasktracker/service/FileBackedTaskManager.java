@@ -7,7 +7,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -47,7 +46,6 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-  //TaskManagerFileHeader
   private static final String TASKS_HEADER = "id,type,name,status,description,epic";
   private static final String HISTORY_HEADER = "history";
   private final File file;
@@ -59,163 +57,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   }
 
   public static FileBackedTaskManager loadFromFile(final File file) {
+    Objects.requireNonNull(file);
     return new FileBackedTaskManager(file);
-  }
-
-  private void load() {
-    try (final BufferedReader br = new BufferedReader(
-        new FileReader(file, StandardCharsets.UTF_8))) {
-      loadTask(br);
-      loadHistory(br);
-    } catch (IOException e) {
-      throw new ManagerLoadException("An Error occurred during reading the file", e);
-    }
-    setCounterLastUsed();
-  }
-
-  private void loadTask(final BufferedReader br) throws IOException {
-    final List<String> taskData = new ArrayList<>();
-    while (br.ready()) {
-      String line = br.readLine();
-      if (line.equals(HISTORY_HEADER)) {
-        break;
-      }
-      taskData.add(line);
-    }
-    if (!taskData.isEmpty()) {
-      this.restoreAll(taskData, TASKS_HEADER);
-    }
-  }
-
-  private void loadHistory(final BufferedReader br) throws IOException {
-    final List<String> historyData = new ArrayList<>();
-    while (br.ready()) {
-      historyData.add(br.readLine());
-    }
-    if (historyData.size() != 0) {
-      this.restoreAll(historyData, HISTORY_HEADER);
-    }
-  }
-
-  private void restoreAll(final List<String> tasks, final String header) {
-    switch (header) {
-      case TASKS_HEADER -> restoreTasks(tasks);
-      case HISTORY_HEADER -> restoreHistory(tasks);
-    }
-  }
-
-  private void restoreTasks(final List<String> tasks) {
-    for (String eachLine : tasks) {
-      if (eachLine.equals(TASKS_HEADER) || eachLine.isBlank()) {
-        continue;
-      }
-      final Task taskFromFile = this.fromString(eachLine);//null
-      final TaskType typeFromFile = TaskType.getType(taskFromFile);
-      switch (typeFromFile) {
-        case TASK -> this.tasks.put(taskFromFile.getId(), taskFromFile);
-        case EPIC -> this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
-        case SUBTASK -> {
-          this.subtasks.put(taskFromFile.getId(), (Subtask) taskFromFile);
-          int epicId = ((Subtask) taskFromFile).getEpicId();
-          this.epics.get(epicId).addSubtask((Subtask) taskFromFile);
-        }
-      }
-    }
-  }
-
-  private void restoreHistory(final List<String> tasksLines) {
-    for (String eachLine : tasksLines) {
-      if (eachLine.equals(HISTORY_HEADER) || eachLine.isBlank()) {
-        continue;
-      }
-      Task taskToRestore = this.fromString(eachLine);
-      if (TaskType.EPIC.equals(TaskType.getType(taskToRestore))) {
-        taskToRestore = epics.get(taskToRestore.getId());
-      }
-      historyManager.add(taskToRestore);
-    }
-  }
-
-  private void setCounterLastUsed() {
-    final Set<Integer> allIds = new HashSet<>(this.tasks.keySet());
-    allIds.addAll(this.epics.keySet());
-    allIds.addAll(this.subtasks.keySet());
-    final Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
-    counter = maxId;
-  }
-
-  private void save() {
-    try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-      fileWriter.write(TASKS_HEADER + System.lineSeparator());
-      for (Task task : getAllTasks()) {
-        fileWriter.write(taskToCsvString(task));
-      }
-      for (Epic epic : getAllEpics()) {
-        fileWriter.write(taskToCsvString(epic));
-      }
-      for (Subtask subtask : getAllSubtasks()) {
-        fileWriter.write(taskToCsvString(subtask));
-      }
-      // save history
-      fileWriter.write(HISTORY_HEADER + System.lineSeparator());
-      for (Task historyTask : getHistory()) {
-        fileWriter.write(taskToCsvString(historyTask));
-      }
-    } catch (IOException e) {
-      throw new ManagerSaveException("An error occurred during saving to the file.", e);
-    }
-  }
-
-  private String taskToCsvString(final Task task) {
-    return String.format("%s,%s,%s,%s,%s,%s" + System.lineSeparator(),
-        task.getId(),
-        TaskType.getType(task),
-        task.getTitle(),
-        task.getStatus(),
-        task.getDescription(),
-        (TaskType.getType(task) == TaskType.SUBTASK) ? ((Subtask) task).getEpicId() : " ");
-  }
-
-  public Task fromString(final String stringCSV) {
-    Objects.requireNonNull(stringCSV);
-    final String formatReg = "^([^,\"']+,){5}[^,\"']+$";
-    if (!Pattern.matches(formatReg, stringCSV)) {
-      return null;
-    }
-    final String[] taskData = stringCSV.split(",");
-    final int id = Integer.parseInt(taskData[0]);
-    final TaskType type = TaskType.valueOf(taskData[1]);
-    final String title = taskData[2];
-    final TaskStatus status = TaskStatus.valueOf(taskData[3]);
-    final String description = taskData[4];
-    switch (type) {
-      case TASK -> {
-        final Task task = new Task();
-        task.setId(id);
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setStatus(status);
-        return task;
-      }
-      case EPIC -> {
-        final Epic epic = new Epic();
-        epic.setId(id);
-        epic.setTitle(title);
-        epic.setDescription(description);
-        epic.setStatus(status);
-        return epic;
-      }
-      case SUBTASK -> {
-        final Subtask subtask = new Subtask();
-        subtask.setId(id);
-        subtask.setTitle(title);
-        subtask.setDescription(description);
-        subtask.setStatus(status);
-        subtask.setEpicId(Integer.parseInt(taskData[5]));
-        return subtask;
-      }
-    }
-    return null;
   }
 
   @Override
@@ -314,67 +157,160 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     save();
   }
 
-  /**
-   * <h2>Use Case File</h2>
-   * <ol>
-   *   <li> GIVEN: A {@code FileBackedTaskManager oldManager} that has  3 Tasks, 2 Epics, and 2 Subtasks for one of the Epic.</li>
-   *   <li> WHEN: A new {@code FileBackedTaskManager newManager} was created from the file of the oldManager.</li>
-   *   <li> THEN: This new manager has all same  Tasks, Epics , and Subtasks in it. </li>
-   * </ol>
-   */
-  public static void main(String[] args) {
-    /* GIVEN */
-    /* Create tasks data: */
-    Task t = new Task();
-    t.setTitle("task");
-    t.setDescription("t description");
-
-    Epic e = new Epic();
-    e.setTitle("epic");
-    e.setDescription("e description");
-
-    Subtask sb = new Subtask();
-    sb.setTitle("sbtask");
-    sb.setDescription("st description");
-
-    Path path = Path.of("useCaseFile.csv");
-    TaskManager oldManager = new FileBackedTaskManager(path.toFile());
-    oldManager.addTask(t); // add task
-    oldManager.addEpic(e); // add epic
-    sb.setEpicId(2);
-    oldManager.addSubtask(sb); // add subtask to epic
-    e.setTitle("epic2");
-    oldManager.addEpic(e); // add epic2
-    sb.setTitle("sbtask2");
-    oldManager.addSubtask(sb); // add subtask2 to epic
-    t.setTitle("task2");
-    oldManager.addTask(t); // add task2
-    t.setTitle("task3");
-    oldManager.addTask(t); // add task3
-    sb.setStatus(TaskStatus.DONE);
-    oldManager.updateSubtask(sb); // update subtask2 of epic
-    oldManager.getEpicById(2);
-
-    /* WHEN */
-    TaskManager newManage = FileBackedTaskManager.loadFromFile(path.toFile());
-    List<Integer> taskIds = new ArrayList<>();
-    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
-    List<Integer> epicIds = new ArrayList<>();
-    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
-    List<Integer> subtaskIds = new ArrayList<>();
-    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
-
-    /* THEN */
-    System.out.println(
-        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
-    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
-    System.out.println(
-        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
-    System.out.println("Epics ids should be 2, 4 : " + epicIds);
-    System.out.println(
-        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
-    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
-    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
-
+  private void load() {
+    try (final BufferedReader br = new BufferedReader(
+        new FileReader(file, StandardCharsets.UTF_8))) {
+      loadTask(br);
+      loadHistory(br);
+    } catch (IOException e) {
+      throw new ManagerLoadException("An Error occurred during reading the file", e);
+    }
+    setCounterLastUsed();
   }
+
+  private void save() {
+    try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
+      fileWriter.write(TASKS_HEADER + System.lineSeparator());
+      for (Task task : getAllTasks()) {
+        fileWriter.write(taskToCsvString(task));
+      }
+      for (Epic epic : getAllEpics()) {
+        fileWriter.write(taskToCsvString(epic));
+      }
+      for (Subtask subtask : getAllSubtasks()) {
+        fileWriter.write(taskToCsvString(subtask));
+      }
+      // save history
+      fileWriter.write(HISTORY_HEADER + System.lineSeparator());
+      for (Task historyTask : getHistory()) {
+        fileWriter.write(taskToCsvString(historyTask));
+      }
+    } catch (IOException e) {
+      throw new ManagerSaveException("An error occurred during saving to the file.", e);
+    }
+  }
+
+  private void loadTask(final BufferedReader br) throws IOException {
+    final List<String> taskData = new ArrayList<>();
+    while (br.ready()) {
+      String line = br.readLine();
+      if (line.equals(HISTORY_HEADER)) {
+        break;
+      }
+      taskData.add(line);
+    }
+    if (!taskData.isEmpty()) {
+      this.restoreAll(taskData, TASKS_HEADER);
+    }
+  }
+
+  private void loadHistory(final BufferedReader br) throws IOException {
+    final List<String> historyData = new ArrayList<>();
+    while (br.ready()) {
+      historyData.add(br.readLine());
+    }
+    if (historyData.size() != 0) {
+      this.restoreAll(historyData, HISTORY_HEADER);
+    }
+  }
+
+  private void restoreAll(final List<String> tasks, final String header) {
+    switch (header) {
+      case TASKS_HEADER -> restoreTasks(tasks);
+      case HISTORY_HEADER -> restoreHistory(tasks);
+    }
+  }
+
+  private void restoreTasks(final List<String> tasks) {
+    for (String eachLine : tasks) {
+      if (eachLine.equals(TASKS_HEADER) || eachLine.isBlank()) {
+        continue;
+      }
+      final Task taskFromFile = this.fromString(eachLine);
+      final TaskType typeFromFile = TaskType.getType(taskFromFile);
+      switch (typeFromFile) {
+        case TASK -> this.tasks.put(taskFromFile.getId(), taskFromFile);
+        case EPIC -> this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
+        case SUBTASK -> {
+          this.subtasks.put(taskFromFile.getId(), (Subtask) taskFromFile);
+          int epicId = ((Subtask) taskFromFile).getEpicId();
+          this.epics.get(epicId).addSubtask((Subtask) taskFromFile);
+        }
+      }
+    }
+  }
+
+  private void restoreHistory(final List<String> tasksLines) {
+    for (String eachLine : tasksLines) {
+      if (eachLine.equals(HISTORY_HEADER) || eachLine.isBlank()) {
+        continue;
+      }
+      Task taskToRestore = this.fromString(eachLine);
+      if (TaskType.EPIC.equals(TaskType.getType(taskToRestore))) {
+        taskToRestore = epics.get(taskToRestore.getId());
+      }
+      historyManager.add(taskToRestore);
+    }
+  }
+
+  private void setCounterLastUsed() {
+    final Set<Integer> allIds = new HashSet<>(this.tasks.keySet());
+    allIds.addAll(this.epics.keySet());
+    allIds.addAll(this.subtasks.keySet());
+    final Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
+    counter = maxId;
+  }
+
+  private String taskToCsvString(final Task task) {
+    return String.format("%s,%s,%s,%s,%s,%s" + System.lineSeparator(),
+        task.getId(),
+        TaskType.getType(task),
+        task.getTitle(),
+        task.getStatus(),
+        task.getDescription(),
+        (TaskType.getType(task) == TaskType.SUBTASK) ? ((Subtask) task).getEpicId() : " ");
+  }
+
+  private Task fromString(final String stringCSV) {
+    Objects.requireNonNull(stringCSV);
+    final String formatReg = "^([^,\"']+,){5}[^,\"']+$";
+    if (!Pattern.matches(formatReg, stringCSV)) {
+      return null;
+    }
+    final String[] taskData = stringCSV.split(",");
+    final int id = Integer.parseInt(taskData[0]);
+    final TaskType type = TaskType.valueOf(taskData[1]);
+    final String title = taskData[2];
+    final TaskStatus status = TaskStatus.valueOf(taskData[3]);
+    final String description = taskData[4];
+    switch (type) {
+      case TASK -> {
+        final Task task = new Task();
+        task.setId(id);
+        task.setTitle(title);
+        task.setDescription(description);
+        task.setStatus(status);
+        return task;
+      }
+      case EPIC -> {
+        final Epic epic = new Epic();
+        epic.setId(id);
+        epic.setTitle(title);
+        epic.setDescription(description);
+        epic.setStatus(status);
+        return epic;
+      }
+      case SUBTASK -> {
+        final Subtask subtask = new Subtask();
+        subtask.setId(id);
+        subtask.setTitle(title);
+        subtask.setDescription(description);
+        subtask.setStatus(status);
+        subtask.setEpicId(Integer.parseInt(taskData[5]));
+        return subtask;
+      }
+    }
+    return null;
+  }
+
 }
