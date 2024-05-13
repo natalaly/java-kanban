@@ -8,11 +8,31 @@ import java.util.Set;
 
 public class Epic extends Task {
 
-  private Set<Subtask> subtasks = new HashSet<>();
+  private final Set<Subtask> subtasks = new HashSet<>();;
+
+  public Epic() {
+  }
+
+  public Epic (Epic epicToCopy) {
+    super(epicToCopy);
+    epicToCopy.subtasks.forEach(s -> subtasks.add(new Subtask(s)));
+  }
 
   @Override
   public TaskStatus getStatus() {
     return calculateStatus();
+  }
+
+  @Override
+  public TaskType getType() {
+    return TaskType.EPIC;
+  }
+
+  @Override
+  public String toString() {
+    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
+        ", subtasks.size=" + subtasks.size() +
+        "}";
   }
 
   public Set<Subtask> getSubtasks() {
@@ -70,23 +90,5 @@ public class Epic extends Task {
     return result;
   }
 
-  @Override
-  public String toString() {
-    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
-        ", subtasks.size=" + subtasks.size() +
-        "}";
-  }
 
-  @Override
-  public Epic clone() {
-    Epic epic = new Epic();
-    epic.setId(this.getId());
-    epic.setTitle(this.getTitle());
-    epic.setDescription(this.getDescription());
-    epic.setStatus(TaskStatus.valueOf(this.getStatus().name()));
-    Set<Subtask> clonedSubtasks = new HashSet<>();
-    this.subtasks.forEach(s -> clonedSubtasks.add(s.clone()));
-    epic.subtasks = clonedSubtasks;
-    return epic;
-  }
 }

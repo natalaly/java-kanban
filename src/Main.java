@@ -31,7 +31,6 @@ public class Main {
       case 2 -> useCaseFile(); /* File saving / restoring */
     }
 
-
   }
 
   /**

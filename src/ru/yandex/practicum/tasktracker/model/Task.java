@@ -2,7 +2,7 @@ package ru.yandex.practicum.tasktracker.model;
 
 import java.util.Objects;
 
-public class Task implements Cloneable {
+public class Task {
 
   private int id;
   private String title;
@@ -11,6 +11,14 @@ public class Task implements Cloneable {
 
   public Task() {
     this.status = TaskStatus.NEW;
+  }
+
+  public Task(Task taskToCopy) {
+    Objects.requireNonNull(taskToCopy);
+    setId(taskToCopy.id);
+    setTitle(taskToCopy.title);
+    setDescription(taskToCopy.description);
+    setStatus(TaskStatus.valueOf(taskToCopy.status.name()));
   }
 
   public int getId() {
@@ -45,6 +53,20 @@ public class Task implements Cloneable {
     this.status = taskStatus;
   }
 
+  public TaskType getType() {
+    return TaskType.TASK;
+  }
+
+  public String toCsvLine() {
+    return String.format("%s,%s,%s,%s,%s,%s" + System.lineSeparator(),
+        this.getId(),
+        this.getType(),
+        this.getTitle(),
+        this.getStatus(),
+        this.getDescription(),
+        " ");
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -70,15 +92,6 @@ public class Task implements Cloneable {
         ", description='" + description + '\'' +
         ", status=" + getStatus() +
         '}';
-  }
-
-  public Task clone() {
-    Task task = new Task();
-    task.setId(this.id);
-    task.setTitle(this.title);
-    task.setDescription(this.description);
-    task.setStatus(TaskStatus.valueOf(this.status.name()));
-    return task;
   }
 
 

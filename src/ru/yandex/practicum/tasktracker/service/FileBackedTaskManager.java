@@ -46,9 +46,11 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-  private static final String TASKS_HEADER = "id,type,name,status,description,epic";
+  private static final String TASKS_CSV_HEADER = "id,type,name,status,description,epic";
   private static final String HISTORY_HEADER = "history";
+  private static final String TASKS_LINE_FORMAT = "^([^,\"']+,){5}[^,\"']+$";// Format used for ensuring that each task line in the file will contain exactly 6 fields separated by commas.
   private final File file;
+
 
   private FileBackedTaskManager(final File file) {
     super();
@@ -170,20 +172,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private void save() {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-      fileWriter.write(TASKS_HEADER + System.lineSeparator());
+      fileWriter.write(TASKS_CSV_HEADER + System.lineSeparator());
       for (Task task : getAllTasks()) {
-        fileWriter.write(taskToCsvString(task));
+        fileWriter.write(task.toCsvLine());
       }
       for (Epic epic : getAllEpics()) {
-        fileWriter.write(taskToCsvString(epic));
+        fileWriter.write(epic.toCsvLine());
       }
       for (Subtask subtask : getAllSubtasks()) {
-        fileWriter.write(taskToCsvString(subtask));
+        fileWriter.write(subtask.toCsvLine());
       }
       // save history
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
       for (Task historyTask : getHistory()) {
-        fileWriter.write(taskToCsvString(historyTask));
+        fileWriter.write(historyTask.toCsvLine());
       }
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
@@ -200,7 +202,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
       taskData.add(line);
     }
     if (!taskData.isEmpty()) {
-      this.restoreAll(taskData, TASKS_HEADER);
+      this.restoreAll(taskData, TASKS_CSV_HEADER);
     }
   }
 
@@ -216,18 +218,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private void restoreAll(final List<String> tasks, final String header) {
     switch (header) {
-      case TASKS_HEADER -> restoreTasks(tasks);
+      case TASKS_CSV_HEADER -> restoreTasks(tasks);
       case HISTORY_HEADER -> restoreHistory(tasks);
     }
   }
 
   private void restoreTasks(final List<String> tasks) {
     for (String eachLine : tasks) {
-      if (eachLine.equals(TASKS_HEADER) || eachLine.isBlank()) {
+      if (eachLine.equals(TASKS_CSV_HEADER) || eachLine.isBlank()) {
         continue;
       }
       final Task taskFromFile = this.fromString(eachLine);
-      final TaskType typeFromFile = TaskType.getType(taskFromFile);
+      final TaskType typeFromFile = taskFromFile.getType();
       switch (typeFromFile) {
         case TASK -> this.tasks.put(taskFromFile.getId(), taskFromFile);
         case EPIC -> this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
@@ -246,7 +248,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         continue;
       }
       Task taskToRestore = this.fromString(eachLine);
-      if (TaskType.EPIC.equals(TaskType.getType(taskToRestore))) {
+      if (TaskType.EPIC.equals(taskToRestore.getType())) {
         taskToRestore = epics.get(taskToRestore.getId());
       }
       historyManager.add(taskToRestore);
@@ -261,20 +263,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     counter = maxId;
   }
 
-  private String taskToCsvString(final Task task) {
-    return String.format("%s,%s,%s,%s,%s,%s" + System.lineSeparator(),
-        task.getId(),
-        TaskType.getType(task),
-        task.getTitle(),
-        task.getStatus(),
-        task.getDescription(),
-        (TaskType.getType(task) == TaskType.SUBTASK) ? ((Subtask) task).getEpicId() : " ");
-  }
-
   private Task fromString(final String stringCSV) {
     Objects.requireNonNull(stringCSV);
-    final String formatReg = "^([^,\"']+,){5}[^,\"']+$";
-    if (!Pattern.matches(formatReg, stringCSV)) {
+    if (!Pattern.matches(TASKS_LINE_FORMAT, stringCSV)) {
       return null;
     }
     final String[] taskData = stringCSV.split(",");

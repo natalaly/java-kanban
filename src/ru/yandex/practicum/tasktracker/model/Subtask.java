@@ -4,6 +4,13 @@ public class Subtask extends Task {
 
   private int epicId;
 
+  public Subtask(){}
+
+  public Subtask(Subtask subtaskToCopy) {
+    super(subtaskToCopy);
+    setEpicId(subtaskToCopy.epicId);
+  }
+
   public int getEpicId() {
     return epicId;
   }
@@ -21,13 +28,12 @@ public class Subtask extends Task {
   }
 
   @Override
-  public Subtask clone() {
-    Subtask subtask = new Subtask();
-    subtask.setId(this.getId());
-    subtask.setTitle(this.getTitle());
-    subtask.setDescription(this.getDescription());
-    subtask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
-    subtask.setEpicId(this.epicId);
-    return subtask;
+  public TaskType getType() {
+    return TaskType.SUBTASK;
+  }
+
+  @Override
+  public String toCsvLine() {
+    return super.toCsvLine().trim() + getEpicId() + System.lineSeparator();
   }
 }

@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -99,7 +98,7 @@ class FileBackedTaskManagerTest {
     String epic = " ";
     Epic epicForId = new Epic();
 
-    switch (TaskType.getType(testTask)) {
+    switch (testTask.getType()) {
       case TASK -> {
         Task t = manager.addTask(testTask);
         epic = " ";
@@ -116,15 +115,15 @@ class FileBackedTaskManagerTest {
         epic = String.valueOf(epicForId.getId());
       }
     }
-    if (TaskType.SUBTASK == TaskType.getType(testTask)) {
+    if (TaskType.SUBTASK == testTask.getType()) {
       expected = """
           id,type,name,status,description,epic
           %s,%s,%s,%s,%s,%s
           %s,%s,%s,%s,%s,%s
           history
-          """.formatted(epicForId.getId(), TaskType.getType(epicForId), epicForId.getTitle(),
+          """.formatted(epicForId.getId(), epicForId.getType(), epicForId.getTitle(),
           epicForId.getStatus(), epicForId.getDescription(), " ",
-          testTask.getId(), TaskType.getType(testTask), testTask.getTitle(),
+          testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), epic);
     } else {
@@ -132,7 +131,7 @@ class FileBackedTaskManagerTest {
           id,type,name,status,description,epic
           %s,%s,%s,%s,%s,%s
           history
-          """.formatted(testTask.getId(), TaskType.getType(testTask), testTask.getTitle(),
+          """.formatted(testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), epic);
     }
@@ -151,7 +150,7 @@ class FileBackedTaskManagerTest {
 
   private void addTasksToManager(final TaskManager manager, final List<Task> tasksData) {
     for (Task task : tasksData) {
-      switch (Objects.requireNonNull(TaskType.getType(task))) {
+      switch (task.getType()) {
         case TASK -> manager.addTask(task);
         case EPIC -> manager.addEpic((Epic) task);
         case SUBTASK -> manager.addSubtask((Subtask) task);
