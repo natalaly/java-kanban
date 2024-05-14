@@ -8,12 +8,12 @@ import java.util.Set;
 
 public class Epic extends Task {
 
-  private final Set<Subtask> subtasks = new HashSet<>();;
+  private final Set<Subtask> subtasks = new HashSet<>();
 
   public Epic() {
   }
 
-  public Epic (Epic epicToCopy) {
+  public Epic(Epic epicToCopy) {
     super(epicToCopy);
     epicToCopy.subtasks.forEach(s -> subtasks.add(new Subtask(s)));
   }
@@ -28,12 +28,6 @@ public class Epic extends Task {
     return TaskType.EPIC;
   }
 
-  @Override
-  public String toString() {
-    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
-        ", subtasks.size=" + subtasks.size() +
-        "}";
-  }
 
   public Set<Subtask> getSubtasks() {
     return Collections.unmodifiableSet(subtasks);

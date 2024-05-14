@@ -4,7 +4,8 @@ public class Subtask extends Task {
 
   private int epicId;
 
-  public Subtask(){}
+  public Subtask() {
+  }
 
   public Subtask(Subtask subtaskToCopy) {
     super(subtaskToCopy);
