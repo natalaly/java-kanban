@@ -13,11 +13,6 @@ public class Epic extends Task {
   public Epic() {
   }
 
-  public Epic(Epic epicToCopy) {
-    super(epicToCopy);
-    epicToCopy.subtasks.forEach(s -> subtasks.add(new Subtask(s)));
-  }
-
   @Override
   public TaskStatus getStatus() {
     return calculateStatus();
@@ -28,6 +23,16 @@ public class Epic extends Task {
     return TaskType.EPIC;
   }
 
+  @Override
+  public Epic copy() {
+    Epic newEpic = new Epic();
+    newEpic.setId(this.getId());
+    newEpic.setTitle(this.getTitle());
+    newEpic.setDescription(this.getDescription());
+    newEpic.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    this.subtasks.forEach(subtask -> newEpic.addSubtask(subtask.copy()));
+    return newEpic;
+  }
 
   public Set<Subtask> getSubtasks() {
     return Collections.unmodifiableSet(subtasks);

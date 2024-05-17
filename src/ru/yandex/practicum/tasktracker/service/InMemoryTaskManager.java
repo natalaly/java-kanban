@@ -109,34 +109,34 @@ public class InMemoryTaskManager implements TaskManager {
   public Task getTaskById(final int id) {
     final Task task = tasks.get(id);
     historyManager.add(tasks.get(id));
-    return task == null ? null : new Task(task);
+    return task == null ? null : task.copy();
   }
 
   @Override
   public Epic getEpicById(final int id) {
     final Epic epic = epics.get(id);
     historyManager.add(epic);
-    return epic == null ? null : new Epic(epic);
+    return epic == null ? null : epic.copy();
   }
 
   @Override
   public Subtask getSubtaskById(final int id) {
     final Subtask subtask = subtasks.get(id);
     historyManager.add(subtask);
-    return subtask == null ? null : new Subtask(subtask);
+    return subtask == null ? null : subtask.copy();
   }
 
   @Override
   public Task addTask(final Task task) {
     task.setId(generateId());
-    tasks.put(task.getId(), new Task(task));
+    tasks.put(task.getId(), task.copy());
     return task;
   }
 
   @Override
   public Epic addEpic(final Epic epic) {
     epic.setId(generateId());
-    epics.put(epic.getId(), new Epic(epic));
+    epics.put(epic.getId(), epic.copy());
     final Set<Subtask> subtasksFromNewEpic = new HashSet<>(epic.getSubtasks());
     epic.clearSubtasks();
     for (Subtask subtask : subtasksFromNewEpic) {
@@ -153,7 +153,7 @@ public class InMemoryTaskManager implements TaskManager {
       return null;
     }
     subtask.setId(generateId());
-    Subtask subtaskToAdd = new Subtask(subtask);
+    Subtask subtaskToAdd = subtask.copy();
     epics.get(epicId).addSubtask(subtaskToAdd);
     subtasks.put(subtask.getId(), subtaskToAdd);
     return subtask;
@@ -164,7 +164,7 @@ public class InMemoryTaskManager implements TaskManager {
     if (!tasks.containsKey(task.getId())) {
       return;
     }
-    tasks.put(task.getId(), new Task(task));
+    tasks.put(task.getId(), task.copy());
   }
 
   /**
@@ -191,7 +191,7 @@ public class InMemoryTaskManager implements TaskManager {
         subtasks.get(subtask.getId()).getEpicId() != subtask.getEpicId()) {
       return;
     }
-    final Subtask subtaskToUpdate = new Subtask(subtask);
+    final Subtask subtaskToUpdate = subtask.copy();
     subtasks.put(subtask.getId(), subtaskToUpdate);
     epics.get(subtask.getEpicId()).updateSubtask(subtaskToUpdate);
   }

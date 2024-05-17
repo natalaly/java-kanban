@@ -13,14 +13,6 @@ public class Task {
     this.status = TaskStatus.NEW;
   }
 
-  public Task(Task taskToCopy) {
-    Objects.requireNonNull(taskToCopy);
-    setId(taskToCopy.id);
-    setTitle(taskToCopy.title);
-    setDescription(taskToCopy.description);
-    setStatus(TaskStatus.valueOf(taskToCopy.status.name()));
-  }
-
   public int getId() {
     return id;
   }
@@ -65,6 +57,15 @@ public class Task {
         this.getStatus(),
         this.getDescription(),
         " ");
+  }
+
+  public Task copy() {
+    final Task newTask = new Task();
+    newTask.setId(this.getId());
+    newTask.setTitle(this.getTitle());
+    newTask.setDescription(this.getDescription());
+    newTask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    return newTask;
   }
 
   @Override
