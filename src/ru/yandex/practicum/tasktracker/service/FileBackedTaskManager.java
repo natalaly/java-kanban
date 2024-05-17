@@ -175,23 +175,25 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
       fileWriter.write(TASKS_CSV_HEADER + System.lineSeparator());
       Stream.concat(
-          Stream.concat(getAllTasks().stream(),getAllEpics().stream()),
+          Stream.concat(getAllTasks().stream(), getAllEpics().stream()),
           getAllSubtasks().stream()
       ).forEach(task -> {
-        try{
+        try {
           fileWriter.write(task.toCsvLine() + System.lineSeparator());
         } catch (IOException e) {
-          throw new ManagerSaveException("An error occurred during saving tasks from taskManager to the file.", e);
+          throw new ManagerSaveException(
+              "An error occurred during saving tasks from taskManager to the file.", e);
         }
       });
       // save history
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
-      getHistory().forEach( historyTask -> {
-        try {
-          fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
-        } catch (IOException e) {
-          throw new ManagerSaveException("An error occurred during saving tasks from the history to the file.", e);
-        }
+      getHistory().forEach(historyTask -> {
+            try {
+              fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
+            } catch (IOException e) {
+              throw new ManagerSaveException(
+                  "An error occurred during saving tasks from the history to the file.", e);
+            }
           }
       );
     } catch (IOException e) {
@@ -273,7 +275,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   private Task fromString(final String stringCsv) {
     Objects.requireNonNull(stringCsv);
     if (!Pattern.matches(TASKS_LINE_FORMAT, stringCsv)) {
-      return null;
+      throw new IllegalArgumentException("Invalid CSV format of the line with task: " + stringCsv);
     }
     final String[] taskData = stringCsv.split(",");
     final int id = Integer.parseInt(taskData[0]);
@@ -308,7 +310,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return subtask;
       }
     }
-    return null;
+    throw new IllegalArgumentException("Unknown task type: " + type);
   }
-
 }

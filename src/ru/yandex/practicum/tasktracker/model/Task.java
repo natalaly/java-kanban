@@ -50,7 +50,7 @@ public class Task {
   }
 
   public String toCsvLine() {
-    return String.format("%s,%s,%s,%s,%s,%s" ,
+    return String.format("%s,%s,%s,%s,%s,%s",
         this.getId(),
         this.getType(),
         this.getTitle(),
@@ -94,6 +94,4 @@ public class Task {
         ", status=" + getStatus() +
         '}';
   }
-
-
 }

@@ -75,7 +75,8 @@ class EpicTest {
     addNewSubtasksToTheEpic();
     updateSubtasksWithStatus(TaskStatus.DONE);
     TaskStatus actualStatus = taskManager.getEpicById(epic.getId()).getStatus();
-    Assertions.assertNotEquals(epicStatusAtStart,actualStatus, "Status should be other than it was before updating.");
+    Assertions.assertNotEquals(epicStatusAtStart, actualStatus,
+        "Status should be other than it was before updating.");
     Assertions.assertEquals(TaskStatus.DONE, actualStatus,
         "Incorrect status when all subtasks are done.");
   }
