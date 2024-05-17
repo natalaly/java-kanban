@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import ru.yandex.practicum.tasktracker.exception.ManagerLoadException;
 import ru.yandex.practicum.tasktracker.exception.ManagerSaveException;
 import ru.yandex.practicum.tasktracker.model.Epic;
@@ -173,20 +174,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   private void save() {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
       fileWriter.write(TASKS_CSV_HEADER + System.lineSeparator());
-      for (Task task : getAllTasks()) {
-        fileWriter.write(task.toCsvLine() + System.lineSeparator());
-      }
-      for (Epic epic : getAllEpics()) {
-        fileWriter.write(epic.toCsvLine() + System.lineSeparator());
-      }
-      for (Subtask subtask : getAllSubtasks()) {
-        fileWriter.write(subtask.toCsvLine() + System.lineSeparator());
-      }
+      Stream.concat(
+          Stream.concat(getAllTasks().stream(),getAllEpics().stream()),
+          getAllSubtasks().stream()
+      ).forEach(task -> {
+        try{
+          fileWriter.write(task.toCsvLine() + System.lineSeparator());
+        } catch (IOException e) {
+          throw new ManagerSaveException("An error occurred during saving tasks from taskManager to the file.", e);
+        }
+      });
       // save history
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
-      for (Task historyTask : getHistory()) {
-        fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
-      }
+      getHistory().forEach( historyTask -> {
+        try {
+          fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
+        } catch (IOException e) {
+          throw new ManagerSaveException("An error occurred during saving tasks from the history to the file.", e);
+        }
+          }
+      );
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
     }
@@ -263,12 +270,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     counter = maxId;
   }
 
-  private Task fromString(final String stringCSV) {
-    Objects.requireNonNull(stringCSV);
-    if (!Pattern.matches(TASKS_LINE_FORMAT, stringCSV)) {
+  private Task fromString(final String stringCsv) {
+    Objects.requireNonNull(stringCsv);
+    if (!Pattern.matches(TASKS_LINE_FORMAT, stringCsv)) {
       return null;
     }
-    final String[] taskData = stringCSV.split(",");
+    final String[] taskData = stringCsv.split(",");
     final int id = Integer.parseInt(taskData[0]);
     final TaskType type = TaskType.valueOf(taskData[1]);
     final String title = taskData[2];
