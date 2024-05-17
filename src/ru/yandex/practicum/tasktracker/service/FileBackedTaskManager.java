@@ -174,18 +174,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
       fileWriter.write(TASKS_CSV_HEADER + System.lineSeparator());
       for (Task task : getAllTasks()) {
-        fileWriter.write(task.toCsvLine());
+        fileWriter.write(task.toCsvLine() + System.lineSeparator());
       }
       for (Epic epic : getAllEpics()) {
-        fileWriter.write(epic.toCsvLine());
+        fileWriter.write(epic.toCsvLine() + System.lineSeparator());
       }
       for (Subtask subtask : getAllSubtasks()) {
-        fileWriter.write(subtask.toCsvLine());
+        fileWriter.write(subtask.toCsvLine() + System.lineSeparator());
       }
       // save history
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
       for (Task historyTask : getHistory()) {
-        fileWriter.write(historyTask.toCsvLine());
+        fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
       }
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);

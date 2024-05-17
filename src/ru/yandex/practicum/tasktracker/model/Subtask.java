@@ -40,6 +40,6 @@ public class Subtask extends Task {
 
   @Override
   public String toCsvLine() {
-    return super.toCsvLine().trim() + getEpicId() + System.lineSeparator();
+    return super.toCsvLine().trim() + getEpicId();
   }
 }
