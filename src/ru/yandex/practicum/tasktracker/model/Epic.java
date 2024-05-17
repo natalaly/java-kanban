@@ -10,9 +10,28 @@ public class Epic extends Task {
 
   private final Set<Subtask> subtasks = new HashSet<>();
 
+  public Epic() {
+  }
+
   @Override
   public TaskStatus getStatus() {
     return calculateStatus();
+  }
+
+  @Override
+  public TaskType getType() {
+    return TaskType.EPIC;
+  }
+
+  @Override
+  public Epic copy() {
+    Epic newEpic = new Epic();
+    newEpic.setId(this.getId());
+    newEpic.setTitle(this.getTitle());
+    newEpic.setDescription(this.getDescription());
+    newEpic.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    this.subtasks.forEach(subtask -> newEpic.addSubtask(subtask.copy()));
+    return newEpic;
   }
 
   public Set<Subtask> getSubtasks() {
@@ -70,10 +89,5 @@ public class Epic extends Task {
     return result;
   }
 
-  @Override
-  public String toString() {
-    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
-        ", subtasks.size=" + subtasks.size() +
-        "}";
-  }
+
 }

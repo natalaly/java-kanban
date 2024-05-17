@@ -45,6 +45,29 @@ public class Task {
     this.status = taskStatus;
   }
 
+  public TaskType getType() {
+    return TaskType.TASK;
+  }
+
+  public String toCsvLine() {
+    return String.format("%s,%s,%s,%s,%s,%s",
+        this.getId(),
+        this.getType(),
+        this.getTitle(),
+        this.getStatus(),
+        this.getDescription(),
+        " ");
+  }
+
+  public Task copy() {
+    final Task newTask = new Task();
+    newTask.setId(this.getId());
+    newTask.setTitle(this.getTitle());
+    newTask.setDescription(this.getDescription());
+    newTask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    return newTask;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) {
@@ -63,7 +86,8 @@ public class Task {
 
   @Override
   public String toString() {
-    return "Task{" +
+    return this.getClass().getSimpleName() +
+        "{" +
         "id=" + id +
         ", title='" + title + '\'' +
         ", description='" + description + '\'' +

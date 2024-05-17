@@ -1,8 +1,13 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.io.File;
+
 /**
- * Utility class
+ * Utility class, is used for getting default implementations of various managers. Provides methods
+ * to retrieve default instances of {@link TaskManager}, {@link HistoryManager}, and create
+ * {@link FileBackedTaskManager} instances from the specified file.
  */
+
 public class Managers {
 
   private Managers() {
@@ -17,4 +22,7 @@ public class Managers {
     return new InMemoryHistoryManager();
   }
 
+  public static TaskManager getFileBackedTaskManager(File file) {
+    return FileBackedTaskManager.loadFromFile(file);
+  }
 }

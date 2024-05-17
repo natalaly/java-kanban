@@ -6,6 +6,23 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The {@code InMemoryHistoryManager} class implements the {@link HistoryManager} interface and
+ * provides an in-memory storage solution for managing the history of viewed tasks.
+ * <p>
+ * This class maintains a doubly linked list structure to store the history of viewed tasks. It
+ * allows adding tasks to the history, removing tasks from the history by their IDs, and retrieving
+ * the entire history of viewed tasks.
+ * <p>
+ * The implementation ensures that only the latest view of a task is kept in the history. If a task
+ * is viewed multiple times, only its latest view is retained in the history.
+ * <p>
+ * Additionally, the {@link #remove(int)} method has been added to allow removing tasks from the
+ * history when they are deleted from the system.
+ *
+ * @see HistoryManager
+ * @see Task
+ */
 public class InMemoryHistoryManager implements HistoryManager {
 
   private final Map<Integer, Node> nodes = new HashMap<>();

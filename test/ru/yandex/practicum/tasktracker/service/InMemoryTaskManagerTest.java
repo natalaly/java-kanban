@@ -532,8 +532,38 @@ class InMemoryTaskManagerTest {
             taskManager.getTaskById(taskInMemoryId).getStatus(),
             "Task status in memory was changed.")
     );
+  }
 
+  @Test
+  void addTaskSavesThreeDifferentIssuesFromTheSameSourceUsedThreeTimes() {
+    Task taskToUse = TestDataBuilder.buildTask("Task", "Same task different id");
+    final Set<String> expectedTaskTitles = Set.of("Task");
+    final Set<String> expectedTaskDescriptions = Set.of("Same task different id");
+    final int expectedTasksIdsNumbers = 3;
+    final int expectedSize = 3;
 
+    taskManager.addTask(taskToUse);
+    taskManager.addTask(taskToUse);
+    taskManager.addTask(taskToUse);
+
+    final int actualSize = taskManager.getAllTasks().size();
+    final Set<String> actualTaskTitles = taskManager.getAllTasks().stream().map(Task::getTitle)
+        .collect(Collectors.toSet());
+    final Set<String> actualTaskDescriptions = taskManager.getAllTasks().stream()
+        .map(Task::getDescription).collect(Collectors.toSet());
+    final int actualTasksIdsNumbers = taskManager.getAllTasks().stream().map(Task::getId)
+        .collect(Collectors.toSet()).size();
+
+    Assertions.assertAll(
+        () -> Assertions.assertEquals(expectedSize, actualSize,
+            "The total number of tasks is not correct."),
+        () -> Assertions.assertIterableEquals(expectedTaskTitles, actualTaskTitles,
+            "Titles should be same."),
+        () -> Assertions.assertIterableEquals(expectedTaskDescriptions, actualTaskDescriptions,
+            "Description should be same."),
+        () -> Assertions.assertEquals(expectedTasksIdsNumbers, actualTasksIdsNumbers,
+            "Ids should be same.")
+    );
   }
 
   // addEpic();

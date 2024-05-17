@@ -13,7 +13,9 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
  * Utility class for preparing test data
  */
 public class TestDataBuilder {
-  private TestDataBuilder(){}
+
+  private TestDataBuilder() {
+  }
 
   public static TaskManager buildTaskManager() {
     return new InMemoryTaskManager();
@@ -27,7 +29,7 @@ public class TestDataBuilder {
   }
 
   public static Task buildTask(int id, String title, String description, TaskStatus status) {
-    Task task = buildTask( title,  description);
+    Task task = buildTask(title, description);
     task.setId(id);
     task.setStatus(status);
     return task;
@@ -97,8 +99,9 @@ public class TestDataBuilder {
         List.of(buildEpic(1, "epic1", "description"),
             buildTask(2, "task1", "d", TaskStatus.NEW),
             buildSubtask(3, "subtask1", "notes", 1),
-            buildEpic(4, "epic1", "description"),
-            buildSubtask(5, "subtask2", "notes", 1)));
+            buildEpic(4, "epic2", "description"),
+            buildSubtask(5, "subtask2", "notes", 1),
+            buildTask(6, "task2", "d", TaskStatus.NEW)));
   }
 
 }

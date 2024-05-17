@@ -4,6 +4,9 @@ public class Subtask extends Task {
 
   private int epicId;
 
+  public Subtask() {
+  }
+
   public int getEpicId() {
     return epicId;
   }
@@ -14,9 +17,29 @@ public class Subtask extends Task {
 
   @Override
   public String toString() {
-    String result = super.toString().substring(0, super.toString().lastIndexOf("}")) +
+    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
         ", epic id=" + epicId +
         '}';
-    return result;
+  }
+
+  @Override
+  public TaskType getType() {
+    return TaskType.SUBTASK;
+  }
+
+  @Override
+  public Subtask copy() {
+    Subtask newSubtask = new Subtask();
+    newSubtask.setId(this.getId());
+    newSubtask.setTitle(this.getTitle());
+    newSubtask.setDescription(this.getDescription());
+    newSubtask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    newSubtask.setEpicId(this.getEpicId());
+    return newSubtask;
+  }
+
+  @Override
+  public String toCsvLine() {
+    return super.toCsvLine().trim() + getEpicId();
   }
 }
