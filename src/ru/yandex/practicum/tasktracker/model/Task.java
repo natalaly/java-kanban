@@ -1,5 +1,7 @@
 package ru.yandex.practicum.tasktracker.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,9 +10,12 @@ public class Task {
   private String title;
   private String description;
   private TaskStatus status;
+  private Duration duration;
+  private LocalDateTime startTime;
 
   public Task() {
     this.status = TaskStatus.NEW;
+    this.duration = Duration.ZERO;
   }
 
   public int getId() {
@@ -45,17 +50,45 @@ public class Task {
     this.status = taskStatus;
   }
 
+//  TODO throw exception if duration < 0
+  public void setDuration(Duration duration) {
+    if (duration.isNegative()) {
+      throw new IllegalArgumentException("Duration cannot be negative");
+    }
+    this.duration = duration;
+  }
+
+  public Duration getDuration() {
+    return duration;
+  }
+
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(LocalDateTime startTime) {
+    this.startTime = startTime;
+  }
+
+//  TODO case when we start time is null
+  public LocalDateTime getEndTime() {
+    return startTime == null ? null : startTime.plus(duration);
+  }
+
   public TaskType getType() {
     return TaskType.TASK;
   }
 
   public String toCsvLine() {
-    return String.format("%s,%s,%s,%s,%s,%s",
+    return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s",
         this.getId(),
         this.getType(),
         this.getTitle(),
         this.getStatus(),
         this.getDescription(),
+        this.getDuration(),
+        this.getStartTime(),
+        this.getEndTime(),
         " ");
   }
 
@@ -65,6 +98,8 @@ public class Task {
     newTask.setTitle(this.getTitle());
     newTask.setDescription(this.getDescription());
     newTask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    newTask.setDuration(this.getDuration());
+    newTask.setStartTime(this.getStartTime());
     return newTask;
   }
 
@@ -92,6 +127,9 @@ public class Task {
         ", title='" + title + '\'' +
         ", description='" + description + '\'' +
         ", status=" + getStatus() +
+        ", duration=" + getDuration() +
+        ", startTime=" + getStartTime() +
+        ", endTime=" + getEndTime() +
         '}';
   }
 }
