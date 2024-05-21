@@ -1,5 +1,7 @@
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
@@ -24,12 +26,62 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int choice = 1;
+    int choice = 3;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
       case 2 -> useCaseFile(); /* File saving / restoring */
+      case 3 -> sprint8Workshop();
     }
+
+  }
+
+  static void sprint8Workshop() {
+//    System.out.println();
+//    Task t = new Task() ;
+//    t.setId(2);
+//    t.setTitle("title");
+//    t.setDescription("description");
+//    t.setDuration(Duration.ofMinutes(15));
+//    t.setStartTime(LocalDateTime.now());
+//    System.out.println(t);
+
+    epic1 = new Epic();
+    epic1.setId(1);
+    epic1.setTitle("Epic1");
+    epic1.setDescription("Do e1");
+
+    sb1 = new Subtask();
+    sb1.setId(2);
+    sb1.setTitle("Subtask1");
+    sb1.setDescription("Subtask1 to the Epic1");
+    sb1.setEpicId(1);
+    sb1.setDuration(Duration.ofMinutes(5));
+    sb1.setStartTime(LocalDateTime.now().plus(Duration.ofDays(4)));
+
+    sb2 = new Subtask();
+    sb2.setId(3);
+    sb2.setTitle("Subtask2");
+    sb2.setDescription("Subtask2 to the Epic1");
+    sb2.setEpicId(1);
+    sb2.setDuration(Duration.ofHours(15));
+    sb2.setStartTime(LocalDateTime.now().plus(Duration.ofDays(1)));
+
+    sb3 = new Subtask();
+    sb3.setId(4);
+    sb3.setTitle("Subtask3");
+    sb3.setDescription("Subtask3 to the Epic1");
+    sb3.setEpicId(1);
+    sb3.setStartTime(LocalDateTime.now().plus(Duration.ofDays(2)));
+
+    epic1.addSubtask(sb1);
+    epic1.addSubtask(sb2);
+    epic1.addSubtask(sb3);
+
+    System.out.println(sb2.getEndTime());
+
+    System.out.println(epic1);
+
 
   }
 

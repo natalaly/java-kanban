@@ -34,6 +34,8 @@ public class Subtask extends Task {
     newSubtask.setTitle(this.getTitle());
     newSubtask.setDescription(this.getDescription());
     newSubtask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    newSubtask.setDuration(this.getDuration());
+    newSubtask.setStartTime(this.getStartTime());
     newSubtask.setEpicId(this.getEpicId());
     return newSubtask;
   }
