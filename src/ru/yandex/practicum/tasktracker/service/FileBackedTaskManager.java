@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -47,9 +49,9 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
-  private static final String TASKS_CSV_HEADER = "id,type,name,status,description,epic";
+  private static final String TASKS_CSV_HEADER = "id,type,name,status,description,duration,startTime,epic";
   private static final String HISTORY_HEADER = "history";
-  private static final String TASKS_LINE_FORMAT = "^([^,\"']+,){5}[^,\"']+$";// Format used for ensuring that each task line in the file will contain exactly 6 fields separated by commas.
+  private static final String TASKS_LINE_FORMAT = "^([^,\"']+,){7}[^,\"']+$";// Format used for ensuring that each task line in the file will contain exactly 8 fields separated by commas.
   private final File file;
 
 
@@ -220,7 +222,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     while (br.ready()) {
       historyData.add(br.readLine());
     }
-    if (historyData.size() != 0) {
+    if (!historyData.isEmpty()) {
       this.restoreAll(historyData, HISTORY_HEADER);
     }
   }
@@ -283,6 +285,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     final String title = taskData[2];
     final TaskStatus status = TaskStatus.valueOf(taskData[3]);
     final String description = taskData[4];
+    final Duration duration = Duration.ofMinutes(Long.parseLong(taskData[5]));
+    final LocalDateTime startTime =
+        taskData[6].equals("null") ? null : LocalDateTime.parse(taskData[6]);
     switch (type) {
       case TASK -> {
         final Task task = new Task();
@@ -290,6 +295,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         task.setTitle(title);
         task.setDescription(description);
         task.setStatus(status);
+        task.setDuration(duration);
+        task.setStartTime(startTime);
         return task;
       }
       case EPIC -> {
@@ -298,6 +305,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         epic.setTitle(title);
         epic.setDescription(description);
         epic.setStatus(status);
+        epic.setDuration(duration);
+        epic.setStartTime(startTime);
         return epic;
       }
       case SUBTASK -> {
@@ -306,7 +315,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         subtask.setTitle(title);
         subtask.setDescription(description);
         subtask.setStatus(status);
-        subtask.setEpicId(Integer.parseInt(taskData[5]));
+        subtask.setDuration(duration);
+        subtask.setStartTime(startTime);
+        subtask.setEpicId(Integer.parseInt(taskData[7]));
         return subtask;
       }
     }

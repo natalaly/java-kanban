@@ -50,7 +50,7 @@ public class Task {
     this.status = taskStatus;
   }
 
-//  TODO throw exception if duration < 0
+  //  TODO throw exception if duration < 0
   public void setDuration(Duration duration) {
     if (duration.isNegative()) {
       throw new IllegalArgumentException("Duration cannot be negative");
@@ -70,7 +70,7 @@ public class Task {
     this.startTime = startTime;
   }
 
-//  TODO case when we start time is null
+  //  TODO case when we start time is null
   public LocalDateTime getEndTime() {
     return startTime == null ? null : startTime.plus(duration);
   }
@@ -80,15 +80,14 @@ public class Task {
   }
 
   public String toCsvLine() {
-    return String.format("%s,%s,%s,%s,%s,%s,%s,%s,%s",
+    return String.format("%s,%s,%s,%s,%s,%s,%s,%s",
         this.getId(),
         this.getType(),
         this.getTitle(),
         this.getStatus(),
         this.getDescription(),
-        this.getDuration(),
+        this.getDuration().toMinutes(),
         this.getStartTime(),
-        this.getEndTime(),
         " ");
   }
 
@@ -127,7 +126,7 @@ public class Task {
         ", title='" + title + '\'' +
         ", description='" + description + '\'' +
         ", status=" + getStatus() +
-        ", duration=" + getDuration() +
+        ", duration=" + getDuration().toMinutes() +
         ", startTime=" + getStartTime() +
         ", endTime=" + getEndTime() +
         '}';

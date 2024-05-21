@@ -3,6 +3,8 @@ package ru.yandex.practicum.tasktracker.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -18,10 +20,13 @@ import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskStatus;
 import ru.yandex.practicum.tasktracker.model.TaskType;
 
 class FileBackedTaskManagerTest {
 
+  private static final LocalDateTime BASE_TEST_TIME = LocalDateTime.parse(
+      "2024-05-21T19:51:24.211613");
   private TaskManager manager;
   private File file;
 
@@ -110,30 +115,37 @@ class FileBackedTaskManagerTest {
       case SUBTASK -> {
         epicForId = manager.addEpic(TestDataBuilder.buildEpic("epic", "eee"));
         Subtask s = (Subtask) testTask;
-        s.setEpicId(epicForId.getId());
+        int epicId = epicForId.getId();
+        s.setEpicId(epicId);
         manager.addSubtask(s);
-        epic = String.valueOf(epicForId.getId());
+        epicForId = manager.getAllEpics().stream().filter((e) -> e.getId() == epicId).findFirst()
+            .orElse(null);
+        epic = String.valueOf(epicId);
       }
     }
     if (TaskType.SUBTASK == testTask.getType()) {
+      assert epicForId != null;
       expected = """
-          id,type,name,status,description,epic
-          %s,%s,%s,%s,%s,%s
-          %s,%s,%s,%s,%s,%s
+          id,type,name,status,description,duration,startTime,epic
+          %s,%s,%s,%s,%s,%s,%s,%s
+          %s,%s,%s,%s,%s,%s,%s,%s
           history
           """.formatted(epicForId.getId(), epicForId.getType(), epicForId.getTitle(),
-          epicForId.getStatus(), epicForId.getDescription(), " ",
+          epicForId.getStatus(), epicForId.getDescription(), epicForId.getDuration().toMinutes(),
+          epicForId.getStartTime(), " ",
           testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
-          testTask.getDescription(), epic);
+          testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
+          epic);
     } else {
       expected = """
-          id,type,name,status,description,epic
-          %s,%s,%s,%s,%s,%s
+          id,type,name,status,description,duration,startTime,epic
+          %s,%s,%s,%s,%s,%s,%s,%s
           history
           """.formatted(testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
-          testTask.getDescription(), epic);
+          testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
+          epic);
     }
 
     final String actual = Files.readString(file.toPath());
@@ -142,9 +154,11 @@ class FileBackedTaskManagerTest {
   }
 
   private static List<Task> provideDifferentTypesTasks() {
-    final Task task = TestDataBuilder.buildTask("task", "d");
+    final Task task = TestDataBuilder.buildTask(0, "task", "d", TaskStatus.NEW,
+        Duration.ofMinutes(15), BASE_TEST_TIME);
     final Epic epic = TestDataBuilder.buildEpic("epic", "description");
-    final Subtask subtask = TestDataBuilder.buildSubtask("subtask", "notes", 2);
+    final Subtask subtask = TestDataBuilder.buildSubtask("subtask", "notes", 2,
+        Duration.ofMinutes(15), BASE_TEST_TIME.plusMinutes(15));
     return new ArrayList<>(Arrays.asList(task, epic, subtask));
   }
 

@@ -1,5 +1,7 @@
 package ru.yandex.practicum.tasktracker.builder;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
@@ -35,6 +37,14 @@ public class TestDataBuilder {
     return task;
   }
 
+  public static Task buildTask(int id, String title, String description, TaskStatus status,
+      Duration duration, LocalDateTime startTime) {
+    Task task = buildTask(id, title, description, status);
+    task.setDuration(duration);
+    task.setStartTime(startTime);
+    return task;
+  }
+
   public static Epic buildEpic(String title, String description) {
     Epic epic = new Epic();
     epic.setTitle(title);
@@ -54,6 +64,14 @@ public class TestDataBuilder {
     subtask.setTitle(title);
     subtask.setDescription(description);
     subtask.setEpicId(epicId);
+    return subtask;
+  }
+
+  public static Subtask buildSubtask(String title, String description, int epicId,
+      Duration duration, LocalDateTime startTime) {
+    Subtask subtask = buildSubtask(title, description, epicId);
+    subtask.setDuration(duration);
+    subtask.setStartTime(startTime);
     return subtask;
   }
 

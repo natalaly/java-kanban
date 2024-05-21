@@ -3,7 +3,6 @@ package ru.yandex.practicum.tasktracker.model;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -60,7 +59,7 @@ public class Epic extends Task {
 
   @Override
   public String toString() {
-    return super.toString().substring(0,super.toString().lastIndexOf("}")) +
+    return super.toString().substring(0, super.toString().lastIndexOf("}")) +
         ", subtasks.size=" + subtasks.size() +
         "}";
   }
@@ -121,9 +120,11 @@ public class Epic extends Task {
   }
 
   /**
-   * Performs a calculation of the total duration of the Epic by summing the durations of its subtasks.
+   * Performs a calculation of the total duration of the Epic by summing the durations of its
+   * subtasks.
    * <p>
    * If the Epic does not have any subtasks, the total duration will be zero.
+   *
    * @return {@link Duration}
    */
   private Duration calculateDuration() {
@@ -134,7 +135,9 @@ public class Epic extends Task {
   /**
    * Defines and returns the earliest start date and time among all subtasks of the Epic.
    * <p>
-   * If the Epic does not contain any subtasks or if all subtasks have null start times, null is returned.
+   * If the Epic does not contain any subtasks or if all subtasks have null start times, null is
+   * returned.
+   *
    * @return {@link LocalDateTime}
    */
   private LocalDateTime defineStartTime() {
@@ -148,7 +151,9 @@ public class Epic extends Task {
   /**
    * Defines and returns the latest end date and time among all subtasks of the Epic.
    * <p>
-   *   If the Epic does not have any subtasks or if ll subtasks have null end times, null is returned.
+   * If the Epic does not have any subtasks or if ll subtasks have null end times, null is
+   * returned.
+   *
    * @return {@link LocalDateTime}
    */
   private LocalDateTime defineEndTime() {
@@ -159,8 +164,6 @@ public class Epic extends Task {
         .orElse(null);
 
   }
-
-
 
 
 }

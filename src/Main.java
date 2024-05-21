@@ -4,10 +4,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
+import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.service.FileBackedTaskManager;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
@@ -26,7 +29,7 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int choice = 3;
+    int choice = 2;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -79,10 +82,62 @@ public class Main {
     epic1.addSubtask(sb3);
 
     System.out.println(sb2.getEndTime());
-
+    System.out.println(epic1.toCsvLine());
+    System.out.println(epic1.toCsvLine().split(",").length);
+    System.out.println(fromString("1,EPIC,Epic1,NEW,Do e1,905,2024-05-22T18:41:32.633049, "));
     System.out.println(epic1);
+    System.out.println(LocalDateTime.parse("2024-05-22T18:48:57.235393"));
 
 
+  }
+
+  public static Task fromString(final String stringCsv) {
+    Objects.requireNonNull(stringCsv);
+    if (!Pattern.matches("^([^,\"']+,){7}[^,\"']+$", stringCsv)) {
+      throw new IllegalArgumentException("Invalid CSV format of the line with task: " + stringCsv);
+    }
+    final String[] taskData = stringCsv.split(",");
+    final int id = Integer.parseInt(taskData[0]);
+    final TaskType type = TaskType.valueOf(taskData[1]);
+    final String title = taskData[2];
+    final TaskStatus status = TaskStatus.valueOf(taskData[3]);
+    final String description = taskData[4];
+    final Duration duration = Duration.ofMinutes(Long.parseLong(taskData[5]));
+    final LocalDateTime startTime = LocalDateTime.parse(taskData[6]);
+    switch (type) {
+      case TASK -> {
+        final Task task = new Task();
+        task.setId(id);
+        task.setTitle(title);
+        task.setDescription(description);
+        task.setStatus(status);
+        task.setDuration(duration);
+        task.setStartTime(startTime);
+        return task;
+      }
+      case EPIC -> {
+        final Epic epic = new Epic();
+        epic.setId(id);
+        epic.setTitle(title);
+        epic.setDescription(description);
+        epic.setStatus(status);
+        epic.setDuration(duration);
+        epic.setStartTime(startTime);
+        return epic;
+      }
+      case SUBTASK -> {
+        final Subtask subtask = new Subtask();
+        subtask.setId(id);
+        subtask.setTitle(title);
+        subtask.setDescription(description);
+        subtask.setStatus(status);
+        subtask.setDuration(duration);
+        subtask.setStartTime(startTime);
+        subtask.setEpicId(Integer.parseInt(taskData[7]));
+        return subtask;
+      }
+    }
+    throw new IllegalArgumentException("Unknown task type: " + type);
   }
 
   /**
@@ -124,6 +179,8 @@ public class Main {
     t.setTitle("task3");
     oldManager.addTask(t); // add task3
     sb.setStatus(TaskStatus.DONE);
+    sb.setDuration(Duration.ofMinutes(15));
+    sb.setStartTime(LocalDateTime.now());
     oldManager.updateSubtask(sb); // update subtask2 of epic
     oldManager.getEpicById(2);
 
