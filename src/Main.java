@@ -141,7 +141,7 @@ public class Main {
   }
 
   /**
-   * <h2>Use Case 2 - {@link #useCaseFile()}</h2>
+   * <h2> Use Case 2 </h2>
    * <ol>
    *   <li> GIVEN: A {@code FileBackedTaskManager oldManager} that has  3 Tasks, 2 Epics, and 2 Subtasks for one of the Epic.</li>
    *   <li> WHEN: A new {@code FileBackedTaskManager newManager} was created from the file of the oldManager.</li>
@@ -157,7 +157,8 @@ public class Main {
 
     Epic e = new Epic();
     e.setTitle("epic");
-    e.setDescription("e description");
+    e.setDescription("null");
+    System.out.println(e.getDescription() == null);
 
     Subtask sb = new Subtask();
     sb.setTitle("sbtask");
@@ -205,11 +206,12 @@ public class Main {
     System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
     System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
 
+    System.out.println(newManage.getHistory().get(0).getDescription().length());
 
   }
 
   /**
-   * <h2>Use Case 1 - {@link #useCase1()}</h2>
+   * <h2>Use Case 1 </h2>
    * <ol>
    *   <li>Create: Two tasks; Epic with three subtasks; Epic without subtask.</li>
    *   <li>Request ({@code .get...()} methods)the created tasks multiple times in different order.</li>

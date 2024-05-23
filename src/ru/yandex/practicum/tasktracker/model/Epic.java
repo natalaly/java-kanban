@@ -68,14 +68,14 @@ public class Epic extends Task {
     return Collections.unmodifiableSet(subtasks);
   }
 
-  public void addSubtask(Subtask subtask) {
+  public void addSubtask(final Subtask subtask) {
     if (subtask == null || subtasks.contains(subtask)) {
       return;
     }
     subtasks.add(subtask);
   }
 
-  public void updateSubtask(Subtask subtask) {
+  public void updateSubtask(final Subtask subtask) {
     if (subtask == null || !subtasks.contains(subtask)) {
       return;
     }
@@ -83,7 +83,7 @@ public class Epic extends Task {
     subtasks.add(subtask);
   }
 
-  public void removeSubtask(Subtask subtask) {
+  public void removeSubtask(final Subtask subtask) {
     subtasks.remove(subtask);
   }
 
@@ -107,15 +107,8 @@ public class Epic extends Task {
   }
 
   private Map<TaskStatus, Integer> getSubtasksStatuses() {
-    Map<TaskStatus, Integer> result = new HashMap<>();
-
-    for (Subtask subtask : subtasks) {
-      if (!result.containsKey(subtask.getStatus())) {
-        result.put(subtask.getStatus(), 1);
-      } else {
-        result.put(subtask.getStatus(), result.get(subtask.getStatus()) + 1);
-      }
-    }
+    final Map<TaskStatus, Integer> result = new HashMap<>();
+    subtasks.forEach(s -> result.put(s.getStatus(), result.getOrDefault(s.getStatus(), 0) + 1));
     return result;
   }
 

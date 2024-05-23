@@ -30,7 +30,7 @@ public class InMemoryHistoryManager implements HistoryManager {
   private Node tail;
 
   @Override
-  public void add(Task task) {
+  public void add(final Task task) {
     if (task == null) {
       return;
     }
@@ -39,8 +39,8 @@ public class InMemoryHistoryManager implements HistoryManager {
   }
 
   @Override
-  public void remove(int id) {
-    Node nodeToRemove = nodes.remove(id);
+  public void remove(final int id) {
+    final Node nodeToRemove = nodes.remove(id);
     removeNode(nodeToRemove);
   }
 
@@ -49,7 +49,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     return getTasks();
   }
 
-  private void linkLast(Task taskToAdd) {
+  private void linkLast(final Task taskToAdd) {
     final Node newNode = new Node(taskToAdd);
     if (tail == null) {
       head = newNode;
@@ -71,7 +71,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     return history;
   }
 
-  private void removeNode(Node nodeToRemove) {
+  private void removeNode(final Node nodeToRemove) {
     if (nodeToRemove == null) {
       return;
     }
@@ -100,7 +100,7 @@ public class InMemoryHistoryManager implements HistoryManager {
     public Node next;
     public Node prev;
 
-    public Node(Task task) {
+    public Node(final Task task) {
       this.data = task;
       this.next = null;
       this.prev = null;

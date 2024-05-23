@@ -22,7 +22,7 @@ public class Task {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(final int id) {
     this.id = id;
   }
 
@@ -30,7 +30,7 @@ public class Task {
     return title;
   }
 
-  public void setTitle(String title) {
+  public void setTitle(final String title) {
     this.title = title;
   }
 
@@ -38,7 +38,7 @@ public class Task {
     return description;
   }
 
-  public void setDescription(String description) {
+  public void setDescription(final String description) {
     this.description = description;
   }
 
@@ -46,12 +46,12 @@ public class Task {
     return status;
   }
 
-  public void setStatus(TaskStatus taskStatus) {
+  public void setStatus(final TaskStatus taskStatus) {
     this.status = taskStatus;
   }
 
   //  TODO throw exception if duration < 0
-  public void setDuration(Duration duration) {
+  public void setDuration(final Duration duration) {
     if (duration.isNegative()) {
       throw new IllegalArgumentException("Duration cannot be negative");
     }
@@ -66,11 +66,11 @@ public class Task {
     return startTime;
   }
 
-  public void setStartTime(LocalDateTime startTime) {
+  public void setStartTime(final LocalDateTime startTime) {
     this.startTime = startTime;
   }
 
-  //  TODO case when we start time is null
+  //  TODO case when start time is null
   public LocalDateTime getEndTime() {
     return startTime == null ? null : startTime.plus(duration);
   }

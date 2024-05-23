@@ -60,7 +60,6 @@ public class InMemoryTaskManager implements TaskManager {
     return new ArrayList<>(subtasks.values());
   }
 
-  //  TODO
   @Override
   public List<Task> getPrioritizedTasks() {
     return new ArrayList<>(prioritizedTasks);
@@ -145,7 +144,6 @@ public class InMemoryTaskManager implements TaskManager {
         .copy();
   }
 
-  //  TODO optional???
   @Override
   public Epic getEpicById(final int id) {
     final Optional<Epic> epic = Optional.ofNullable(epics.get(id));
@@ -163,6 +161,15 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
+  public Set<Subtask> getSubtasksByEpicId(final int epicId) {
+    final Optional<Epic> optionalEpic = Optional.ofNullable(epics.get(epicId));
+    final Optional<Set<Subtask>> optionalSubtasks = optionalEpic.map(
+        epic -> new HashSet<>(epic.getSubtasks()));
+    return optionalSubtasks.orElseThrow(
+        () -> new TaskNotFoundException("Epic with Id " + epicId + " was not found."));
+  }
+
+  @Override
   public Task addTask(final Task task) {
     task.setId(generateId());
     addPrioritized(task);
@@ -176,10 +183,10 @@ public class InMemoryTaskManager implements TaskManager {
     epics.put(epic.getId(), epic.copy());
     final Set<Subtask> subtasksFromNewEpic = new HashSet<>(epic.getSubtasks());
     epic.clearSubtasks();
-    for (Subtask subtask : subtasksFromNewEpic) {
-      subtask.setEpicId(epic.getId());
-      addSubtask(subtask);
-    }
+    subtasksFromNewEpic.forEach(s -> {
+      s.setEpicId(epic.getId());
+      addSubtask(s);
+    });
     return epic;
   }
 
@@ -242,14 +249,6 @@ public class InMemoryTaskManager implements TaskManager {
     epics.get(subtask.getEpicId()).updateSubtask(subtaskToUpdate);
   }
 
-  @Override
-  public Set<Subtask> getSubtasksByEpicId(final int id) {
-    if (!epics.containsKey(id)) {
-      return null;
-    }
-    return new HashSet<>(epics.get(id).getSubtasks());
-  }
-
   private int generateId() {
     return ++counter;
   }
@@ -303,5 +302,24 @@ public class InMemoryTaskManager implements TaskManager {
         task1.getStartTime().isAfter(task2.getEndTime()));
   }
 
+  private boolean canBePrioritized1(final Task taskToCheck) {
+    if (taskToCheck.getStartTime() == null) {
+      return false;
+    }
+    final Task floor = ((TreeSet<Task>) prioritizedTasks).floor(taskToCheck);
+    final Task ceiling = ((TreeSet<Task>) prioritizedTasks).ceiling(taskToCheck);
+
+    if (floor != null && hasTimeConflict(taskToCheck, floor)) {
+      throw new TaskValidationException(
+          "Task has time conflict with existing task with ID " + floor.getId());
+    }
+    if (ceiling != null && hasTimeConflict(taskToCheck, ceiling)) {
+      throw new TaskValidationException(
+          "Task has time conflict with existing task with ID " + ceiling.getId());
+    }
+    return true;
+  }
 
 }
+
+
