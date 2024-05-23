@@ -1,5 +1,10 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.TreeSet;
+import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
+import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
@@ -37,7 +42,8 @@ public class InMemoryTaskManager implements TaskManager {
   protected final Map<Integer, Epic> epics = new HashMap<>();
   protected final Map<Integer, Subtask> subtasks = new HashMap<>();
   protected final HistoryManager historyManager = Managers.getDefaultHistory();
-
+  protected final Set<Task> prioritizedTasks = new TreeSet<>(
+      Comparator.comparing(Task::getStartTime));
 
   @Override
   public List<Task> getAllTasks() {
@@ -54,16 +60,36 @@ public class InMemoryTaskManager implements TaskManager {
     return new ArrayList<>(subtasks.values());
   }
 
+  //  TODO
+  @Override
+  public List<Task> getPrioritizedTasks() {
+    return new ArrayList<>(prioritizedTasks);
+  }
+
+  @Override
+  public List<Task> getHistory() {
+    return historyManager.getHistory();
+  }
+
   @Override
   public void clearTasks() {
-    tasks.values().forEach(t -> historyManager.remove(t.getId()));
+    tasks.values().forEach(t -> {
+      historyManager.remove(t.getId());
+      prioritizedTasks.remove(t);
+    });
     tasks.clear();
   }
 
   @Override
   public void clearEpics() {
-    subtasks.values().forEach(st -> historyManager.remove(st.getId()));
-    epics.values().forEach(e -> historyManager.remove(e.getId()));
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      prioritizedTasks.remove(st);
+    });
+    epics.values().forEach(e -> {
+      historyManager.remove(e.getId());
+      prioritizedTasks.remove(e);
+    });
     subtasks.clear();
     epics.clear();
   }
@@ -71,15 +97,19 @@ public class InMemoryTaskManager implements TaskManager {
   @Override
   public void clearSubtasks() {
     epics.values().forEach(Epic::clearSubtasks);
-    subtasks.values().forEach(st -> historyManager.remove(st.getId()));
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      prioritizedTasks.remove(st);
+    });
     subtasks.clear();
   }
 
   @Override
   public void deleteTask(final int id) {
-    final Task task = tasks.remove(id);
-    if (task != null) {
+    final Task removedTask = tasks.remove(id);
+    if (removedTask != null) {
       historyManager.remove(id);
+      prioritizedTasks.remove(removedTask);
     }
   }
 
@@ -87,10 +117,11 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteEpic(final int id) {
     final Epic epic = epics.remove(id);
     if (epic != null) {
-      for (Subtask subtask : epic.getSubtasks()) {
-        subtasks.remove(subtask.getId());
-        historyManager.remove(subtask.getId());
-      }
+      epic.getSubtasks().forEach(s -> {
+        subtasks.remove(s.getId());
+        historyManager.remove(s.getId());
+        prioritizedTasks.remove(s);
+      });
       historyManager.remove(id);
     }
   }
@@ -102,33 +133,39 @@ public class InMemoryTaskManager implements TaskManager {
       final int epicId = subtask.getEpicId();
       epics.get(epicId).removeSubtask(subtask);
       historyManager.remove(id);
+      prioritizedTasks.remove(subtask);
     }
   }
 
   @Override
   public Task getTaskById(final int id) {
-    final Task task = tasks.get(id);
-    historyManager.add(tasks.get(id));
-    return task == null ? null : task.copy();
+    final Optional<Task> t = Optional.ofNullable(tasks.get(id));
+    t.ifPresent(historyManager::add);
+    return t.orElseThrow(() -> new TaskNotFoundException("Task with Id " + id + " was not found."))
+        .copy();
   }
 
+  //  TODO optional???
   @Override
   public Epic getEpicById(final int id) {
-    final Epic epic = epics.get(id);
-    historyManager.add(epic);
-    return epic == null ? null : epic.copy();
+    final Optional<Epic> epic = Optional.ofNullable(epics.get(id));
+    epic.ifPresent(historyManager::add);
+    return epic.orElseThrow(
+        () -> new TaskNotFoundException("Epic with Id " + id + " was not found.")).copy();
   }
 
   @Override
   public Subtask getSubtaskById(final int id) {
-    final Subtask subtask = subtasks.get(id);
-    historyManager.add(subtask);
-    return subtask == null ? null : subtask.copy();
+    final Optional<Subtask> subtask = Optional.ofNullable(subtasks.get(id));
+    subtask.ifPresent(historyManager::add);
+    return subtask.orElseThrow(
+        () -> new TaskNotFoundException("Subtask with Id " + id + " was not found.")).copy();
   }
 
   @Override
   public Task addTask(final Task task) {
     task.setId(generateId());
+    addPrioritized(task);
     tasks.put(task.getId(), task.copy());
     return task;
   }
@@ -148,23 +185,28 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public Subtask addSubtask(final Subtask subtask) {
-    int epicId = subtask.getEpicId();
+    final int epicId = subtask.getEpicId();
     if (!epics.containsKey(epicId)) {
-      return null;
+      throw new TaskValidationException("Invalid epic Id " + epicId);
     }
     subtask.setId(generateId());
     Subtask subtaskToAdd = subtask.copy();
+    addPrioritized(subtask);
     epics.get(epicId).addSubtask(subtaskToAdd);
     subtasks.put(subtask.getId(), subtaskToAdd);
     return subtask;
   }
 
   @Override
-  public void updateTask(final Task task) {
-    if (!tasks.containsKey(task.getId())) {
-      return;
+  public void updateTask(final Task taskToUpdate) {
+    final Task taskInMemory = tasks.get(taskToUpdate.getId());
+    if (taskInMemory == null) {
+      throw new TaskNotFoundException(
+          "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
-    tasks.put(task.getId(), task.copy());
+    prioritizedTasks.remove(taskInMemory);
+    addPrioritized(taskToUpdate.copy());
+    tasks.put(taskToUpdate.getId(), taskToUpdate.copy());
   }
 
   /**
@@ -187,18 +229,17 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void updateSubtask(final Subtask subtask) {
-    if (!subtasks.containsKey(subtask.getId()) ||
-        subtasks.get(subtask.getId()).getEpicId() != subtask.getEpicId()) {
-      return;
+    final Subtask subtaskInMemory = subtasks.get(subtask.getId());
+    if (subtaskInMemory == null ||
+        subtaskInMemory.getEpicId() != subtask.getEpicId()) {
+      throw new TaskNotFoundException(
+          "The subtask " + subtask + "does not exist in the TaskManager");
     }
+    prioritizedTasks.remove(subtaskInMemory);
     final Subtask subtaskToUpdate = subtask.copy();
+    addPrioritized(subtaskToUpdate);
     subtasks.put(subtask.getId(), subtaskToUpdate);
     epics.get(subtask.getEpicId()).updateSubtask(subtaskToUpdate);
-  }
-
-  @Override
-  public List<Task> getHistory() {
-    return historyManager.getHistory();
   }
 
   @Override
@@ -212,4 +253,55 @@ public class InMemoryTaskManager implements TaskManager {
   private int generateId() {
     return ++counter;
   }
+
+  //  TODO
+
+  /**
+   * Adds a task to the {@link #prioritizedTasks} if it can be prioritized.
+   * <p>This method first checks if the task can be prioritized using the
+   * {@link #canBePrioritized(Task)} method.
+   * <p>If the task cannot be prioritized (due to a null start time or a time conflict with
+   * existing tasks), it will not be added to the set of prioritized tasks.
+   *
+   * @param taskToAdd
+   * @throws TaskValidationException if the task has a time conflict with an existing task.
+   */
+  private void addPrioritized(final Task taskToAdd) {
+    if (!canBePrioritized(taskToAdd)) {
+      return;
+    }
+    prioritizedTasks.add(taskToAdd);
+  }
+
+  //  TODO now it is O(n)
+
+  /**
+   * Method checks for a valid start time and ensures no time conflicts before allowing a task to be
+   * prioritized.
+   *
+   * @param taskToCheck
+   * @return {@Code true} if {@code taskToCheck} meets above requirements
+   * @throws TaskValidationException if the task has a time conflict with an existing task.
+   */
+  private boolean canBePrioritized(final Task taskToCheck) {
+    if (taskToCheck.getStartTime() == null) {
+      return false;
+    }
+    Optional<Task> conflictTask = prioritizedTasks.stream()
+        .filter((t) -> hasTimeConflict(taskToCheck, t))
+        .findFirst();
+    if (conflictTask.isPresent()) {
+      throw new TaskValidationException(
+          "Task has time conflict with existing task with " + conflictTask);
+    }
+    return true;
+  }
+
+  //  TODO
+  private boolean hasTimeConflict(final Task task1, final Task task2) {
+    return !(task1.getEndTime().isBefore(task2.getStartTime()) ||
+        task1.getStartTime().isAfter(task2.getEndTime()));
+  }
+
+
 }

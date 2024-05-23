@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
+import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
@@ -240,7 +242,7 @@ class InMemoryTaskManagerTest {
 
   // delete..();
   @Test
-  public void deleteTaskShouldDeleteTaskBiIdFromTheMemoryAndHistory() {
+  public void deleteTaskShouldDeleteTaskByIdFromTheMemoryAndHistory() {
     final Task task1 = TestDataBuilder.buildTask("t1", "d1");
     final Task task2 = TestDataBuilder.buildTask("t2", "d2");
     taskManager.addTask(task1);
@@ -248,17 +250,23 @@ class InMemoryTaskManagerTest {
     final int idToDelete = taskToDelete.getId();
     taskManager.getTaskById(idToDelete);
     final int historySizeBefore = taskManager.getHistory().size();
+    final String expectedExceptionMessage = "Task with Id " + idToDelete + " was not found.";
 
-    taskManager.deleteTask(taskToDelete.getId());
+    taskManager.deleteTask(idToDelete);
     final boolean isDeletedFromHistory = !taskManager.getHistory().contains(taskToDelete);
     final int actualHistorySize = taskManager.getHistory().size();
 
+    TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> {
+          taskManager.getTaskById(idToDelete);
+        });
+
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getTaskById(task2.getId()),
+        () -> Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
             "Task was not deleted."),
         () -> Assertions.assertTrue(isDeletedFromHistory, "Task was not deleted from the history."),
         () -> Assertions.assertTrue(actualHistorySize < historySizeBefore,
-            "THistory should reduce its size.")
+            "History should reduce its size.")
     );
   }
 
@@ -271,17 +279,22 @@ class InMemoryTaskManagerTest {
     taskManager.getEpicById(epicToDelete.getId());
     taskManager.getSubtaskById(sbToDelete.getId());
     final List<Task> historyBeforeDeleting = taskManager.getHistory();
+    final String expectedExceptionMessage =
+        "Epic with Id " + epicToDelete.getId() + " was not found.";
 
     taskManager.deleteEpic(epicToDelete.getId());
     final List<Task> actualHistory = taskManager.getHistory();
-    final Epic actualEpicInMemory = taskManager.getEpicById(epicToDelete.getId());
+    final TaskNotFoundException actualException = Assertions.assertThrows(
+        TaskNotFoundException.class, () -> taskManager.getEpicById(epicToDelete.getId()));
+//    final Epic actualEpicInMemory = taskManager.getEpicById(epicToDelete.getId());
     final List<Subtask> actualSubtasksInMemory = taskManager.getAllSubtasks().stream()
         .filter(st -> st.getEpicId() == epicToDelete.getId()).toList();
     final boolean isEpicDeletedFromHistory = !actualHistory.contains(epicToDelete);
     final boolean isSubtaskDeletedFromHistory = !actualHistory.contains(sbToDelete);
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(actualEpicInMemory, "Epic was not deleted."),
+        () -> Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
+            "Exception message should contain the expected text."),
         () -> Assertions.assertEquals(List.of(), actualSubtasksInMemory,
             "Subtasks were not deleted."),
         () -> Assertions.assertTrue(actualHistory.size() < historyBeforeDeleting.size(),
@@ -311,7 +324,8 @@ class InMemoryTaskManagerTest {
     boolean isDeletedFromTheHistory = !actualHistory.contains(idSubtaskToDelete);
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getSubtaskById(idSubtaskToDelete),
+        () -> Assertions.assertThrows(TaskNotFoundException.class,
+            () -> taskManager.getSubtaskById(idSubtaskToDelete),
             "Subtask was not deleted."),
         () -> Assertions.assertTrue(isDeletedFromEpic, "Subtask was not deleted from Epic."),
         () -> Assertions.assertTrue(actualHistory.size() < historyBeforeDeleting.size(),
@@ -336,10 +350,14 @@ class InMemoryTaskManagerTest {
   }
 
   @Test
-  public void getTaskByIdShouldReturnNullWhenIdIsNotValid() {
-    Task returnedTask = taskManager.getTaskById(0);
+  public void getTaskByIdShouldThrowAnExceptionWhenIdIsNotValid() {
+    final String expectedExceptionMessage = "Task with Id " + 0 + " was not found.";
 
-    Assertions.assertNull(returnedTask, "Task was not returned.");
+    TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getTaskById(0));
+
+    Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
+        "Exception message should contain the expected text.");
   }
 
   @Test
@@ -359,7 +377,8 @@ class InMemoryTaskManagerTest {
     int taskId = 0;
     List<Task> expected = List.of();
 
-    taskManager.getTaskById(taskId);
+    TaskNotFoundException exception = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getTaskById(taskId));
     List<Task> actual = taskManager.getHistory();
 
     Assertions.assertIterableEquals(expected, actual, " Null was added to the history.");
@@ -380,10 +399,13 @@ class InMemoryTaskManagerTest {
   }
 
   @Test
-  public void getEpicByIdShouldReturnNullWhenIdIsNotValid() {
-    Epic returnedEpic = taskManager.getEpicById(0);
+  public void getEpicByIdShouldTrhowAnExceptionWhenIdIsNotValid() {
+    final String expectedExceptionMessage = "Epic with Id " + 0 + " was not found.";
+    TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getEpicById(0));
 
-    Assertions.assertNull(returnedEpic, "Epic was not returned.");
+    Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
+        "Exception message should contain the expected text.");
   }
 
   @Test
@@ -403,7 +425,8 @@ class InMemoryTaskManagerTest {
     int epicId = 0;
     List<Task> expected = List.of();
 
-    taskManager.getEpicById(epicId);
+    TaskNotFoundException exception = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getEpicById(epicId));
     List<Task> actual = taskManager.getHistory();
 
     Assertions.assertIterableEquals(expected, actual, " Null was added to the history.");
@@ -427,10 +450,14 @@ class InMemoryTaskManagerTest {
   }
 
   @Test
-  public void getSubtaskByIdShouldReturnNullWhenIdIsNotValid() {
-    Subtask returnedSubtask = taskManager.getSubtaskById(0);
+  public void getSubtaskByIdShouldThrowAnExceptionWhenIdIsNotValid() {
+    final String expectedExceptionMessage = "Subtask with Id " + 0 + " was not found.";
 
-    Assertions.assertNull(returnedSubtask, "Subtask was not returned.");
+    TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getSubtaskById(0));
+
+    Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
+        "Exception message should contain the expected text.");
   }
 
   @Test
@@ -453,7 +480,8 @@ class InMemoryTaskManagerTest {
     int subtaskId = 0;
     List<Subtask> expected = List.of();
 
-    taskManager.getSubtaskById(subtaskId);
+    TaskNotFoundException exception = Assertions.assertThrows(TaskNotFoundException.class,
+        () -> taskManager.getSubtaskById(subtaskId));
     List<Task> actual = taskManager.getHistory();
 
     Assertions.assertIterableEquals(expected, actual, " Null was added to the history.");
@@ -746,33 +774,45 @@ class InMemoryTaskManagerTest {
   }
 
   @Test
-  void addSubtaskShouldNotAddSubtaskWithIncorrectEpicId() {
+  void addSubtaskShouldThrowAnExceptionAndNotAddSubtaskWithIncorrectEpicId() {
     Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1", "d", 1);
-    int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size();
+    final int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size();
+    final String expectedMessage = "Invalid epic Id";
 
-    Subtask subtaskAdded = taskManager.addSubtask(subtaskToAdd);
+    TaskValidationException actualException = Assertions.assertThrows(TaskValidationException.class,
+        () -> {
+          taskManager.addSubtask(subtaskToAdd);
+        });
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(subtaskAdded, "Subtask added."),
+        () -> Assertions.assertTrue(actualException.getMessage().contains(expectedMessage),
+            "Exception message should contain the expected text."),
         () -> Assertions.assertEquals(expectedNumberOfSubtasks, taskManager.getAllSubtasks().size(),
-            "Subtask added.")
+            "Number of subtasks should remain the same after exception.")
     );
   }
 
   @Test
   void subtaskShouldNotBeAbleBecomeItsOwnSubtask() {
-    Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("Epic", "d"));
-    Subtask subtaskInMemory = taskManager.addSubtask(
+    final Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("Epic", "d"));
+    final Subtask subtaskInMemory = taskManager.addSubtask(
         TestDataBuilder.buildSubtask("Sb", "D", epicInMemory.getId()));
-    Subtask subtaskToAdd = TestDataBuilder.buildCopySubtask(subtaskInMemory);
+    final Subtask subtaskToAdd = TestDataBuilder.buildCopySubtask(subtaskInMemory);
     subtaskToAdd.setEpicId(subtaskInMemory.getId());
+    final String expectedMessage = "Invalid epic Id";
 
-    taskManager.addSubtask(subtaskToAdd);
-    boolean existsSubtaskAsSubtaskItself =
+    final TaskValidationException actualException = Assertions.assertThrows(
+        TaskValidationException.class, () -> {
+          taskManager.addSubtask(subtaskToAdd);
+        });
+    final boolean existsSubtaskAsSubtaskItself =
         taskManager.getAllSubtasks().stream().anyMatch(sb -> sb.getEpicId() == sb.getId());
 
     Assertions.assertAll(
-        () -> Assertions.assertNull(taskManager.getEpicById(subtaskInMemory.getId())),
+        () -> Assertions.assertTrue(actualException.getMessage().contains(expectedMessage),
+            "Exception message should contain the expected text."),
+        () -> Assertions.assertThrows(TaskNotFoundException.class,
+            () -> taskManager.getEpicById(subtaskInMemory.getId())),
         () -> Assertions.assertFalse(existsSubtaskAsSubtaskItself)
     );
   }
@@ -853,13 +893,16 @@ class InMemoryTaskManagerTest {
 
   private void getHistoryReady() {
     final List<Task> tasks = TestDataBuilder.buildTasks();
+    List<Integer> ids = new ArrayList<>();
     for (Task t : tasks) {
       if (t instanceof Epic) {
-        taskManager.addEpic((Epic) t);
+        ids.add(taskManager.addEpic((Epic) t).getId());
       } else if (t instanceof Subtask) {
-        taskManager.addSubtask((Subtask) t);
+        Subtask st = (Subtask) t;
+        st.setEpicId(ids.get(0));
+        ids.add(taskManager.addSubtask(st).getId());
       } else {
-        taskManager.addTask(t);
+        ids.add(taskManager.addTask(t).getId());
       }
     }
     for (Task t : tasks) {
