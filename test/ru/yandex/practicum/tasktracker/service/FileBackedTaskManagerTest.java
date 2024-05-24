@@ -23,27 +23,33 @@ import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
 import ru.yandex.practicum.tasktracker.model.TaskType;
 
-class FileBackedTaskManagerTest {
+class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
   private static final LocalDateTime BASE_TEST_TIME = LocalDateTime.parse(
       "2024-05-21T19:51:24.211613");
-  private TaskManager manager;
+//  private TaskManager taskManager;
   private File file;
 
   @BeforeEach
-  void setUp() throws IOException {
-    file = File.createTempFile("emptyFile", ".csv");
-    manager = FileBackedTaskManager.loadFromFile(file);
+  @Override
+  void setUp() {
+   try {
+     file = File.createTempFile("emptyFile", ".csv");
+     taskManager = FileBackedTaskManager.loadFromFile(file);
+   } catch (IOException e) {
+     System.out.println(e.getMessage());
+   }
   }
+
 
   @Test
   void loadFromFileCreatesNewObjectFromEmptyFile() {
     final int totalTasksNumber =
-        manager.getAllTasks().size() + manager.getAllEpics().size() + manager.getAllSubtasks()
-            .size() + manager.getHistory().size();
+        taskManager.getAllTasks().size() + taskManager.getAllEpics().size() + taskManager.getAllSubtasks()
+            .size() + taskManager.getHistory().size();
 
     Assertions.assertAll(
-        () -> Assertions.assertNotNull(manager, "TaskManager object should not be null."),
+        () -> Assertions.assertNotNull(taskManager, "TaskManager object should not be null."),
         () -> Assertions.assertEquals(0, totalTasksNumber,
             "All lists of Task, Epics, Subtasks and history should be empty.")
     );
@@ -56,16 +62,16 @@ class FileBackedTaskManagerTest {
 
     /* WHEN add all tasks to the given taskManager
      * AND view Epic */
-    addTasksToManager(manager, tasksData);
-    final Map<TaskType, Integer> lastIds = getLastUsedIdsByType(manager);
-    generateHistory(manager, lastIds);
-    final List<Task> expectedTasks = manager.getAllTasks();
+    addTasksToManager(taskManager, tasksData);
+    final Map<TaskType, Integer> lastIds = getLastUsedIdsByType(taskManager);
+    generateHistory(taskManager, lastIds);
+    final List<Task> expectedTasks = taskManager.getAllTasks();
     expectedTasks.sort(Comparator.comparing(Task::getId));
-    final List<Epic> expectedEpics = manager.getAllEpics();
+    final List<Epic> expectedEpics = taskManager.getAllEpics();
     expectedEpics.sort(Comparator.comparing(Epic::getId));
-    final List<Subtask> expectedSubtasks = manager.getAllSubtasks();
+    final List<Subtask> expectedSubtasks = taskManager.getAllSubtasks();
     expectedSubtasks.sort(Comparator.comparing(Subtask::getId));
-    final List<Task> expectedHistory = manager.getHistory();
+    final List<Task> expectedHistory = new ArrayList<>(taskManager.getHistory()) ;
     expectedHistory.sort(Comparator.comparing(Task::getId));
 
     /* AND a new taskManager created from the file of previous one */
@@ -76,7 +82,7 @@ class FileBackedTaskManagerTest {
     actualEpics.sort(Comparator.comparing(Epic::getId));
     final List<Subtask> actualSubtasks = newManager.getAllSubtasks();
     actualSubtasks.sort(Comparator.comparing(Subtask::getId));
-    final List<Task> actualHistory = newManager.getHistory();
+    final List<Task> actualHistory = new ArrayList<>(newManager.getHistory());
     actualHistory.sort(Comparator.comparing(Task::getId));
 
     /* THEN all tasks should be saved in the file and restored */
@@ -105,20 +111,20 @@ class FileBackedTaskManagerTest {
 
     switch (testTask.getType()) {
       case TASK -> {
-        Task t = manager.addTask(testTask);
+        Task t = taskManager.addTask(testTask);
         epic = " ";
       }
       case EPIC -> {
-        Epic e = manager.addEpic((Epic) testTask);
+        Epic e = taskManager.addEpic((Epic) testTask);
         epic = " ";
       }
       case SUBTASK -> {
-        epicForId = manager.addEpic(TestDataBuilder.buildEpic("epic", "eee"));
+        epicForId = taskManager.addEpic(TestDataBuilder.buildEpic("epic", "eee"));
         Subtask s = (Subtask) testTask;
         int epicId = epicForId.getId();
         s.setEpicId(epicId);
-        manager.addSubtask(s);
-        epicForId = manager.getAllEpics().stream().filter((e) -> e.getId() == epicId).findFirst()
+        taskManager.addSubtask(s);
+        epicForId = taskManager.getAllEpics().stream().filter((e) -> e.getId() == epicId).findFirst()
             .orElse(null);
         epic = String.valueOf(epicId);
       }

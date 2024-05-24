@@ -1,8 +1,11 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
@@ -67,7 +70,14 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public List<Task> getHistory() {
-    return historyManager.getHistory();
+    return historyManager.getHistory().stream()
+        .map(Task::getId)
+        .map(id -> tasks.containsKey(id) ? tasks.get(id)
+            : (epics.containsKey(id) ? epics.get(id)
+                : (subtasks.getOrDefault(id, null))))
+        .filter(Objects::nonNull)
+        .toList();
+//    return historyManager.getHistory();
   }
 
   @Override
@@ -319,6 +329,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
     return true;
   }
+
 
 }
 
