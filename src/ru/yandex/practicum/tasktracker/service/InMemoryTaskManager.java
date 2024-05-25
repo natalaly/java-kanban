@@ -220,7 +220,9 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
-    prioritizedTasks.remove(taskInMemory);
+    if (taskInMemory.getStartTime() != null) {
+      prioritizedTasks.remove(taskInMemory);
+    }
     addPrioritized(taskToUpdate.copy());
     tasks.put(taskToUpdate.getId(), taskToUpdate.copy());
   }
@@ -251,7 +253,9 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The subtask " + subtask + "does not exist in the TaskManager");
     }
-    prioritizedTasks.remove(subtaskInMemory);
+    if (subtaskInMemory.getStartTime() != null ) {
+      prioritizedTasks.remove(subtaskInMemory);
+    }
     final Subtask subtaskToUpdate = subtask.copy();
     addPrioritized(subtaskToUpdate);
     subtasks.put(subtask.getId(), subtaskToUpdate);

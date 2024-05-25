@@ -21,15 +21,18 @@ public class Main {
   private static TaskManager tm;
   private static Task task1;
   private static Task task2;
+  private static Task task3;
   private static Epic epic1;
   private static Subtask sb1;
   private static Subtask sb2;
   private static Subtask sb3;
   private static Epic epic2;
+  private static LocalDateTime time1 = LocalDateTime.now();
+  private static LocalDateTime time2 = time1.plusMinutes(20);
 
   public static void main(String[] args) {
 
-    int choice = 0;
+    int choice = 2;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -37,9 +40,9 @@ public class Main {
       case 3 -> sprint8Workshop();
     }
 
-    Task t = new Task();
-    t.setDuration(Duration.ofMinutes(-3));
-    System.out.println(t);
+//    Task t = new Task();
+//    t.setDuration(Duration.ofMinutes(-3));
+//    System.out.println(t);
   }
 
   static void sprint8Workshop() {
@@ -154,62 +157,88 @@ public class Main {
   static void useCaseFile() {
     /* GIVEN */
     /* Create tasks data: */
-    Task t = new Task();
-    t.setTitle("task");
-    t.setDescription("t description");
+    task1 = new Task();
+    task1.setTitle("task");
+    task1.setDescription("t description");
 
-    Epic e = new Epic();
-    e.setTitle("epic");
-    e.setDescription("null");
-    System.out.println(e.getDescription() == null);
+    task2 = new Task();
+    task2.setTitle("task2");
+    task2.setDescription("t2");
+    task2.setDuration(Duration.ofMinutes(20));
+    task2.setStartTime(LocalDateTime.of(2024,05,21,12,20,00));
 
-    Subtask sb = new Subtask();
-    sb.setTitle("sbtask");
-    sb.setDescription("st description");
+    task3 = new Task();
+    task3.setTitle("task3");
+    task3.setDescription("t3");
+    task3.setDuration(Duration.ofMinutes(20));
+    task3.setStartTime(LocalDateTime.of(2024,05,21,12,00,00));
+
+    epic1 = new Epic();
+    epic1.setTitle("epic");
+    epic1.setDescription("null");
+
+    epic2 =  new Epic();
+    epic2.setTitle("epic2");
+    epic2.setDescription("null");
+
+    sb1 = new Subtask();
+    sb1.setTitle("sbtask");
+    sb1.setDescription("st description");
+
+    sb2 = new Subtask();
+    sb2.setTitle("sbtask2");
+    sb2.setDescription("st2 description");
 
     Path path = Path.of("resources/test/useCaseFile.csv");
     File temp = path.toFile();
     TaskManager oldManager = FileBackedTaskManager.loadFromFile(temp);
-    oldManager.addTask(t); // add task
-    oldManager.addEpic(e); // add epic
-    sb.setEpicId(2);
-    oldManager.addSubtask(sb); // add subtask to epic
-    e.setTitle("epic2");
-    oldManager.addEpic(e); // add epic2
-    sb.setTitle("sbtask2");
-    oldManager.addSubtask(sb); // add subtask2 to epic
-    t.setTitle("task2");
-    oldManager.addTask(t); // add task2
-    t.setTitle("task3");
-    oldManager.addTask(t); // add task3
-    sb.setStatus(TaskStatus.DONE);
-    sb.setDuration(Duration.ofMinutes(15));
-    sb.setStartTime(LocalDateTime.now());
-    oldManager.updateSubtask(sb); // update subtask2 of epic
+
+    oldManager.addTask(task1); // add task -1
+    oldManager.addEpic(epic1); // add epic -2
+    sb1.setEpicId(epic1.getId());
+    oldManager.addSubtask(sb1); // add subtask to epic -3
+    oldManager.addEpic(epic2); // add epic2-4
+    sb2.setEpicId(epic1.getId());
+    oldManager.addSubtask(sb2); // add subtask2 to epic-5
+    oldManager.addTask(task2); // add task2-6
+    oldManager.addTask(task3); // add task3 -7
+
+    sb2.setStatus(TaskStatus.DONE);
+    sb2.setDuration(Duration.ofMinutes(15));
+    sb2.setStartTime(time2);
+    oldManager.updateSubtask(sb2); // update subtask2 of epic
+
     oldManager.getEpicById(2);
 
+    System.out.println("GIVEN: oldManager.getPrioritizedTasks():" );
+    oldManager.getPrioritizedTasks().forEach(System.out::println);
+    System.out.println();
+
     /* WHEN */
-    TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
-    List<Integer> taskIds = new ArrayList<>();
-    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
-    List<Integer> epicIds = new ArrayList<>();
-    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
-    List<Integer> subtaskIds = new ArrayList<>();
-    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
-
-    /* THEN */
-    System.out.println(
-        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
-    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
-    System.out.println(
-        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
-    System.out.println("Epics ids should be 2, 4 : " + epicIds);
-    System.out.println(
-        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
-    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
-    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
-
-    System.out.println(newManage.getHistory().get(0).getDescription().length());
+//    TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
+//    List<Integer> taskIds = new ArrayList<>();
+//    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
+//    List<Integer> epicIds = new ArrayList<>();
+//    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
+//    List<Integer> subtaskIds = new ArrayList<>();
+//    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
+//
+//    /* THEN */
+//    System.out.println(
+//        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
+//    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
+//    System.out.println(
+//        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
+//    System.out.println("Epics ids should be 2, 4 : " + epicIds);
+//    System.out.println(
+//        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
+//    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
+//    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
+//
+//    System.out.println(newManage.getHistory().get(0).getDescription().length());
+//    System.out.println("GIVEN: newManage.getPrioritizedTasks():" );
+//    newManage.getPrioritizedTasks().forEach(System.out::println);
+//    System.out.println();
 
   }
 

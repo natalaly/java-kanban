@@ -187,7 +187,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
               "An error occurred during saving tasks from taskManager to the file.", e);
         }
       });
-      // save history
+      /* save history */
       fileWriter.write(HISTORY_HEADER + System.lineSeparator());
       getHistory().forEach(historyTask -> {
             try {
@@ -198,6 +198,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
           }
       );
+      /* save prioritized */
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
     }
