@@ -1,7 +1,5 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,6 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
+import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
@@ -949,7 +948,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   void addTaskShouldTrowWhenHaveTimeConflict(Task task1,Task task2, String message ) {
     final String expectedExceptionMessage ="Task has time conflict with existing task with ID ";
     task1 = taskManager.addTask(task1);
-    final Exception actualException = Assertions.assertThrows(TaskValidationException.class,() -> {
+    final Exception actualException = Assertions.assertThrows(TaskPrioritizationException.class,() -> {
      taskManager.addTask(task2);
    });
     Assertions.assertEquals(expectedExceptionMessage + task1.getId(), actualException.getMessage(), message);

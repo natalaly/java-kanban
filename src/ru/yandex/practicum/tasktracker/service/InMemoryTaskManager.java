@@ -1,12 +1,11 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
+import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
@@ -120,7 +119,6 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void deleteEpic(final int id) {
-
     final Epic epic = epics.remove(id);
     if (epic != null) {
       epic.getSubtasks().forEach(s -> {
@@ -130,8 +128,8 @@ public class InMemoryTaskManager implements TaskManager {
           prioritizedTasks.remove(s);
         }
       });
-      historyManager.remove(id);
     }
+    historyManager.remove(id);
   }
 
   @Override
@@ -224,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
           "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
     if (taskInMemory.getStartTime() != null) {
-      prioritizedTasks.remove(taskInMemory);
+    prioritizedTasks.remove(taskInMemory);
     }
     addPrioritized(taskToUpdate.copy());
     tasks.put(taskToUpdate.getId(), taskToUpdate.copy());
@@ -292,28 +290,29 @@ public class InMemoryTaskManager implements TaskManager {
    *
    * @param taskToCheck
    * @return {@Code true} if {@code taskToCheck} meets above requirements
-   * @throws TaskValidationException if the task has a time conflict with an existing task.
+   * @throws TaskPrioritizationException if the task has a time conflict with an existing task.
    */
   private boolean canBePrioritized(final Task taskToCheck) {
+    Objects.requireNonNull(taskToCheck);
     if (taskToCheck.getStartTime() == null) {
       return false;
     }
     final Task floor = ((TreeSet<Task>) prioritizedTasks).floor(taskToCheck);
     final Task ceiling = ((TreeSet<Task>) prioritizedTasks).ceiling(taskToCheck);
 
-    if (floor != null && hasTimeConflict(taskToCheck, floor)) {
-      throw new TaskValidationException(
+    if (hasTimeConflict(taskToCheck, floor)) {
+      throw new TaskPrioritizationException(
           "Task has time conflict with existing task with ID " + floor.getId());
     }
-    if (ceiling != null && hasTimeConflict(taskToCheck, ceiling)) {
-      throw new TaskValidationException(
+    if (hasTimeConflict(taskToCheck, ceiling)) {
+      throw new TaskPrioritizationException(
           "Task has time conflict with existing task with ID " + ceiling.getId());
     }
     return true;
   }
 
   private boolean hasTimeConflict(final Task task1, final Task task2) {
-    return task1.getStartTime().isBefore(task2.getEndTime()) &&
+    return task2 != null && task1.getStartTime().isBefore(task2.getEndTime()) &&
         task1.getEndTime().isAfter(task2.getStartTime());
   }
 
