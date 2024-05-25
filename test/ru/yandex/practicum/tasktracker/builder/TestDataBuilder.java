@@ -81,6 +81,16 @@ public class TestDataBuilder {
     return subtask;
   }
 
+  public static Subtask buildSubtask(int id, String title, String description, int epicId,
+      TaskStatus status, Duration duration, LocalDateTime startTime) {
+    Subtask subtask = buildSubtask(id, title, description, epicId);
+    subtask.setStatus(status);
+    subtask.setDuration(duration);
+    subtask.setStartTime(startTime);
+    return subtask;
+  }
+
+
   public static Task buildCopyTask(Task task) {
     Task result = new Task();
     result.setId(task.getId());
@@ -115,10 +125,10 @@ public class TestDataBuilder {
   public static List<Task> buildTasks() {
     return new LinkedList<>(
         List.of(buildEpic(1, "epic1", "description"),
-            buildTask(2, "task1", "d", TaskStatus.NEW),
+            buildTask(2, "task1", "d", TaskStatus.NEW, Duration.ofMinutes(15), LocalDateTime.now()),
             buildSubtask(3, "subtask1", "notes", 1),
             buildEpic(4, "epic2", "description"),
-            buildSubtask(5, "subtask2", "notes", 1),
+            buildSubtask(5, "subtask2", "notes", 1,TaskStatus.IN_PROGRESS,Duration.ofMinutes(15),LocalDateTime.now().plusMinutes(20)),
             buildTask(6, "task2", "d", TaskStatus.NEW)));
   }
 

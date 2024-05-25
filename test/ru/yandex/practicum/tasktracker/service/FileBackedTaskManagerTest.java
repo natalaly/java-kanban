@@ -5,14 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -76,9 +74,10 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     /* WHEN add all tasks to the given taskManager
      * AND view Epic */
-    addTasksToManager(taskManager, tasksData);
+    addTasksToTheManager(taskManager, tasksData);
     final Map<TaskType, Integer> lastIds = getLastUsedIdsByType(taskManager);
     generateHistory(taskManager, lastIds);
+
     final List<Task> expectedTasks = taskManager.getAllTasks();
     expectedTasks.sort(Comparator.comparing(Task::getId));
     final List<Epic> expectedEpics = taskManager.getAllEpics();
@@ -87,6 +86,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     expectedSubtasks.sort(Comparator.comparing(Subtask::getId));
     final List<Task> expectedHistory = new ArrayList<>(taskManager.getHistory());
     expectedHistory.sort(Comparator.comparing(Task::getId));
+    final List<Task> expectedPrioritized = taskManager.getPrioritizedTasks();
 
     /* AND a new taskManager created from the file of previous one */
     final TaskManager newManager = FileBackedTaskManager.loadFromFile(file);
@@ -98,6 +98,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     actualSubtasks.sort(Comparator.comparing(Subtask::getId));
     final List<Task> actualHistory = new ArrayList<>(newManager.getHistory());
     actualHistory.sort(Comparator.comparing(Task::getId));
+    final List<Task> actualPrioritized = newManager.getPrioritizedTasks();
 
     /* THEN all tasks should be saved in the file and restored */
     Assertions.assertAll(
@@ -109,10 +110,12 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
             "Subtask list should be same."),
         () -> Assertions.assertIterableEquals(expectedHistory, actualHistory,
             "History list should be same."),
+        () -> Assertions.assertIterableEquals(expectedPrioritized,actualPrioritized,"Prioritized list should be same."),
         () -> Assertions.assertFalse(expectedTasks.isEmpty(), "Task list has not restored."),
         () -> Assertions.assertFalse(expectedEpics.isEmpty(), "Epic list has not restored."),
         () -> Assertions.assertFalse(expectedSubtasks.isEmpty(), "Subtask list has not restored."),
-        () -> Assertions.assertFalse(expectedHistory.isEmpty(), "History list has not restored.")
+        () -> Assertions.assertFalse(expectedHistory.isEmpty(), "History list has not restored."),
+        () -> Assertions.assertFalse(expectedPrioritized.isEmpty(), "Prioritized list has not restored.")
     );
   }
 
@@ -203,7 +206,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     return new ArrayList<>(Arrays.asList(task, epic, subtask));
   }
 
-  private void addTasksToManager(final TaskManager manager, final List<Task> tasksData) {
+  private void addTasksToTheManager(final TaskManager manager, final List<Task> tasksData) {
     for (Task task : tasksData) {
       switch (task.getType()) {
         case TASK -> manager.addTask(task);

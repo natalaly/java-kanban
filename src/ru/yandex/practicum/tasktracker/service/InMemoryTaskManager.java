@@ -81,23 +81,18 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void clearTasks() {
-    tasks.values().forEach(t -> {
-      historyManager.remove(t.getId());
-      prioritizedTasks.remove(t);
-    });
+    tasks.values().stream().peek(t -> historyManager.remove(t.getId()))
+        .filter(t -> t.getStartTime() != null)
+        .forEach(prioritizedTasks::remove);
     tasks.clear();
   }
 
   @Override
   public void clearEpics() {
-    subtasks.values().forEach(st -> {
-      historyManager.remove(st.getId());
-      prioritizedTasks.remove(st);
-    });
-    epics.values().forEach(e -> {
-      historyManager.remove(e.getId());
-      prioritizedTasks.remove(e);
-    });
+    subtasks.values().stream().peek(st -> historyManager.remove(st.getId()))
+        .filter(st -> st.getStartTime() != null)
+        .forEach(prioritizedTasks::remove);
+    epics.values().forEach(e -> historyManager.remove(e.getId()));
     subtasks.clear();
     epics.clear();
   }
@@ -105,30 +100,35 @@ public class InMemoryTaskManager implements TaskManager {
   @Override
   public void clearSubtasks() {
     epics.values().forEach(Epic::clearSubtasks);
-    subtasks.values().forEach(st -> {
-      historyManager.remove(st.getId());
-      prioritizedTasks.remove(st);
-    });
+    subtasks.values().stream()
+        .peek(st -> historyManager.remove(st.getId()))
+        .filter(st -> st.getStartTime() != null)
+        .forEach(prioritizedTasks::remove);
     subtasks.clear();
   }
 
   @Override
   public void deleteTask(final int id) {
-    final Task removedTask = tasks.remove(id);
-    if (removedTask != null) {
-      historyManager.remove(id);
-      prioritizedTasks.remove(removedTask);
-    }
+    Optional.ofNullable(tasks.remove(id))
+        .ifPresent(removedTask -> {
+          historyManager.remove(id);
+          if (removedTask.getStartTime() != null) {
+            prioritizedTasks.remove(removedTask);
+          }
+        });
   }
 
   @Override
   public void deleteEpic(final int id) {
+
     final Epic epic = epics.remove(id);
     if (epic != null) {
       epic.getSubtasks().forEach(s -> {
         subtasks.remove(s.getId());
         historyManager.remove(s.getId());
-        prioritizedTasks.remove(s);
+        if (s.getStartTime() != null) {
+          prioritizedTasks.remove(s);
+        }
       });
       historyManager.remove(id);
     }
@@ -137,10 +137,13 @@ public class InMemoryTaskManager implements TaskManager {
   @Override
   public void deleteSubtask(final int id) {
     final Subtask subtask = subtasks.remove(id);
-    if (subtask != null) {
-      final int epicId = subtask.getEpicId();
-      epics.get(epicId).removeSubtask(subtask);
-      historyManager.remove(id);
+    if (subtask == null) {
+      return;
+    }
+    final int epicId = subtask.getEpicId();
+    epics.get(epicId).removeSubtask(subtask);
+    historyManager.remove(id);
+    if (subtask.getStartTime() != null) {
       prioritizedTasks.remove(subtask);
     }
   }
@@ -253,7 +256,7 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The subtask " + subtask + "does not exist in the TaskManager");
     }
-    if (subtaskInMemory.getStartTime() != null ) {
+    if (subtaskInMemory.getStartTime() != null) {
       prioritizedTasks.remove(subtaskInMemory);
     }
     final Subtask subtaskToUpdate = subtask.copy();
