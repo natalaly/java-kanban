@@ -1,15 +1,22 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
@@ -20,6 +27,8 @@ import ru.yandex.practicum.tasktracker.model.TaskStatus;
 
 public abstract class TaskManagerTest<T extends TaskManager> {
 
+  protected static final LocalDateTime BASE_TEST_TIME = LocalDateTime.parse(
+      "2024-05-21T19:51:24.211613");
   protected T taskManager;
 
   @BeforeEach
@@ -124,6 +133,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   }
 
   @Test
+  @DisplayName("getHistory() - returns up to dated viewed tasks.")
+  public void tasksInHistoryShouldUpdateTheirStateAfterUpdatingThemInTaskManager() {
+    final Task addedTask = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
+    int taskId = addedTask.getId();
+    taskManager.getTaskById(taskId);
+    final TaskStatus expectedStatus = TaskStatus.DONE;// taskManager.getHistory()
+    // .get(taskManager.getHistory().size() - 1);
+
+    addedTask.setStatus(expectedStatus);
+    taskManager.updateTask(addedTask);
+    final Task actual = taskManager.getHistory().get(taskManager.getHistory().size() - 1);
+
+    Assertions.assertEquals(addedTask, actual, "Id is different");
+    Assertions.assertEquals(addedTask.getTitle(), actual.getTitle(), "Title is different");
+    Assertions.assertEquals(addedTask.getDescription(), actual.getDescription(),
+        "Description is different");
+    Assertions.assertEquals(addedTask.getStatus(), actual.getStatus(), "Status is different");
+  }
+
+  @Test
   @DisplayName("clearTasks() - deletes all tasks from the task manager.")
   public void clearTaskShouldDeleteAllTasksFromTheMemory() {
     final Task task1 = TestDataBuilder.buildTask("t1", "d1");
@@ -139,7 +168,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @Test
   @DisplayName("clearTasks() - deletes all tasks from the history.")
   public void clearTaskShouldDeleteAllTasksFromTheHistory() {
-    getHistoryReady();
+    buildHistoryInTaskManager();
     final List<Integer> taskIdsInMemory = taskManager.getAllTasks().stream().map(Task::getId)
         .toList();
     final List<Task> historyBeforeClear = taskManager.getHistory();
@@ -178,7 +207,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @Test
   @DisplayName("clearEpics() - deletes all epics from the history.")
   public void clearEpicShouldDeleteAllEpicsAndSubtasksFromTheHistory() {
-    getHistoryReady();
+    buildHistoryInTaskManager();
     final List<Integer> epicsIdsInMemory = taskManager.getAllEpics().stream().map(Epic::getId)
         .toList();
     final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
@@ -229,7 +258,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @Test
   @DisplayName("clearSubtasks() - deletes all subtasks from the history.")
   public void clearSubtasksShouldDeleteAllSubtasksFromTheHistory() {
-    getHistoryReady();
+    buildHistoryInTaskManager();
     //given
     final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
         .map(Subtask::getId).toList(); // size = 2, [3,5]
@@ -316,7 +345,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   }
 
   @Test
-  @DisplayName("deleteSubtask(int id) - removes subtasks from the task manager, history and from the corresponding gepic. ")
+  @DisplayName("deleteSubtask(int id) - removes subtasks from the task manager, history and from the corresponding epic. ")
   public void deleteSubtaskShouldDeleteSubtaskFromTheMemoryFromItsEpicAndFromTheHistory() {
     final Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d1"));
     taskManager.addSubtask(TestDataBuilder.buildSubtask("st1", "d1", epicInMemory.getId()));
@@ -805,9 +834,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   }
 
   @Test
-  @DisplayName("addSubtask(Subtask) - does not add a subtask tyo the task manager when epic id is invalid.")
+  @DisplayName("addSubtask(Subtask) - does not add a subtask to the task manager when epic id is invalid.")
   void addSubtaskShouldThrowAnExceptionAndNotAddSubtaskWithIncorrectEpicId() {
-    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1", "d", 1);
+    Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1", "d", 0);
     final int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size();
     final String expectedMessage = "Invalid epic Id";
 
@@ -905,46 +934,75 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   }
 
-//  @Test
-//  @DisplayName("History remains unchangeable after updating a task which exist in the history. ")
-//  public void tasksInHistoryShouldKeepTheirStateAfterUpdatingThemInTaskManager() {
-//    Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
-//    int taskInMemoryId = taskInMemory.getId();
-//    taskManager.getTaskById(taskInMemoryId);
-//    Task expected = taskManager.getHistory().get(taskManager.getHistory().size() - 1);
-//
-//    taskInMemory.setStatus(TaskStatus.DONE);
-//    taskManager.updateTask(taskInMemory);
-//    Task actual = taskManager.getHistory().get(taskManager.getHistory().size() - 1);
-//
-//    Assertions.assertEquals(expected, actual, "Id is different");
-//    Assertions.assertEquals(expected.getTitle(), actual.getTitle(), "Title is different");
-//    Assertions.assertEquals(expected.getDescription(), actual.getDescription(),
-//        "Description is different");
-//    Assertions.assertEquals(expected.getStatus(), actual.getStatus(), "Status is different");
-//  }
-
-  @Test
-  @DisplayName("getHistory() - returns up to dated viewed tasks.")
-  public void tasksInHistoryShouldUpdateTheirStateAfterUpdatingThemInTaskManager() {
-    final Task addedTask = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
-    int taskId = addedTask.getId();
-    taskManager.getTaskById(taskId);
-    final TaskStatus expectedStatus = TaskStatus.DONE;// taskManager.getHistory()
-    // .get(taskManager.getHistory().size() - 1);
-
-    addedTask.setStatus(expectedStatus);
-    taskManager.updateTask(addedTask);
-    final Task actual = taskManager.getHistory().get(taskManager.getHistory().size() - 1);
-
-    Assertions.assertEquals(addedTask, actual, "Id is different");
-    Assertions.assertEquals(addedTask.getTitle(), actual.getTitle(), "Title is different");
-    Assertions.assertEquals(addedTask.getDescription(), actual.getDescription(),
-        "Description is different");
-    Assertions.assertEquals(addedTask.getStatus(), actual.getStatus(), "Status is different");
+  @ParameterizedTest
+  @DisplayName("Tasks with no time conflict should be added.")
+  @MethodSource("provideTasksWithoutTimeConflict")
+  void addTaskShouldSaveNonConflictingTaskInTaskManager(Task task1,Task task2, String message ) {
+    Assertions.assertDoesNotThrow(() -> taskManager.addTask(task1),message);
+    Assertions.assertDoesNotThrow(() -> taskManager.addTask(task2), message);
+    Assertions.assertEquals(2, taskManager.getAllTasks().size(), "Tasks should be added.");
   }
 
-  private void getHistoryReady() {
+  @ParameterizedTest
+  @DisplayName("Adding tasks with time conflict throws an Exception.")
+  @MethodSource("provideTasksWithTimeConflict")
+  void addTaskShouldTrowWhenHaveTimeConflict(Task task1,Task task2, String message ) {
+    final String expectedExceptionMessage ="Task has time conflict with existing task with ID ";
+    task1 = taskManager.addTask(task1);
+    final Exception actualException = Assertions.assertThrows(TaskValidationException.class,() -> {
+     taskManager.addTask(task2);
+   });
+    Assertions.assertEquals(expectedExceptionMessage + task1.getId(), actualException.getMessage(), message);
+    Assertions.assertEquals(1,taskManager.getPrioritizedTasks().size(), "Only one task should be added.");
+  }
+
+  private static Stream<Arguments> provideTasksWithTimeConflict() {
+    final Duration duration = Duration.ofMinutes(15);
+    return Stream.of(
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, Duration.ofMinutes(45),BASE_TEST_TIME),
+            "Task1 starts after Task2 starts and ends before task2 ends: should have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, Duration.ofMinutes(45),BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            "Task2 starts after task1 starts and ends before task1 ends: should have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, Duration.ofMinutes(30),BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            "Task1 starts before task2 starts and ends after task2 starts: should have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0,"task1","d2",TaskStatus.NEW, Duration.ofMinutes(30),BASE_TEST_TIME),
+            "Task1 starts before Task2 ends and ends after task2 ends: should have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            "Task1 and Task2 starts and ends at the same time: should have conflict.")
+    );
+  }
+
+  private static Stream<Arguments> provideTasksWithoutTimeConflict() {
+    final Duration duration = Duration.ofMinutes(15);
+    return Stream.of(
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(30)),
+            "Task1 starts and ends before Task2 starts: should not have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(30)),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            "Task1 starts and ends after Task2 ends: should not have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            "Task2 starts at time when Task1 ends: should not have conflict."),
+
+        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+            "Task1 starts at time when Task2 ends: should not have conflict.")
+    );
+  }
+
+  private void buildHistoryInTaskManager() {
     final List<Task> tasks = TestDataBuilder.buildTasks();
     List<Integer> ids = new ArrayList<>();
     for (Task t : tasks) {
@@ -968,5 +1026,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
       }
     }
   }
+
+
 
 }

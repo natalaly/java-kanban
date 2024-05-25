@@ -3,6 +3,7 @@ package ru.yandex.practicum.tasktracker.service;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -11,12 +12,14 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
+import ru.yandex.practicum.tasktracker.exception.ManagerLoadException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
@@ -25,27 +28,38 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
 
 class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
-  private static final LocalDateTime BASE_TEST_TIME = LocalDateTime.parse(
-      "2024-05-21T19:51:24.211613");
-//  private TaskManager taskManager;
   private File file;
 
   @BeforeEach
   @Override
   void setUp() {
-   try {
-     file = File.createTempFile("emptyFile", ".csv");
-     taskManager = FileBackedTaskManager.loadFromFile(file);
-   } catch (IOException e) {
-     System.out.println(e.getMessage());
-   }
+    try {
+      file = File.createTempFile("emptyFile", ".csv");
+      taskManager = FileBackedTaskManager.loadFromFile(file);
+    } catch (IOException e) {
+      System.out.println(e.getMessage());
+    }
   }
 
+  @Test
+  void exceptionShouldBeThrownWhenFileIsInvalid() {
+    final String filePath = " ";
+    final String expectedExceptionMessage = "An Error occurred during reading the file";
+
+    final Exception actualException = Assertions.assertThrows(ManagerLoadException.class, () -> {
+      FileBackedTaskManager.loadFromFile(Path.of(filePath).toFile());
+    });
+
+    Assertions.assertEquals(expectedExceptionMessage, actualException.getMessage(),
+        "Exception message should contain the expected text.");
+
+  }
 
   @Test
   void loadFromFileCreatesNewObjectFromEmptyFile() {
     final int totalTasksNumber =
-        taskManager.getAllTasks().size() + taskManager.getAllEpics().size() + taskManager.getAllSubtasks()
+        taskManager.getAllTasks().size() + taskManager.getAllEpics().size()
+            + taskManager.getAllSubtasks()
             .size() + taskManager.getHistory().size();
 
     Assertions.assertAll(
@@ -71,7 +85,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     expectedEpics.sort(Comparator.comparing(Epic::getId));
     final List<Subtask> expectedSubtasks = taskManager.getAllSubtasks();
     expectedSubtasks.sort(Comparator.comparing(Subtask::getId));
-    final List<Task> expectedHistory = new ArrayList<>(taskManager.getHistory()) ;
+    final List<Task> expectedHistory = new ArrayList<>(taskManager.getHistory());
     expectedHistory.sort(Comparator.comparing(Task::getId));
 
     /* AND a new taskManager created from the file of previous one */
@@ -124,7 +138,8 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         int epicId = epicForId.getId();
         s.setEpicId(epicId);
         taskManager.addSubtask(s);
-        epicForId = taskManager.getAllEpics().stream().filter((e) -> e.getId() == epicId).findFirst()
+        epicForId = taskManager.getAllEpics().stream().filter((e) -> e.getId() == epicId)
+            .findFirst()
             .orElse(null);
         epic = String.valueOf(epicId);
       }

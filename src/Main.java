@@ -29,7 +29,7 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int choice = 2;
+    int choice = 0;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -37,6 +37,9 @@ public class Main {
       case 3 -> sprint8Workshop();
     }
 
+    Task t = new Task();
+    t.setDuration(Duration.ofMinutes(-3));
+    System.out.println(t);
   }
 
   static void sprint8Workshop() {

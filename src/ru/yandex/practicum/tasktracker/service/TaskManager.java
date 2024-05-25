@@ -69,5 +69,4 @@ public interface TaskManager {
   void updateSubtask(final Subtask subtask);
 
 
-
 }

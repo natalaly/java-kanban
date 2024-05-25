@@ -50,10 +50,10 @@ public class Task {
     this.status = taskStatus;
   }
 
-  //  TODO throw exception if duration < 0
   public void setDuration(final Duration duration) {
+    Objects.requireNonNull(duration,"Can not set duration to null.");
     if (duration.isNegative()) {
-      throw new IllegalArgumentException("Duration cannot be negative");
+      throw new IllegalArgumentException("Duration cannot be negative.");
     }
     this.duration = duration;
   }
@@ -70,7 +70,6 @@ public class Task {
     this.startTime = startTime;
   }
 
-  //  TODO case when start time is null
   public LocalDateTime getEndTime() {
     return startTime == null ? null : startTime.plus(duration);
   }

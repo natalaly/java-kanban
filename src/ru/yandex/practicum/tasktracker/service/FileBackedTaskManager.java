@@ -272,6 +272,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     allIds.addAll(this.subtasks.keySet());
     final Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
     counter = maxId;
+    Integer biggestId = Stream.concat(
+        Stream.concat(this.tasks.keySet().stream(),this.epics.keySet().stream()),
+        this.subtasks.keySet().stream())
+        .max(Comparator.naturalOrder())
+        .orElse(0);
   }
 
   private Task fromString(final String stringCsv) {

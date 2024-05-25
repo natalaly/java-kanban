@@ -77,7 +77,6 @@ public class InMemoryTaskManager implements TaskManager {
                 : (subtasks.getOrDefault(id, null))))
         .filter(Objects::nonNull)
         .toList();
-//    return historyManager.getHistory();
   }
 
   @Override
@@ -282,7 +281,7 @@ public class InMemoryTaskManager implements TaskManager {
     prioritizedTasks.add(taskToAdd);
   }
 
-  //  TODO now it is O(n)
+  //  TODO now it is O(log(n))
 
   /**
    * Method checks for a valid start time and ensures no time conflicts before allowing a task to be
@@ -293,26 +292,6 @@ public class InMemoryTaskManager implements TaskManager {
    * @throws TaskValidationException if the task has a time conflict with an existing task.
    */
   private boolean canBePrioritized(final Task taskToCheck) {
-    if (taskToCheck.getStartTime() == null) {
-      return false;
-    }
-    Optional<Task> conflictTask = prioritizedTasks.stream()
-        .filter((t) -> hasTimeConflict(taskToCheck, t))
-        .findFirst();
-    if (conflictTask.isPresent()) {
-      throw new TaskValidationException(
-          "Task has time conflict with existing task with " + conflictTask);
-    }
-    return true;
-  }
-
-  //  TODO
-  private boolean hasTimeConflict(final Task task1, final Task task2) {
-    return !(task1.getEndTime().isBefore(task2.getStartTime()) ||
-        task1.getStartTime().isAfter(task2.getEndTime()));
-  }
-
-  private boolean canBePrioritized1(final Task taskToCheck) {
     if (taskToCheck.getStartTime() == null) {
       return false;
     }
@@ -330,6 +309,11 @@ public class InMemoryTaskManager implements TaskManager {
     return true;
   }
 
+  //  TODO
+  private boolean hasTimeConflict(final Task task1, final Task task2) {
+    return task1.getStartTime().isBefore(task2.getEndTime()) &&
+        task1.getEndTime().isAfter(task2.getStartTime());
+  }
 
 }
 
