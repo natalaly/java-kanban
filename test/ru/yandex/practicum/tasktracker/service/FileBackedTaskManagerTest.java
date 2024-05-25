@@ -151,10 +151,29 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
           %s,%s,%s,%s,%s,%s,%s,%s
           %s,%s,%s,%s,%s,%s,%s,%s
           history
+          prioritized
+          %s,%s,%s,%s,%s,%s,%s,%s
           """.formatted(epicForId.getId(), epicForId.getType(), epicForId.getTitle(),
           epicForId.getStatus(), epicForId.getDescription(), epicForId.getDuration().toMinutes(),
           epicForId.getStartTime(), " ",
           testTask.getId(), testTask.getType(), testTask.getTitle(),
+          testTask.getStatus(),
+          testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
+          epic,testTask.getId(), testTask.getType(), testTask.getTitle(),
+          testTask.getStatus(),
+          testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
+          epic);
+    } else if (TaskType.TASK == testTask.getType()) {
+      expected = """
+          id,type,name,status,description,duration,startTime,epic
+          %s,%s,%s,%s,%s,%s,%s,%s
+          history
+          prioritized
+          %s,%s,%s,%s,%s,%s,%s,%s
+          """.formatted(testTask.getId(), testTask.getType(), testTask.getTitle(),
+          testTask.getStatus(),
+          testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
+          epic,testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
           epic);
@@ -163,6 +182,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
           id,type,name,status,description,duration,startTime,epic
           %s,%s,%s,%s,%s,%s,%s,%s
           history
+          prioritized
           """.formatted(testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),

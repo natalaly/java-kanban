@@ -51,6 +51,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private static final String TASKS_CSV_HEADER = "id,type,name,status,description,duration,startTime,epic";
   private static final String HISTORY_HEADER = "history";
+  private static final String PRIORITIZED_HEADER = "prioritized";
   private static final String TASKS_LINE_FORMAT = "^([^,\"']+,){7}[^,\"']+$";// Format used for ensuring that each task line in the file will contain exactly 8 fields separated by commas.
   private final File file;
 
@@ -167,6 +168,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         new FileReader(file, StandardCharsets.UTF_8))) {
       loadTask(br);
       loadHistory(br);
+      loadPrioritized(br);
     } catch (IOException e) {
       throw new ManagerLoadException("An Error occurred during reading the file", e);
     }
@@ -199,6 +201,17 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
           }
       );
       /* save prioritized */
+      fileWriter.write(PRIORITIZED_HEADER + System.lineSeparator());
+      getPrioritizedTasks().forEach(task -> {
+            try {
+              fileWriter.write(task.toCsvLine() + System.lineSeparator());
+            } catch (IOException e) {
+              throw new ManagerSaveException(
+                  "An error occurred during saving tasks  prioritized tasks  to the file.", e);
+            }
+          }
+      );
+
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
     }
@@ -219,12 +232,26 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   }
 
   private void loadHistory(final BufferedReader br) throws IOException {
-    final List<String> historyData = new ArrayList<>();
+    final List<String> historydata = new ArrayList<>();
     while (br.ready()) {
-      historyData.add(br.readLine());
+      String line = br.readLine();
+      if (line.equals(PRIORITIZED_HEADER)) {
+        break;
+      }
+      historydata.add(line);
     }
-    if (!historyData.isEmpty()) {
-      this.restoreAll(historyData, HISTORY_HEADER);
+    if (!historydata.isEmpty()) {
+      this.restoreAll(historydata, HISTORY_HEADER);
+    }
+  }
+
+  private void loadPrioritized(final BufferedReader br) throws IOException {
+    final List<String> prioritizedData = new ArrayList<>();
+    while (br.ready()) {
+      prioritizedData.add(br.readLine());
+    }
+    if (!prioritizedData.isEmpty()) {
+      this.restoreAll(prioritizedData, PRIORITIZED_HEADER);
     }
   }
 
@@ -232,6 +259,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     switch (header) {
       case TASKS_CSV_HEADER -> restoreTasks(tasks);
       case HISTORY_HEADER -> restoreHistory(tasks);
+      case PRIORITIZED_HEADER -> restorePrioritized(tasks);
     }
   }
 
@@ -267,13 +295,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
   }
 
+  private void restorePrioritized(final List<String> tasksLines) {
+    for (String eachLine : tasksLines) {
+      if (eachLine.equals(PRIORITIZED_HEADER) || eachLine.isBlank()) {
+        continue;
+      }
+      Task taskToRestore = this.fromString(eachLine);
+      if (TaskType.EPIC.equals(taskToRestore.getType())) {
+        taskToRestore = epics.get(taskToRestore.getId());
+      }
+      prioritizedTasks.add(taskToRestore);
+    }
+  }
+
   private void setCounterLastUsed() {
-    final Set<Integer> allIds = new HashSet<>(this.tasks.keySet());
-    allIds.addAll(this.epics.keySet());
-    allIds.addAll(this.subtasks.keySet());
-    final Integer maxId = allIds.stream().max(Comparator.naturalOrder()).orElse(0);
-    counter = maxId;
-    Integer biggestId = Stream.concat(
+    counter =  Stream.concat(
         Stream.concat(this.tasks.keySet().stream(),this.epics.keySet().stream()),
         this.subtasks.keySet().stream())
         .max(Comparator.naturalOrder())

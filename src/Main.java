@@ -37,113 +37,8 @@ public class Main {
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
       case 2 -> useCaseFile(); /* File saving / restoring */
-      case 3 -> sprint8Workshop();
     }
 
-//    Task t = new Task();
-//    t.setDuration(Duration.ofMinutes(-3));
-//    System.out.println(t);
-  }
-
-  static void sprint8Workshop() {
-//    System.out.println();
-//    Task t = new Task() ;
-//    t.setId(2);
-//    t.setTitle("title");
-//    t.setDescription("description");
-//    t.setDuration(Duration.ofMinutes(15));
-//    t.setStartTime(LocalDateTime.now());
-//    System.out.println(t);
-
-    epic1 = new Epic();
-    epic1.setId(1);
-    epic1.setTitle("Epic1");
-    epic1.setDescription("Do e1");
-
-    sb1 = new Subtask();
-    sb1.setId(2);
-    sb1.setTitle("Subtask1");
-    sb1.setDescription("Subtask1 to the Epic1");
-    sb1.setEpicId(1);
-    sb1.setDuration(Duration.ofMinutes(5));
-    sb1.setStartTime(LocalDateTime.now().plus(Duration.ofDays(4)));
-
-    sb2 = new Subtask();
-    sb2.setId(3);
-    sb2.setTitle("Subtask2");
-    sb2.setDescription("Subtask2 to the Epic1");
-    sb2.setEpicId(1);
-    sb2.setDuration(Duration.ofHours(15));
-    sb2.setStartTime(LocalDateTime.now().plus(Duration.ofDays(1)));
-
-    sb3 = new Subtask();
-    sb3.setId(4);
-    sb3.setTitle("Subtask3");
-    sb3.setDescription("Subtask3 to the Epic1");
-    sb3.setEpicId(1);
-    sb3.setStartTime(LocalDateTime.now().plus(Duration.ofDays(2)));
-
-    epic1.addSubtask(sb1);
-    epic1.addSubtask(sb2);
-    epic1.addSubtask(sb3);
-
-    System.out.println(sb2.getEndTime());
-    System.out.println(epic1.toCsvLine());
-    System.out.println(epic1.toCsvLine().split(",").length);
-    System.out.println(fromString("1,EPIC,Epic1,NEW,Do e1,905,2024-05-22T18:41:32.633049, "));
-    System.out.println(epic1);
-    System.out.println(LocalDateTime.parse("2024-05-22T18:48:57.235393"));
-
-
-  }
-
-  public static Task fromString(final String stringCsv) {
-    Objects.requireNonNull(stringCsv);
-    if (!Pattern.matches("^([^,\"']+,){7}[^,\"']+$", stringCsv)) {
-      throw new IllegalArgumentException("Invalid CSV format of the line with task: " + stringCsv);
-    }
-    final String[] taskData = stringCsv.split(",");
-    final int id = Integer.parseInt(taskData[0]);
-    final TaskType type = TaskType.valueOf(taskData[1]);
-    final String title = taskData[2];
-    final TaskStatus status = TaskStatus.valueOf(taskData[3]);
-    final String description = taskData[4];
-    final Duration duration = Duration.ofMinutes(Long.parseLong(taskData[5]));
-    final LocalDateTime startTime = LocalDateTime.parse(taskData[6]);
-    switch (type) {
-      case TASK -> {
-        final Task task = new Task();
-        task.setId(id);
-        task.setTitle(title);
-        task.setDescription(description);
-        task.setStatus(status);
-        task.setDuration(duration);
-        task.setStartTime(startTime);
-        return task;
-      }
-      case EPIC -> {
-        final Epic epic = new Epic();
-        epic.setId(id);
-        epic.setTitle(title);
-        epic.setDescription(description);
-        epic.setStatus(status);
-        epic.setDuration(duration);
-        epic.setStartTime(startTime);
-        return epic;
-      }
-      case SUBTASK -> {
-        final Subtask subtask = new Subtask();
-        subtask.setId(id);
-        subtask.setTitle(title);
-        subtask.setDescription(description);
-        subtask.setStatus(status);
-        subtask.setDuration(duration);
-        subtask.setStartTime(startTime);
-        subtask.setEpicId(Integer.parseInt(taskData[7]));
-        return subtask;
-      }
-    }
-    throw new IllegalArgumentException("Unknown task type: " + type);
   }
 
   /**
@@ -215,30 +110,29 @@ public class Main {
     System.out.println();
 
     /* WHEN */
-//    TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
-//    List<Integer> taskIds = new ArrayList<>();
-//    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
-//    List<Integer> epicIds = new ArrayList<>();
-//    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
-//    List<Integer> subtaskIds = new ArrayList<>();
-//    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
-//
-//    /* THEN */
-//    System.out.println(
-//        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
-//    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
-//    System.out.println(
-//        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
-//    System.out.println("Epics ids should be 2, 4 : " + epicIds);
-//    System.out.println(
-//        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
-//    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
-//    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
-//
-//    System.out.println(newManage.getHistory().get(0).getDescription().length());
-//    System.out.println("GIVEN: newManage.getPrioritizedTasks():" );
-//    newManage.getPrioritizedTasks().forEach(System.out::println);
-//    System.out.println();
+    TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
+    List<Integer> taskIds = new ArrayList<>();
+    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
+    List<Integer> epicIds = new ArrayList<>();
+    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
+    List<Integer> subtaskIds = new ArrayList<>();
+    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
+
+    /* THEN */
+    System.out.println(
+        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
+    System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
+    System.out.println(
+        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
+    System.out.println("Epics ids should be 2, 4 : " + epicIds);
+    System.out.println(
+        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
+    System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
+    System.out.println("newManage.getHistory() should have epic id=2: ");
+    newManage.getHistory().forEach(System.out::println);
+
+    System.out.println("THEN: newManage.getPrioritizedTasks():" );
+    newManage.getPrioritizedTasks().forEach(System.out::println);
 
   }
 

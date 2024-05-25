@@ -266,8 +266,6 @@ public class InMemoryTaskManager implements TaskManager {
     return ++counter;
   }
 
-  //  TODO
-
   /**
    * Adds a task to the {@link #prioritizedTasks} if it can be prioritized.
    * <p>This method first checks if the task can be prioritized using the
@@ -284,8 +282,6 @@ public class InMemoryTaskManager implements TaskManager {
     }
     prioritizedTasks.add(taskToAdd);
   }
-
-  //  TODO now it is O(log(n))
 
   /**
    * Method checks for a valid start time and ensures no time conflicts before allowing a task to be
@@ -313,7 +309,6 @@ public class InMemoryTaskManager implements TaskManager {
     return true;
   }
 
-  //  TODO
   private boolean hasTimeConflict(final Task task1, final Task task2) {
     return task1.getStartTime().isBefore(task2.getEndTime()) &&
         task1.getEndTime().isAfter(task2.getStartTime());
