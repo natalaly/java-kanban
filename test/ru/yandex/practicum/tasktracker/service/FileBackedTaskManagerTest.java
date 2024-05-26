@@ -110,12 +110,14 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
             "Subtask list should be same."),
         () -> Assertions.assertIterableEquals(expectedHistory, actualHistory,
             "History list should be same."),
-        () -> Assertions.assertIterableEquals(expectedPrioritized,actualPrioritized,"Prioritized list should be same."),
+        () -> Assertions.assertIterableEquals(expectedPrioritized, actualPrioritized,
+            "Prioritized list should be same."),
         () -> Assertions.assertFalse(expectedTasks.isEmpty(), "Task list has not restored."),
         () -> Assertions.assertFalse(expectedEpics.isEmpty(), "Epic list has not restored."),
         () -> Assertions.assertFalse(expectedSubtasks.isEmpty(), "Subtask list has not restored."),
         () -> Assertions.assertFalse(expectedHistory.isEmpty(), "History list has not restored."),
-        () -> Assertions.assertFalse(expectedPrioritized.isEmpty(), "Prioritized list has not restored.")
+        () -> Assertions.assertFalse(expectedPrioritized.isEmpty(),
+            "Prioritized list has not restored.")
     );
   }
 
@@ -162,7 +164,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
           testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
-          epic,testTask.getId(), testTask.getType(), testTask.getTitle(),
+          epic, testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
           epic);
@@ -176,7 +178,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
           """.formatted(testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
-          epic,testTask.getId(), testTask.getType(), testTask.getTitle(),
+          epic, testTask.getId(), testTask.getType(), testTask.getTitle(),
           testTask.getStatus(),
           testTask.getDescription(), testTask.getDuration().toMinutes(), testTask.getStartTime(),
           epic);

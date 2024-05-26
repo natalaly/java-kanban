@@ -132,6 +132,35 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   }
 
   @Test
+  @DisplayName("getPrioritized() - should return a list of tasks.")
+  public void getPrioritizedTasksReturnsAllListOrPrioritizedTasks() {
+    final List<Task> taskData = TestDataBuilder.buildTasks();
+    final List<Integer> ids = addTaskDataToTheTaskManager(taskData);
+    final List<Task> expected = List.of(taskManager.getTaskById(ids.get(1)),
+        taskManager.getSubtaskById(ids.get(4)));
+
+    final List<Task> actual = taskManager.getPrioritizedTasks();
+
+    Assertions.assertAll(
+        () -> Assertions.assertNotNull(actual, "List was not returned."),
+        () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
+    );
+  }
+
+  @Test
+  @DisplayName("getPrioritized() - returns an empty List when task manager is new. ")
+  public void getPrioritizedTasksReturnsEmptyListWhenTaskManagerIsNew() {
+    final List<Task> expected = List.of();
+
+    final List<Task> actual = taskManager.getPrioritizedTasks();
+
+    Assertions.assertAll(
+        () -> Assertions.assertNotNull(actual, "List should not be null."),
+        () -> Assertions.assertIterableEquals(expected, actual, "List returned is not correct.")
+    );
+  }
+
+  @Test
   @DisplayName("getHistory() - returns up to dated viewed tasks.")
   public void tasksInHistoryShouldUpdateTheirStateAfterUpdatingThemInTaskManager() {
     final Task addedTask = taskManager.addTask(TestDataBuilder.buildTask("t", "d"));
@@ -1021,18 +1050,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   private void buildHistoryInTaskManager() {
     final List<Task> tasks = TestDataBuilder.buildTasks();
-    List<Integer> ids = new ArrayList<>();
-    for (Task t : tasks) {
-      if (t instanceof Epic) {
-        ids.add(taskManager.addEpic((Epic) t).getId());
-      } else if (t instanceof Subtask) {
-        Subtask st = (Subtask) t;
-        st.setEpicId(ids.get(0));
-        ids.add(taskManager.addSubtask(st).getId());
-      } else {
-        ids.add(taskManager.addTask(t).getId());
-      }
-    }
+    List<Integer> ids = addTaskDataToTheTaskManager(tasks);
     for (Task t : tasks) {
       if (t instanceof Epic) {
         taskManager.getEpicById(t.getId());
@@ -1044,5 +1062,19 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     }
   }
 
+  private List<Integer> addTaskDataToTheTaskManager(List<Task> taskData) {
+    List<Integer> ids = new ArrayList<>();
+    for (Task t : taskData) {
+      if (t instanceof Epic) {
+        ids.add(taskManager.addEpic((Epic) t).getId());
+      } else if (t instanceof Subtask st) {
+        st.setEpicId(ids.get(0));
+        ids.add(taskManager.addSubtask(st).getId());
+      } else {
+        ids.add(taskManager.addTask(t).getId());
+      }
+    }
+    return ids;
+  }
 
 }

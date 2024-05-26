@@ -11,10 +11,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import ru.yandex.practicum.tasktracker.exception.ManagerLoadException;
@@ -309,9 +307,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   }
 
   private void setCounterLastUsed() {
-    counter =  Stream.concat(
-        Stream.concat(this.tasks.keySet().stream(),this.epics.keySet().stream()),
-        this.subtasks.keySet().stream())
+    counter = Stream.concat(
+            Stream.concat(this.tasks.keySet().stream(), this.epics.keySet().stream()),
+            this.subtasks.keySet().stream())
         .max(Comparator.naturalOrder())
         .orElse(0);
   }

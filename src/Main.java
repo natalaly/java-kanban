@@ -4,13 +4,10 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.regex.Pattern;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
-import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.service.FileBackedTaskManager;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
@@ -32,7 +29,7 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int choice = 2;
+    int choice = 0;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -60,19 +57,19 @@ public class Main {
     task2.setTitle("task2");
     task2.setDescription("t2");
     task2.setDuration(Duration.ofMinutes(20));
-    task2.setStartTime(LocalDateTime.of(2024,05,21,12,20,00));
+    task2.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 20, 00));
 
     task3 = new Task();
     task3.setTitle("task3");
     task3.setDescription("t3");
     task3.setDuration(Duration.ofMinutes(20));
-    task3.setStartTime(LocalDateTime.of(2024,05,21,12,00,00));
+    task3.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 00, 00));
 
     epic1 = new Epic();
     epic1.setTitle("epic");
     epic1.setDescription("null");
 
-    epic2 =  new Epic();
+    epic2 = new Epic();
     epic2.setTitle("epic2");
     epic2.setDescription("null");
 
@@ -105,7 +102,7 @@ public class Main {
 
     oldManager.getEpicById(2);
 
-    System.out.println("GIVEN: oldManager.getPrioritizedTasks():" );
+    System.out.println("GIVEN: oldManager.getPrioritizedTasks():");
     oldManager.getPrioritizedTasks().forEach(System.out::println);
     System.out.println();
 
@@ -131,7 +128,7 @@ public class Main {
     System.out.println("newManage.getHistory() should have epic id=2: ");
     newManage.getHistory().forEach(System.out::println);
 
-    System.out.println("THEN: newManage.getPrioritizedTasks():" );
+    System.out.println("THEN: newManage.getPrioritizedTasks():");
     newManage.getPrioritizedTasks().forEach(System.out::println);
 
   }

@@ -51,7 +51,7 @@ public class Task {
   }
 
   public void setDuration(final Duration duration) {
-    Objects.requireNonNull(duration,"Can not set duration to null.");
+    Objects.requireNonNull(duration, "Can not set duration to null.");
     if (duration.isNegative()) {
       throw new IllegalArgumentException("Duration cannot be negative.");
     }
