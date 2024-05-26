@@ -222,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
           "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
     if (taskInMemory.getStartTime() != null) {
-    prioritizedTasks.remove(taskInMemory);
+      prioritizedTasks.remove(taskInMemory);
     }
     addPrioritized(taskToUpdate.copy());
     tasks.put(taskToUpdate.getId(), taskToUpdate.copy());

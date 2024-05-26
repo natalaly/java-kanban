@@ -26,19 +26,16 @@ public class Epic extends Task {
     return TaskType.EPIC;
   }
 
-  // TODO
   @Override
   public Duration getDuration() {
     return calculateDuration();
   }
 
-  //  TODO
   @Override
   public LocalDateTime getStartTime() {
     return defineStartTime();
   }
 
-  //  TODO
   @Override
   public LocalDateTime getEndTime() {
     return defineEndTime();
@@ -155,8 +152,6 @@ public class Epic extends Task {
         .filter(Objects::nonNull)
         .max(LocalDateTime::compareTo)
         .orElse(null);
-
   }
-
 
 }

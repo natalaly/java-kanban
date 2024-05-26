@@ -90,7 +90,6 @@ public class TestDataBuilder {
     return subtask;
   }
 
-
   public static Task buildCopyTask(Task task) {
     Task result = new Task();
     result.setId(task.getId());
@@ -122,13 +121,28 @@ public class TestDataBuilder {
     return result;
   }
 
+  /**
+   * Provides a {@code List<Task>}, which includes:
+   * <ol>
+   *   <li>Epic - id, title, description</li>
+   *   <li>Task - id, title, description, status, duration, startTime </li>
+   *   <li>Subtask - id, title, description, epicId</li>
+   *   <li>Epic - id, title, description</li>
+   *   <li>Subtask - id, title,description epicId,status,duration, startTine </li>
+   *   <li>Task - id, title, description, status</li>
+   * </ol>
+   * All tasks have non-conflicting startTime and duration.
+   *
+   * @return {@code List<Task>}
+   */
   public static List<Task> buildTasks() {
     return new LinkedList<>(
         List.of(buildEpic(1, "epic1", "description"),
             buildTask(2, "task1", "d", TaskStatus.NEW, Duration.ofMinutes(15), LocalDateTime.now()),
             buildSubtask(3, "subtask1", "notes", 1),
             buildEpic(4, "epic2", "description"),
-            buildSubtask(5, "subtask2", "notes", 1,TaskStatus.IN_PROGRESS,Duration.ofMinutes(15),LocalDateTime.now().plusMinutes(20)),
+            buildSubtask(5, "subtask2", "notes", 1, TaskStatus.IN_PROGRESS, Duration.ofMinutes(15),
+                LocalDateTime.now().plusMinutes(20)),
             buildTask(6, "task2", "d", TaskStatus.NEW)));
   }
 

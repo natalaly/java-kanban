@@ -27,7 +27,7 @@ import ru.yandex.practicum.tasktracker.model.TaskStatus;
 public abstract class TaskManagerTest<T extends TaskManager> {
 
   protected static final LocalDateTime BASE_TEST_TIME = LocalDateTime.parse(
-      "2024-05-21T19:51:24.211613");
+      "2024-05-21T01:00:00.00000");
   protected T taskManager;
 
   @BeforeEach
@@ -275,7 +275,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
             "Deleted subtasks should not remain in the history")
     );
   }
-
 
   @Test
   @DisplayName("deleteTask(int id) - removes task by id from the task manager and from the history.")
@@ -533,7 +532,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     Assertions.assertIterableEquals(expected, actual, " Null was added to the history.");
   }
-
 
   @Test
   @DisplayName("addTask(Task) - saves task to the task manager.")
@@ -936,8 +934,8 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @ParameterizedTest
   @DisplayName("Tasks with no time conflict should be added.")
   @MethodSource("provideTasksWithoutTimeConflict")
-  void addTaskShouldSaveNonConflictingTaskInTaskManager(Task task1,Task task2, String message ) {
-    Assertions.assertDoesNotThrow(() -> taskManager.addTask(task1),message);
+  void addTaskShouldSaveNonConflictingTaskInTaskManager(Task task1, Task task2, String message) {
+    Assertions.assertDoesNotThrow(() -> taskManager.addTask(task1), message);
     Assertions.assertDoesNotThrow(() -> taskManager.addTask(task2), message);
     Assertions.assertEquals(2, taskManager.getAllTasks().size(), "Tasks should be added.");
   }
@@ -945,37 +943,51 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @ParameterizedTest
   @DisplayName("Adding tasks with time conflict throws an Exception.")
   @MethodSource("provideTasksWithTimeConflict")
-  void addTaskShouldTrowWhenHaveTimeConflict(Task task1,Task task2, String message ) {
-    final String expectedExceptionMessage ="Task has time conflict with existing task with ID ";
+  void addTaskShouldTrowWhenHaveTimeConflict(Task task1, Task task2, String message) {
+    final String expectedExceptionMessage = "Task has time conflict with existing task with ID ";
     task1 = taskManager.addTask(task1);
-    final Exception actualException = Assertions.assertThrows(TaskPrioritizationException.class,() -> {
-     taskManager.addTask(task2);
-   });
-    Assertions.assertEquals(expectedExceptionMessage + task1.getId(), actualException.getMessage(), message);
-    Assertions.assertEquals(1,taskManager.getPrioritizedTasks().size(), "Only one task should be added.");
+    final Exception actualException = Assertions.assertThrows(TaskPrioritizationException.class,
+        () -> {
+          taskManager.addTask(task2);
+        });
+    Assertions.assertEquals(expectedExceptionMessage + task1.getId(), actualException.getMessage(),
+        message);
+    Assertions.assertEquals(1, taskManager.getPrioritizedTasks().size(),
+        "Only one task should be added.");
   }
 
   private static Stream<Arguments> provideTasksWithTimeConflict() {
     final Duration duration = Duration.ofMinutes(15);
     return Stream.of(
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, Duration.ofMinutes(45),BASE_TEST_TIME),
+        Arguments.of(TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, Duration.ofMinutes(45),
+                BASE_TEST_TIME),
             "Task1 starts after Task2 starts and ends before task2 ends: should have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, Duration.ofMinutes(45),BASE_TEST_TIME),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+        Arguments.of(
+            TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, Duration.ofMinutes(45),
+                BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
             "Task2 starts after task1 starts and ends before task1 ends: should have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, Duration.ofMinutes(30),BASE_TEST_TIME),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+        Arguments.of(
+            TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, Duration.ofMinutes(30),
+                BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
             "Task1 starts before task2 starts and ends after task2 starts: should have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
-            TestDataBuilder.buildTask(0,"task1","d2",TaskStatus.NEW, Duration.ofMinutes(30),BASE_TEST_TIME),
+        Arguments.of(TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0, "task1", "d2", TaskStatus.NEW, Duration.ofMinutes(30),
+                BASE_TEST_TIME),
             "Task1 starts before Task2 ends and ends after task2 ends: should have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+        Arguments.of(
+            TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration, BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration, BASE_TEST_TIME),
             "Task1 and Task2 starts and ends at the same time: should have conflict.")
     );
   }
@@ -983,20 +995,26 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   private static Stream<Arguments> provideTasksWithoutTimeConflict() {
     final Duration duration = Duration.ofMinutes(15);
     return Stream.of(
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(30)),
+        Arguments.of(
+            TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration, BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(30)),
             "Task1 starts and ends before Task2 starts: should not have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(30)),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+        Arguments.of(TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(30)),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration, BASE_TEST_TIME),
             "Task1 starts and ends after Task2 ends: should not have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
+        Arguments.of(
+            TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration, BASE_TEST_TIME),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
             "Task2 starts at time when Task1 ends: should not have conflict."),
 
-        Arguments.of(TestDataBuilder.buildTask(0,"task1","d1",TaskStatus.NEW, duration,BASE_TEST_TIME.plusMinutes(15)),
-            TestDataBuilder.buildTask(0,"task2","d2",TaskStatus.NEW, duration,BASE_TEST_TIME),
+        Arguments.of(TestDataBuilder.buildTask(0, "task1", "d1", TaskStatus.NEW, duration,
+                BASE_TEST_TIME.plusMinutes(15)),
+            TestDataBuilder.buildTask(0, "task2", "d2", TaskStatus.NEW, duration, BASE_TEST_TIME),
             "Task1 starts at time when Task2 ends: should not have conflict.")
     );
   }
@@ -1025,7 +1043,6 @@ public abstract class TaskManagerTest<T extends TaskManager> {
       }
     }
   }
-
 
 
 }
