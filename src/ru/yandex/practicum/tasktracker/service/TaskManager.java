@@ -32,6 +32,10 @@ public interface TaskManager {
 
   List<Subtask> getAllSubtasks();
 
+  List<Task> getPrioritizedTasks();
+
+  List<Task> getHistory();
+
   void clearTasks();
 
   void clearEpics();
@@ -50,6 +54,8 @@ public interface TaskManager {
 
   Subtask getSubtaskById(final int id);
 
+  Set<Subtask> getSubtasksByEpicId(final int id);
+
   Task addTask(final Task task);
 
   Epic addEpic(final Epic epic);
@@ -61,9 +67,5 @@ public interface TaskManager {
   void updateEpic(final Epic epic);
 
   void updateSubtask(final Subtask subtask);
-
-  Set<Subtask> getSubtasksByEpicId(final int id);
-
-  List<Task> getHistory();
 
 }

@@ -1,5 +1,7 @@
 import java.io.File;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
@@ -16,15 +18,18 @@ public class Main {
   private static TaskManager tm;
   private static Task task1;
   private static Task task2;
+  private static Task task3;
   private static Epic epic1;
   private static Subtask sb1;
   private static Subtask sb2;
   private static Subtask sb3;
   private static Epic epic2;
+  private static LocalDateTime time1 = LocalDateTime.now();
+  private static LocalDateTime time2 = time1.plusMinutes(20);
 
   public static void main(String[] args) {
 
-    int choice = 2;
+    int choice = 0;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -34,7 +39,7 @@ public class Main {
   }
 
   /**
-   * <h2>Use Case 2 - {@link #useCaseFile()}</h2>
+   * <h2> Use Case 2 </h2>
    * <ol>
    *   <li> GIVEN: A {@code FileBackedTaskManager oldManager} that has  3 Tasks, 2 Epics, and 2 Subtasks for one of the Epic.</li>
    *   <li> WHEN: A new {@code FileBackedTaskManager newManager} was created from the file of the oldManager.</li>
@@ -44,36 +49,62 @@ public class Main {
   static void useCaseFile() {
     /* GIVEN */
     /* Create tasks data: */
-    Task t = new Task();
-    t.setTitle("task");
-    t.setDescription("t description");
+    task1 = new Task();
+    task1.setTitle("task");
+    task1.setDescription("t description");
 
-    Epic e = new Epic();
-    e.setTitle("epic");
-    e.setDescription("e description");
+    task2 = new Task();
+    task2.setTitle("task2");
+    task2.setDescription("t2");
+    task2.setDuration(Duration.ofMinutes(20));
+    task2.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 20, 00));
 
-    Subtask sb = new Subtask();
-    sb.setTitle("sbtask");
-    sb.setDescription("st description");
+    task3 = new Task();
+    task3.setTitle("task3");
+    task3.setDescription("t3");
+    task3.setDuration(Duration.ofMinutes(20));
+    task3.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 00, 00));
+
+    epic1 = new Epic();
+    epic1.setTitle("epic");
+    epic1.setDescription("null");
+
+    epic2 = new Epic();
+    epic2.setTitle("epic2");
+    epic2.setDescription("null");
+
+    sb1 = new Subtask();
+    sb1.setTitle("sbtask");
+    sb1.setDescription("st description");
+
+    sb2 = new Subtask();
+    sb2.setTitle("sbtask2");
+    sb2.setDescription("st2 description");
 
     Path path = Path.of("resources/test/useCaseFile.csv");
     File temp = path.toFile();
     TaskManager oldManager = FileBackedTaskManager.loadFromFile(temp);
-    oldManager.addTask(t); // add task
-    oldManager.addEpic(e); // add epic
-    sb.setEpicId(2);
-    oldManager.addSubtask(sb); // add subtask to epic
-    e.setTitle("epic2");
-    oldManager.addEpic(e); // add epic2
-    sb.setTitle("sbtask2");
-    oldManager.addSubtask(sb); // add subtask2 to epic
-    t.setTitle("task2");
-    oldManager.addTask(t); // add task2
-    t.setTitle("task3");
-    oldManager.addTask(t); // add task3
-    sb.setStatus(TaskStatus.DONE);
-    oldManager.updateSubtask(sb); // update subtask2 of epic
+
+    oldManager.addTask(task1); // add task -1
+    oldManager.addEpic(epic1); // add epic -2
+    sb1.setEpicId(epic1.getId());
+    oldManager.addSubtask(sb1); // add subtask to epic -3
+    oldManager.addEpic(epic2); // add epic2-4
+    sb2.setEpicId(epic1.getId());
+    oldManager.addSubtask(sb2); // add subtask2 to epic-5
+    oldManager.addTask(task2); // add task2-6
+    oldManager.addTask(task3); // add task3 -7
+
+    sb2.setStatus(TaskStatus.DONE);
+    sb2.setDuration(Duration.ofMinutes(15));
+    sb2.setStartTime(time2);
+    oldManager.updateSubtask(sb2); // update subtask2 of epic
+
     oldManager.getEpicById(2);
+
+    System.out.println("GIVEN: oldManager.getPrioritizedTasks():");
+    oldManager.getPrioritizedTasks().forEach(System.out::println);
+    System.out.println();
 
     /* WHEN */
     TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
@@ -94,13 +125,16 @@ public class Main {
     System.out.println(
         "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
     System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
-    System.out.println("newManage.getHistory() should have epic id=2: " + newManage.getHistory());
+    System.out.println("newManage.getHistory() should have epic id=2: ");
+    newManage.getHistory().forEach(System.out::println);
 
+    System.out.println("THEN: newManage.getPrioritizedTasks():");
+    newManage.getPrioritizedTasks().forEach(System.out::println);
 
   }
 
   /**
-   * <h2>Use Case 1 - {@link #useCase1()}</h2>
+   * <h2>Use Case 1 </h2>
    * <ol>
    *   <li>Create: Two tasks; Epic with three subtasks; Epic without subtask.</li>
    *   <li>Request ({@code .get...()} methods)the created tasks multiple times in different order.</li>

@@ -1,5 +1,7 @@
 package ru.yandex.practicum.tasktracker.model;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,16 +10,19 @@ public class Task {
   private String title;
   private String description;
   private TaskStatus status;
+  private Duration duration;
+  private LocalDateTime startTime;
 
   public Task() {
     this.status = TaskStatus.NEW;
+    this.duration = Duration.ZERO;
   }
 
   public int getId() {
     return id;
   }
 
-  public void setId(int id) {
+  public void setId(final int id) {
     this.id = id;
   }
 
@@ -25,7 +30,7 @@ public class Task {
     return title;
   }
 
-  public void setTitle(String title) {
+  public void setTitle(final String title) {
     this.title = title;
   }
 
@@ -33,7 +38,7 @@ public class Task {
     return description;
   }
 
-  public void setDescription(String description) {
+  public void setDescription(final String description) {
     this.description = description;
   }
 
@@ -41,8 +46,32 @@ public class Task {
     return status;
   }
 
-  public void setStatus(TaskStatus taskStatus) {
+  public void setStatus(final TaskStatus taskStatus) {
     this.status = taskStatus;
+  }
+
+  public void setDuration(final Duration duration) {
+    Objects.requireNonNull(duration, "Can not set duration to null.");
+    if (duration.isNegative()) {
+      throw new IllegalArgumentException("Duration cannot be negative.");
+    }
+    this.duration = duration;
+  }
+
+  public Duration getDuration() {
+    return duration;
+  }
+
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
+
+  public void setStartTime(final LocalDateTime startTime) {
+    this.startTime = startTime;
+  }
+
+  public LocalDateTime getEndTime() {
+    return startTime == null ? null : startTime.plus(duration);
   }
 
   public TaskType getType() {
@@ -50,12 +79,14 @@ public class Task {
   }
 
   public String toCsvLine() {
-    return String.format("%s,%s,%s,%s,%s,%s",
+    return String.format("%s,%s,%s,%s,%s,%s,%s,%s",
         this.getId(),
         this.getType(),
         this.getTitle(),
         this.getStatus(),
         this.getDescription(),
+        this.getDuration().toMinutes(),
+        this.getStartTime(),
         " ");
   }
 
@@ -65,6 +96,8 @@ public class Task {
     newTask.setTitle(this.getTitle());
     newTask.setDescription(this.getDescription());
     newTask.setStatus(TaskStatus.valueOf(this.getStatus().name()));
+    newTask.setDuration(this.getDuration());
+    newTask.setStartTime(this.getStartTime());
     return newTask;
   }
 
@@ -92,6 +125,9 @@ public class Task {
         ", title='" + title + '\'' +
         ", description='" + description + '\'' +
         ", status=" + getStatus() +
+        ", duration=" + getDuration().toMinutes() +
+        ", startTime=" + getStartTime() +
+        ", endTime=" + getEndTime() +
         '}';
   }
 }
