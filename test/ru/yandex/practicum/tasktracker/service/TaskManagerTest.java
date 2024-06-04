@@ -43,7 +43,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     final List<Task> expected = new ArrayList<>(List.of(task1, task2));
     expected.sort(Comparator.comparing(Task::getId));
 
-    final List<Task> actual = taskManager.getAllTasks();
+    final List<Task> actual = taskManager.getTasks();
     actual.sort(Comparator.comparing(Task::getId));
 
     Assertions.assertAll(
@@ -57,7 +57,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   public void getAllTaskShouldReturnEmptyListWhenThereIsNoTasks() {
     final List<Task> expected = List.of();
 
-    final List<Task> actual = taskManager.getAllTasks();
+    final List<Task> actual = taskManager.getTasks();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
@@ -67,7 +67,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   @Test
   @DisplayName("getAllEpics() - should return a list of epics.")
-  public void getAllEpicsShouldReturnList() {
+  public void getEpicsShouldReturnList() {
     final Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     final Epic epic2 = TestDataBuilder.buildEpic("e2", "d2");
     taskManager.addEpic(epic1);
@@ -75,7 +75,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     final List<Epic> expected = new ArrayList<>(List.of(epic1, epic2));
     expected.sort(Comparator.comparing(Epic::getId));
 
-    final List<Epic> actual = taskManager.getAllEpics();
+    final List<Epic> actual = taskManager.getEpics();
     actual.sort(Comparator.comparing(Epic::getId));
 
     Assertions.assertAll(
@@ -86,10 +86,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   @Test
   @DisplayName("getAllEpics() - returns an empty List when task manager is new.")
-  public void getAllEpicShouldReturnEmptyListWhenThereIsNoEpic() {
+  public void getEpicShouldReturnEmptyListWhenThereIsNoEpic() {
     final List<Epic> expected = List.of();
 
-    final List<Epic> actual = taskManager.getAllEpics();
+    final List<Epic> actual = taskManager.getEpics();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
@@ -99,7 +99,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   @Test
   @DisplayName("getAllSubtasks() - should return a list of subtasks.")
-  public void getAllSubtasksShouldReturnList() {
+  public void getSubtasksShouldReturnList() {
     final Epic epic1 = TestDataBuilder.buildEpic("e1", "d1");
     taskManager.addEpic(epic1);
     final Subtask subtask1 = TestDataBuilder.buildSubtask("st1", "d1", epic1.getId());
@@ -109,7 +109,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     final List<Subtask> expected = new ArrayList<>(List.of(subtask1, subtask2));
     expected.sort(Comparator.comparing(Subtask::getId));
 
-    final List<Subtask> actual = taskManager.getAllSubtasks();
+    final List<Subtask> actual = taskManager.getSubtasks();
     actual.sort(Comparator.comparing(Subtask::getId));
 
     Assertions.assertAll(
@@ -120,10 +120,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
   @Test
   @DisplayName("getAllSubtasks() - returns an empty List when task manager is new.")
-  public void getAllSubtasksShouldReturnEmptyListWhenThereIsNoSubtasks() {
+  public void getSubtasksShouldReturnEmptyListWhenThereIsNoSubtasks() {
     final List<Subtask> expected = List.of();
 
-    final List<Subtask> actual = taskManager.getAllSubtasks();
+    final List<Subtask> actual = taskManager.getSubtasks();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(actual, "List should not be null."),
@@ -190,14 +190,14 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     taskManager.clearTasks();
 
-    Assertions.assertEquals(List.of(), taskManager.getAllTasks(), "Tasks were not deleted.");
+    Assertions.assertEquals(List.of(), taskManager.getTasks(), "Tasks were not deleted.");
   }
 
   @Test
   @DisplayName("clearTasks() - deletes all tasks from the history.")
   public void clearTaskShouldDeleteAllTasksFromTheHistory() {
     buildHistoryInTaskManager();
-    final List<Integer> taskIdsInMemory = taskManager.getAllTasks().stream().map(Task::getId)
+    final List<Integer> taskIdsInMemory = taskManager.getTasks().stream().map(Task::getId)
         .toList();
     final List<Task> historyBeforeClear = taskManager.getHistory();
 
@@ -225,9 +225,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     taskManager.clearEpics();
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(List.of(), taskManager.getAllEpics(),
+        () -> Assertions.assertEquals(List.of(), taskManager.getEpics(),
             "Epics was not deleted."),
-        () -> Assertions.assertEquals(List.of(), taskManager.getAllSubtasks(),
+        () -> Assertions.assertEquals(List.of(), taskManager.getSubtasks(),
             "Subtasks were not deleted.")
     );
   }
@@ -236,9 +236,9 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @DisplayName("clearEpics() - deletes all epics from the history.")
   public void clearEpicShouldDeleteAllEpicsAndSubtasksFromTheHistory() {
     buildHistoryInTaskManager();
-    final List<Integer> epicsIdsInMemory = taskManager.getAllEpics().stream().map(Epic::getId)
+    final List<Integer> epicsIdsInMemory = taskManager.getEpics().stream().map(Epic::getId)
         .toList();
-    final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
+    final List<Integer> subtasksIdsInMemory = taskManager.getSubtasks().stream()
         .map(Subtask::getId).toList();
     final List<Task> historyBeforeClear = taskManager.getHistory();
 
@@ -271,12 +271,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
 
     taskManager.clearSubtasks();
     ArrayList<Subtask> subtasksFromEpics = new ArrayList<>();
-    for (Epic epic : taskManager.getAllEpics()) {
+    for (Epic epic : taskManager.getEpics()) {
       subtasksFromEpics.addAll(taskManager.getSubtasksByEpicId(epic.getId()));
     }
 
     Assertions.assertAll(
-        () -> Assertions.assertEquals(List.of(), taskManager.getAllSubtasks(),
+        () -> Assertions.assertEquals(List.of(), taskManager.getSubtasks(),
             "Subtasks was not deleted."),
         () -> Assertions.assertEquals(List.of(), subtasksFromEpics,
             "Subtasks were not deleted from Epics.")
@@ -288,7 +288,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   public void clearSubtasksShouldDeleteAllSubtasksFromTheHistory() {
     buildHistoryInTaskManager();
     //given
-    final List<Integer> subtasksIdsInMemory = taskManager.getAllSubtasks().stream()
+    final List<Integer> subtasksIdsInMemory = taskManager.getSubtasks().stream()
         .map(Subtask::getId).toList(); // size = 2, [3,5]
     final List<Task> historyBeforeClear = taskManager.getHistory();
     //when
@@ -352,7 +352,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     final List<Task> actualHistory = taskManager.getHistory();
     final TaskNotFoundException actualException = Assertions.assertThrows(
         TaskNotFoundException.class, () -> taskManager.getEpicById(epicToDelete.getId()));
-    final List<Subtask> actualSubtasksInMemory = taskManager.getAllSubtasks().stream()
+    final List<Subtask> actualSubtasksInMemory = taskManager.getSubtasks().stream()
         .filter(st -> st.getEpicId() == epicToDelete.getId()).toList();
     final boolean isEpicDeletedFromHistory = !actualHistory.contains(epicToDelete);
     final boolean isSubtaskDeletedFromHistory = !actualHistory.contains(sbToDelete);
@@ -566,15 +566,15 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @DisplayName("addTask(Task) - saves task to the task manager.")
   void addTaskShouldSaveTaskInTaskManager() {
     Task taskToAdd = TestDataBuilder.buildTask("task", "d");
-    int expectedNumberOfTasks = taskManager.getAllTasks().size() + 1;
+    int expectedNumberOfTasks = taskManager.getTasks().size() + 1;
 
     Task task = taskManager.addTask(taskToAdd);
-    int actualNumberOfTasks = taskManager.getAllTasks().size();
+    int actualNumberOfTasks = taskManager.getTasks().size();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(taskManager.getTaskById(task.getId()),
             "Task was not found."),
-        () -> Assertions.assertNotNull(taskManager.getAllTasks(), "Tasks are not returned."),
+        () -> Assertions.assertNotNull(taskManager.getTasks(), "Tasks are not returned."),
         () -> Assertions.assertEquals(expectedNumberOfTasks, actualNumberOfTasks,
             "Incorrect number of tasks.")
     );
@@ -605,10 +605,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     Task taskInMemory = taskManager.addTask(TestDataBuilder.buildTask("t1", "d"));
     int taskInMemoryId = taskInMemory.getId();
     Task taskToAdd = TestDataBuilder.buildTask(taskInMemoryId, "t2", "d", TaskStatus.IN_PROGRESS);
-    int expectedNumberOfTasks = taskManager.getAllTasks().size() + 1;
+    int expectedNumberOfTasks = taskManager.getTasks().size() + 1;
 
     Task taskAdded = taskManager.addTask(taskToAdd);
-    int actualNumberOfTasks = taskManager.getAllTasks().size();
+    int actualNumberOfTasks = taskManager.getTasks().size();
 
     Assertions.assertAll(
         () -> Assertions.assertNotEquals(taskInMemoryId, taskAdded.getId(),
@@ -653,12 +653,12 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     taskManager.addTask(taskToUse);
     taskManager.addTask(taskToUse);
 
-    final int actualSize = taskManager.getAllTasks().size();
-    final Set<String> actualTaskTitles = taskManager.getAllTasks().stream().map(Task::getTitle)
+    final int actualSize = taskManager.getTasks().size();
+    final Set<String> actualTaskTitles = taskManager.getTasks().stream().map(Task::getTitle)
         .collect(Collectors.toSet());
-    final Set<String> actualTaskDescriptions = taskManager.getAllTasks().stream()
+    final Set<String> actualTaskDescriptions = taskManager.getTasks().stream()
         .map(Task::getDescription).collect(Collectors.toSet());
-    final int actualTasksIdsNumbers = taskManager.getAllTasks().stream().map(Task::getId)
+    final int actualTasksIdsNumbers = taskManager.getTasks().stream().map(Task::getId)
         .collect(Collectors.toSet()).size();
 
     Assertions.assertAll(
@@ -677,15 +677,15 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @DisplayName("addEpic(Epic) - saves an epic to the task manager.")
   void addEpicShouldSaveEpicInTaskManager() {
     Epic epicToAdd = TestDataBuilder.buildEpic("epic", "d");
-    int expectedNumberOfEpic = taskManager.getAllEpics().size() + 1;
+    int expectedNumberOfEpic = taskManager.getEpics().size() + 1;
 
     Epic epic = taskManager.addEpic(epicToAdd);
-    int actualNumberOfEpics = taskManager.getAllEpics().size();
+    int actualNumberOfEpics = taskManager.getEpics().size();
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(taskManager.getEpicById(epic.getId()),
             "Epic was not found."),
-        () -> Assertions.assertNotNull(taskManager.getAllEpics(), "Epics are not returned."),
+        () -> Assertions.assertNotNull(taskManager.getEpics(), "Epics are not returned."),
         () -> Assertions.assertEquals(expectedNumberOfEpic, actualNumberOfEpics,
             "Incorrect number of epics.")
     );
@@ -714,10 +714,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
     int epicInMemoryId = epicInMemory.getId();
     Epic epicToAdd = TestDataBuilder.buildEpic(epicInMemoryId, "e2", "d");
-    int expectedNumberOfEpics = taskManager.getAllEpics().size() + 1;
+    int expectedNumberOfEpics = taskManager.getEpics().size() + 1;
 
     Epic epicAdded = taskManager.addEpic(epicToAdd);
-    int actualNumberOfEpics = taskManager.getAllEpics().size();
+    int actualNumberOfEpics = taskManager.getEpics().size();
 
     Assertions.assertAll(
         () -> Assertions.assertNotEquals(epicInMemoryId, epicAdded.getId(),
@@ -767,16 +767,16 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   void addSubtaskShouldSaveSubtaskInTaskManager() {
     Epic epicInMemory = taskManager.addEpic(TestDataBuilder.buildEpic("e1", "d"));
     Subtask subtaskToAdd = TestDataBuilder.buildSubtask("task", "d", epicInMemory.getId());
-    int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size() + 1;
+    int expectedNumberOfSubtasks = taskManager.getSubtasks().size() + 1;
 
     Subtask savedSubtask = taskManager.addSubtask(subtaskToAdd);
-    int actualNumberOfSubtasks = taskManager.getAllSubtasks().size();
+    int actualNumberOfSubtasks = taskManager.getSubtasks().size();
     boolean subtaskExistInEpic = taskManager.getSubtasksByEpicId(savedSubtask.getEpicId())
         .contains(savedSubtask);
 
     Assertions.assertAll(
         () -> Assertions.assertNotNull(savedSubtask, "Subtask was not found."),
-        () -> Assertions.assertNotNull(taskManager.getAllSubtasks(), "Subtasks are not returned."),
+        () -> Assertions.assertNotNull(taskManager.getSubtasks(), "Subtasks are not returned."),
         () -> Assertions.assertEquals(expectedNumberOfSubtasks, actualNumberOfSubtasks,
             "Incorrect number of tasks."),
         () -> Assertions.assertTrue(subtaskExistInEpic, "Subtask was not saved inside epic.")
@@ -814,10 +814,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     int subtaskInMemoryId = subtaskInMemory.getId();
     Subtask subtaskToAdd = TestDataBuilder.buildSubtask(subtaskInMemoryId, "t2", "d",
         subtaskInMemory.getEpicId());
-    int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size() + 1;
+    int expectedNumberOfSubtasks = taskManager.getSubtasks().size() + 1;
 
     Subtask subtaskAdded = taskManager.addSubtask(subtaskToAdd);
-    int actualNumberOfTasks = taskManager.getAllSubtasks().size();
+    int actualNumberOfTasks = taskManager.getSubtasks().size();
 
     Assertions.assertAll(
         () -> Assertions.assertNotEquals(subtaskInMemoryId, subtaskAdded.getId(),
@@ -863,7 +863,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @DisplayName("addSubtask(Subtask) - does not add a subtask to the task manager when epic id is invalid.")
   void addSubtaskShouldThrowAnExceptionAndNotAddSubtaskWithIncorrectEpicId() {
     Subtask subtaskToAdd = TestDataBuilder.buildSubtask("st1", "d", 0);
-    final int expectedNumberOfSubtasks = taskManager.getAllSubtasks().size();
+    final int expectedNumberOfSubtasks = taskManager.getSubtasks().size();
     final String expectedMessage = "Invalid epic Id";
 
     TaskValidationException actualException = Assertions.assertThrows(TaskValidationException.class,
@@ -874,7 +874,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
     Assertions.assertAll(
         () -> Assertions.assertTrue(actualException.getMessage().contains(expectedMessage),
             "Exception message should contain the expected text."),
-        () -> Assertions.assertEquals(expectedNumberOfSubtasks, taskManager.getAllSubtasks().size(),
+        () -> Assertions.assertEquals(expectedNumberOfSubtasks, taskManager.getSubtasks().size(),
             "Number of subtasks should remain the same after exception.")
     );
   }
@@ -894,7 +894,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
           taskManager.addSubtask(subtaskToAdd);
         });
     final boolean existsSubtaskAsSubtaskItself =
-        taskManager.getAllSubtasks().stream().anyMatch(sb -> sb.getEpicId() == sb.getId());
+        taskManager.getSubtasks().stream().anyMatch(sb -> sb.getEpicId() == sb.getId());
 
     Assertions.assertAll(
         () -> Assertions.assertTrue(actualException.getMessage().contains(expectedMessage),
@@ -966,7 +966,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   void addTaskShouldSaveNonConflictingTaskInTaskManager(Task task1, Task task2, String message) {
     Assertions.assertDoesNotThrow(() -> taskManager.addTask(task1), message);
     Assertions.assertDoesNotThrow(() -> taskManager.addTask(task2), message);
-    Assertions.assertEquals(2, taskManager.getAllTasks().size(), "Tasks should be added.");
+    Assertions.assertEquals(2, taskManager.getTasks().size(), "Tasks should be added.");
   }
 
   @ParameterizedTest

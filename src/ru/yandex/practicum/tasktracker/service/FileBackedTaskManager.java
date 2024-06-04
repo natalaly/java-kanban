@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import ru.yandex.practicum.tasktracker.exception.ManagerLoadException;
@@ -164,9 +165,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   private void load() {
     try (final BufferedReader br = new BufferedReader(
         new FileReader(file, StandardCharsets.UTF_8))) {
-      loadTask(br);
-      loadHistory(br);
-      loadPrioritized(br);
+      loadSection(br, TASKS_CSV_HEADER,HISTORY_HEADER);
+      loadSection(br,HISTORY_HEADER,PRIORITIZED_HEADER);
+      loadSection(br, PRIORITIZED_HEADER, "");
     } catch (IOException e) {
       throw new ManagerLoadException("An Error occurred during reading the file", e);
     }
@@ -175,99 +176,58 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
   private void save() {
     try (final Writer fileWriter = new FileWriter(file, StandardCharsets.UTF_8)) {
-      fileWriter.write(TASKS_CSV_HEADER + System.lineSeparator());
-      Stream.concat(
-          Stream.concat(getAllTasks().stream(), getAllEpics().stream()),
-          getAllSubtasks().stream()
-      ).forEach(task -> {
-        try {
-          fileWriter.write(task.toCsvLine() + System.lineSeparator());
-        } catch (IOException e) {
-          throw new ManagerSaveException(
-              "An error occurred during saving tasks from taskManager to the file.", e);
-        }
-      });
-      /* save history */
-      fileWriter.write(HISTORY_HEADER + System.lineSeparator());
-      getHistory().forEach(historyTask -> {
-            try {
-              fileWriter.write(historyTask.toCsvLine() + System.lineSeparator());
-            } catch (IOException e) {
-              throw new ManagerSaveException(
-                  "An error occurred during saving tasks from the history to the file.", e);
-            }
-          }
-      );
-      /* save prioritized */
-      fileWriter.write(PRIORITIZED_HEADER + System.lineSeparator());
-      getPrioritizedTasks().forEach(task -> {
-            try {
-              fileWriter.write(task.toCsvLine() + System.lineSeparator());
-            } catch (IOException e) {
-              throw new ManagerSaveException(
-                  "An error occurred during saving tasks  prioritized tasks  to the file.", e);
-            }
-          }
-      );
-
+      saveSection(fileWriter, TASKS_CSV_HEADER, getAllTasks());
+      saveSection(fileWriter, HISTORY_HEADER, historyManager.getHistory());
+      saveSection(fileWriter, PRIORITIZED_HEADER, new ArrayList<>(prioritizedTasks));
     } catch (IOException e) {
       throw new ManagerSaveException("An error occurred during saving to the file.", e);
     }
   }
 
-  private void loadTask(final BufferedReader br) throws IOException {
+  private void saveSection(final Writer fileWriter, final String header, final List<Task> tasksToSave) throws IOException {
+    fileWriter.write(header + System.lineSeparator());
+    tasksToSave.forEach(task -> {
+      try {
+        fileWriter.write(task.toCsvLine() + System.lineSeparator());
+      } catch (IOException e) {
+        throw new ManagerSaveException(
+            "An error occurred during saving tasks from taskManager to the file.", e);
+      }
+    });
+  }
+
+  private void loadSection(final BufferedReader br,final String start, final String end) throws IOException {
     final List<String> taskData = new ArrayList<>();
+
     while (br.ready()) {
       String line = br.readLine();
-      if (line.equals(HISTORY_HEADER)) {
+      if (line.equals(end)) {
         break;
       }
       taskData.add(line);
     }
     if (!taskData.isEmpty()) {
-      this.restoreAll(taskData, TASKS_CSV_HEADER);
+      this.restore(taskData, start);
     }
   }
 
-  private void loadHistory(final BufferedReader br) throws IOException {
-    final List<String> historydata = new ArrayList<>();
-    while (br.ready()) {
-      String line = br.readLine();
-      if (line.equals(PRIORITIZED_HEADER)) {
-        break;
-      }
-      historydata.add(line);
-    }
-    if (!historydata.isEmpty()) {
-      this.restoreAll(historydata, HISTORY_HEADER);
-    }
-  }
-
-  private void loadPrioritized(final BufferedReader br) throws IOException {
-    final List<String> prioritizedData = new ArrayList<>();
-    while (br.ready()) {
-      prioritizedData.add(br.readLine());
-    }
-    if (!prioritizedData.isEmpty()) {
-      this.restoreAll(prioritizedData, PRIORITIZED_HEADER);
-    }
-  }
-
-  private void restoreAll(final List<String> tasks, final String header) {
+  private void restore(final List<String> tasks, final String header) {
     switch (header) {
-      case TASKS_CSV_HEADER -> restoreTasks(tasks);
-      case HISTORY_HEADER -> restoreHistory(tasks);
-      case PRIORITIZED_HEADER -> restorePrioritized(tasks);
+      case TASKS_CSV_HEADER -> restoreByTaskType(tasks);
+      case HISTORY_HEADER -> restoreTasks(tasks,header, historyManager::add);
+      case PRIORITIZED_HEADER -> restoreTasks(tasks,header, prioritizedTasks::add);
     }
   }
 
-  private void restoreTasks(final List<String> tasks) {
+  private void restoreByTaskType(final List<String> tasks) {
     for (String eachLine : tasks) {
       if (eachLine.equals(TASKS_CSV_HEADER) || eachLine.isBlank()) {
         continue;
       }
+
       final Task taskFromFile = this.fromString(eachLine);
       final TaskType typeFromFile = taskFromFile.getType();
+
       switch (typeFromFile) {
         case TASK -> this.tasks.put(taskFromFile.getId(), taskFromFile);
         case EPIC -> this.epics.put(taskFromFile.getId(), (Epic) taskFromFile);
@@ -280,29 +240,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
   }
 
-  private void restoreHistory(final List<String> tasksLines) {
+  private void restoreTasks(final List<String> tasksLines, final String header, Consumer<Task> action) {
     for (String eachLine : tasksLines) {
-      if (eachLine.equals(HISTORY_HEADER) || eachLine.isBlank()) {
+      if (eachLine.equals(header) || eachLine.isBlank()) {
         continue;
       }
-      Task taskToRestore = this.fromString(eachLine);
-      if (TaskType.EPIC.equals(taskToRestore.getType())) {
-        taskToRestore = epics.get(taskToRestore.getId());
-      }
-      historyManager.add(taskToRestore);
-    }
-  }
 
-  private void restorePrioritized(final List<String> tasksLines) {
-    for (String eachLine : tasksLines) {
-      if (eachLine.equals(PRIORITIZED_HEADER) || eachLine.isBlank()) {
-        continue;
-      }
       Task taskToRestore = this.fromString(eachLine);
+
       if (TaskType.EPIC.equals(taskToRestore.getType())) {
         taskToRestore = epics.get(taskToRestore.getId());
       }
-      prioritizedTasks.add(taskToRestore);
+      action.accept(taskToRestore);
     }
   }
 
@@ -362,5 +311,12 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
       }
     }
     throw new IllegalArgumentException("Unknown task type: " + type);
+  }
+
+  private List<Task> getAllTasks() {
+    return Stream.concat(
+        Stream.concat(tasks.values().stream(), epics.values().stream()),
+        subtasks.values().stream()
+    ).toList();
   }
 }

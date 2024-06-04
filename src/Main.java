@@ -109,21 +109,21 @@ public class Main {
     /* WHEN */
     TaskManager newManage = FileBackedTaskManager.loadFromFile(temp);
     List<Integer> taskIds = new ArrayList<>();
-    newManage.getAllTasks().forEach(a -> taskIds.add(a.getId()));
+    newManage.getTasks().forEach(a -> taskIds.add(a.getId()));
     List<Integer> epicIds = new ArrayList<>();
-    newManage.getAllEpics().forEach(a -> epicIds.add(a.getId()));
+    newManage.getEpics().forEach(a -> epicIds.add(a.getId()));
     List<Integer> subtaskIds = new ArrayList<>();
-    newManage.getAllSubtasks().forEach(a -> subtaskIds.add(a.getId()));
+    newManage.getSubtasks().forEach(a -> subtaskIds.add(a.getId()));
 
     /* THEN */
     System.out.println(
-        "newManage.getAllTasks().size() should be 3: " + newManage.getAllTasks().size());
+        "newManage.getAllTasks().size() should be 3: " + newManage.getTasks().size());
     System.out.println("Tasks ids should be 1,6,7 : " + taskIds);
     System.out.println(
-        "newManage.getAllEpics().size() should be 2: " + newManage.getAllEpics().size());
+        "newManage.getAllEpics().size() should be 2: " + newManage.getEpics().size());
     System.out.println("Epics ids should be 2, 4 : " + epicIds);
     System.out.println(
-        "newManage.getAllSubtasks().size() should be 2: " + newManage.getAllSubtasks().size());
+        "newManage.getAllSubtasks().size() should be 2: " + newManage.getSubtasks().size());
     System.out.println("Subtasks ids should 3, 5 : " + subtaskIds);
     System.out.println("newManage.getHistory() should have epic id=2: ");
     newManage.getHistory().forEach(System.out::println);
@@ -219,11 +219,11 @@ public class Main {
     tm.addEpic(epic2);
 
     System.out.println("Tasks: ");
-    System.out.println(tm.getAllTasks());
+    System.out.println(tm.getTasks());
     System.out.println("Epics: ");
-    System.out.println(tm.getAllEpics());
+    System.out.println(tm.getEpics());
     System.out.println("Subtasks:");
-    System.out.println(tm.getAllSubtasks());
+    System.out.println(tm.getSubtasks());
     System.out.println();
   }
 

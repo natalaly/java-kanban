@@ -48,17 +48,17 @@ public class InMemoryTaskManager implements TaskManager {
       Comparator.comparing(Task::getStartTime));
 
   @Override
-  public List<Task> getAllTasks() {
+  public List<Task> getTasks() {
     return new ArrayList<>(tasks.values());
   }
 
   @Override
-  public List<Epic> getAllEpics() {
+  public List<Epic> getEpics() {
     return new ArrayList<>(epics.values());
   }
 
   @Override
-  public List<Subtask> getAllSubtasks() {
+  public List<Subtask> getSubtasks() {
     return new ArrayList<>(subtasks.values());
   }
 

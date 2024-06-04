@@ -26,11 +26,11 @@ import java.util.List;
  */
 public interface TaskManager {
 
-  List<Task> getAllTasks();
+  List<Task> getTasks();
 
-  List<Epic> getAllEpics();
+  List<Epic> getEpics();
 
-  List<Subtask> getAllSubtasks();
+  List<Subtask> getSubtasks();
 
   List<Task> getPrioritizedTasks();
 
