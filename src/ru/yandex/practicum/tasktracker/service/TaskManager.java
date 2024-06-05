@@ -36,18 +36,6 @@ public interface TaskManager {
 
   List<Task> getHistory();
 
-  void clearTasks();
-
-  void clearEpics();
-
-  void clearSubtasks();
-
-  void deleteTask(final int id);
-
-  void deleteEpic(final int id);
-
-  void deleteSubtask(final int id);
-
   Task getTaskById(final int id);
 
   Epic getEpicById(final int id);
@@ -67,5 +55,19 @@ public interface TaskManager {
   void updateEpic(final Epic epic);
 
   void updateSubtask(final Subtask subtask);
+
+  void clearTasks();
+
+  void clearEpics();
+
+  void clearSubtasks();
+
+  void deleteTask(final int id);
+
+  void deleteEpic(final int id);
+
+  void deleteSubtask(final int id);
+
+
 
 }

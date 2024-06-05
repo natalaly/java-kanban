@@ -1,6 +1,10 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.File;
+import java.time.LocalDateTime;
+import ru.yandex.practicum.tasktracker.adapter.LocaleDateTimeAdapter;
 
 /**
  * Utility class, is used for getting default implementations of various managers. Provides methods
@@ -24,5 +28,12 @@ public class Managers {
 
   public static TaskManager getFileBackedTaskManager(final File file) {
     return FileBackedTaskManager.loadFromFile(file);
+  }
+
+  public static Gson getGson() {
+    GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LocalDateTime.class, new LocaleDateTimeAdapter())
+        .serializeNulls();;
+    return gsonBuilder.create();
   }
 }
