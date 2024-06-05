@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
@@ -67,6 +68,13 @@ public class InMemoryTaskManager implements TaskManager {
     return new ArrayList<>(prioritizedTasks);
   }
 
+  /**
+   * Retrieves the history of tasks from the history manager. This method fetches the history list
+   * from the history manager, resolves each task to its corresponding object from the appropriate
+   * collection.
+   *
+   * @return a list of tasks in the history
+   */
   @Override
   public List<Task> getHistory() {
     return historyManager.getHistory().stream()
@@ -80,18 +88,20 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void clearTasks() {
-    tasks.values().stream().peek(t -> historyManager.remove(t.getId()))
-        .filter(t -> t.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
+    tasks.values().forEach(t -> {
+      historyManager.remove(t.getId());
+      removePrioritized(t);
+    });
     tasks.clear();
   }
 
   @Override
   public void clearEpics() {
-    subtasks.values().stream().peek(st -> historyManager.remove(st.getId()))
-        .filter(st -> st.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
-    epics.values().forEach(e -> historyManager.remove(e.getId()));
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      removePrioritized(st);
+    });
+    epics.keySet().forEach(historyManager::remove);
     subtasks.clear();
     epics.clear();
   }
@@ -99,36 +109,34 @@ public class InMemoryTaskManager implements TaskManager {
   @Override
   public void clearSubtasks() {
     epics.values().forEach(Epic::clearSubtasks);
-    subtasks.values().stream()
-        .peek(st -> historyManager.remove(st.getId()))
-        .filter(st -> st.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      removePrioritized(st);
+    });
     subtasks.clear();
   }
 
   @Override
   public void deleteTask(final int id) {
-    Optional.ofNullable(tasks.remove(id))
-        .ifPresent(removedTask -> {
-          historyManager.remove(id);
-          if (removedTask.getStartTime() != null) {
-            prioritizedTasks.remove(removedTask);
-          }
-        });
+    Task removedTask = tasks.remove(id);
+    if (removedTask == null) {
+      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
+    }
+    historyManager.remove(id);
+    removePrioritized(removedTask);
   }
 
   @Override
   public void deleteEpic(final int id) {
     final Epic epic = epics.remove(id);
-    if (epic != null) {
-      epic.getSubtasks().forEach(s -> {
-        subtasks.remove(s.getId());
-        historyManager.remove(s.getId());
-        if (s.getStartTime() != null) {
-          prioritizedTasks.remove(s);
-        }
-      });
+    if (epic == null) {
+      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
     }
+    epic.getSubtasks().forEach(s -> {
+      subtasks.remove(s.getId());
+      historyManager.remove(s.getId());
+      removePrioritized(s);
+    });
     historyManager.remove(id);
   }
 
@@ -136,14 +144,12 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteSubtask(final int id) {
     final Subtask subtask = subtasks.remove(id);
     if (subtask == null) {
-      return;
+      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
     }
     final int epicId = subtask.getEpicId();
     epics.get(epicId).removeSubtask(subtask);
     historyManager.remove(id);
-    if (subtask.getStartTime() != null) {
-      prioritizedTasks.remove(subtask);
-    }
+    removePrioritized(subtask);
   }
 
   @Override
@@ -221,9 +227,7 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
-    if (taskInMemory.getStartTime() != null) {
-      prioritizedTasks.remove(taskInMemory);
-    }
+    removePrioritized(taskInMemory);
     addPrioritized(taskToUpdate.copy());
     tasks.put(taskToUpdate.getId(), taskToUpdate.copy());
   }
@@ -254,9 +258,7 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The subtask " + subtask + "does not exist in the TaskManager");
     }
-    if (subtaskInMemory.getStartTime() != null) {
-      prioritizedTasks.remove(subtaskInMemory);
-    }
+    removePrioritized(subtaskInMemory);
     final Subtask subtaskToUpdate = subtask.copy();
     addPrioritized(subtaskToUpdate);
     subtasks.put(subtask.getId(), subtaskToUpdate);
@@ -314,6 +316,13 @@ public class InMemoryTaskManager implements TaskManager {
   private boolean hasTimeConflict(final Task task1, final Task task2) {
     return task2 != null && task1.getStartTime().isBefore(task2.getEndTime()) &&
         task1.getEndTime().isAfter(task2.getStartTime());
+  }
+
+  private void removePrioritized(Task task) {
+    if (task != null && task.getStartTime() != null) {
+      prioritizedTasks.remove(task);
+    }
+
   }
 
 }
