@@ -29,7 +29,7 @@ public class Main {
 
   public static void main(String[] args) {
 
-    int choice = 0;
+    int choice = 2;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -49,42 +49,14 @@ public class Main {
   static void useCaseFile() {
     /* GIVEN */
     /* Create tasks data: */
-    task1 = new Task();
-    task1.setTitle("task");
-    task1.setDescription("t description");
+    createTasksData();
 
-    task2 = new Task();
-    task2.setTitle("task2");
-    task2.setDescription("t2");
-    task2.setDuration(Duration.ofMinutes(20));
-    task2.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 20, 00));
-
-    task3 = new Task();
-    task3.setTitle("task3");
-    task3.setDescription("t3");
-    task3.setDuration(Duration.ofMinutes(20));
-    task3.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 00, 00));
-
-    epic1 = new Epic();
-    epic1.setTitle("epic");
-    epic1.setDescription("null");
-
-    epic2 = new Epic();
-    epic2.setTitle("epic2");
-    epic2.setDescription("null");
-
-    sb1 = new Subtask();
-    sb1.setTitle("sbtask");
-    sb1.setDescription("st description");
-
-    sb2 = new Subtask();
-    sb2.setTitle("sbtask2");
-    sb2.setDescription("st2 description");
-
+    /* An empty old manager */
     Path path = Path.of("resources/test/useCaseFile.csv");
     File temp = path.toFile();
     TaskManager oldManager = FileBackedTaskManager.loadFromFile(temp);
 
+    /* Old manager filled with tasks */
     oldManager.addTask(task1); // add task -1
     oldManager.addEpic(epic1); // add epic -2
     sb1.setEpicId(epic1.getId());
@@ -95,6 +67,7 @@ public class Main {
     oldManager.addTask(task2); // add task2-6
     oldManager.addTask(task3); // add task3 -7
 
+    /* Update Subtask */
     sb2.setStatus(TaskStatus.DONE);
     sb2.setDuration(Duration.ofMinutes(15));
     sb2.setStartTime(time2);
@@ -131,6 +104,49 @@ public class Main {
     System.out.println("THEN: newManage.getPrioritizedTasks():");
     newManage.getPrioritizedTasks().forEach(System.out::println);
 
+    System.out.println();
+    System.out.println();
+//    ///////////      ///////////      ///////////          //////////       //////////
+//    Task t = new Task();
+//    t.setTitle("t");
+//    t.setDescription("d");
+//    t.setDuration(Duration.ofMinutes(7));
+//    t.setStartTime(LocalDateTime.of(2024, 5,21,12,20));
+//    newManage.addTask(t);
+
+  }
+  private static void createTasksData() {
+    task1 = new Task();
+    task1.setTitle("task");
+    task1.setDescription("t description");
+
+    task2 = new Task();
+    task2.setTitle("task2");
+    task2.setDescription("t2");
+    task2.setDuration(Duration.ofMinutes(20));
+    task2.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 20, 00));
+
+    task3 = new Task();
+    task3.setTitle("task3");
+    task3.setDescription("t3");
+    task3.setDuration(Duration.ofMinutes(20));
+    task3.setStartTime(LocalDateTime.of(2024, 05, 21, 12, 00, 00));
+
+    epic1 = new Epic();
+    epic1.setTitle("epic");
+    epic1.setDescription("null");
+
+    epic2 = new Epic();
+    epic2.setTitle("epic2");
+    epic2.setDescription("null");
+
+    sb1 = new Subtask();
+    sb1.setTitle("sbtask");
+    sb1.setDescription("st description");
+
+    sb2 = new Subtask();
+    sb2.setTitle("sbtask2");
+    sb2.setDescription("st2 description");
   }
 
   /**

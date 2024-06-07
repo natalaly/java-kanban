@@ -120,7 +120,8 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteTask(final int id) {
     Task removedTask = tasks.remove(id);
     if (removedTask == null) {
-      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
+//      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
+      return;
     }
     historyManager.remove(id);
     removePrioritized(removedTask);
@@ -153,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public Task getTaskById(final int id) {
+  public Task getTaskById(final int id) throws TaskNotFoundException {
     final Optional<Task> t = Optional.ofNullable(tasks.get(id));
     t.ifPresent(historyManager::add);
     return t.orElseThrow(() -> new TaskNotFoundException("Task with Id " + id + " was not found."))
@@ -186,7 +187,7 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public Task addTask(final Task task) {
+  public Task addTask(final Task task) throws TaskPrioritizationException {
     task.setId(generateId());
     addPrioritized(task);
     tasks.put(task.getId(), task.copy());
@@ -221,7 +222,7 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public void updateTask(final Task taskToUpdate) {
+  public void updateTask(final Task taskToUpdate) throws TaskNotFoundException, TaskPrioritizationException{
     final Task taskInMemory = tasks.get(taskToUpdate.getId());
     if (taskInMemory == null) {
       throw new TaskNotFoundException(
@@ -279,7 +280,7 @@ public class InMemoryTaskManager implements TaskManager {
    * @param taskToAdd
    * @throws TaskValidationException if the task has a time conflict with an existing task.
    */
-  private void addPrioritized(final Task taskToAdd) {
+  private void addPrioritized(final Task taskToAdd) throws TaskPrioritizationException {
     if (!canBePrioritized(taskToAdd)) {
       return;
     }
@@ -294,7 +295,7 @@ public class InMemoryTaskManager implements TaskManager {
    * @return {@Code true} if {@code taskToCheck} meets above requirements
    * @throws TaskPrioritizationException if the task has a time conflict with an existing task.
    */
-  private boolean canBePrioritized(final Task taskToCheck) {
+  private boolean canBePrioritized(final Task taskToCheck) throws TaskPrioritizationException {
     Objects.requireNonNull(taskToCheck);
     if (taskToCheck.getStartTime() == null) {
       return false;
@@ -322,7 +323,6 @@ public class InMemoryTaskManager implements TaskManager {
     if (task != null && task.getStartTime() != null) {
       prioritizedTasks.remove(task);
     }
-
   }
 
 }
