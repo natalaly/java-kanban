@@ -1,6 +1,7 @@
 package ru.yandex.practicum.tasktracker.server;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
@@ -19,8 +20,49 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
  *
  * @see TaskManager
  */
-public class BaseHttpHandler {
+abstract public class BaseHttpHandler implements HttpHandler {
+
   private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
+
+  @Override
+  public void handle(HttpExchange exchange) {
+    try {
+      final String path = exchange.getRequestURI().getPath();
+      final String requestMethod = exchange.getRequestMethod();
+      final Endpoint endpoint = Endpoint.getEndpoint(requestMethod,path);
+
+      switch (requestMethod) {
+        case "GET": {
+          handleGET(exchange, path);
+          break;
+        }
+        case "POST": {
+          handlePOST(exchange, path);
+          break;
+        }
+        case "DELETE": {
+          handleDelete(exchange, path);
+          break;
+        }
+        default: {
+          System.out.println(
+              "Only GET, PUT or DELETE methods can be accepted but received: " + requestMethod);
+          sendNotAllowed405(exchange);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    } finally {
+      exchange.close();
+    }
+  }
+
+  protected abstract  void handleDelete(HttpExchange exchange, String path) throws IOException;
+
+  protected abstract void handlePOST(HttpExchange exchange, String path) throws IOException;
+
+  protected abstract void handleGET(HttpExchange exchange, String path) throws IOException;
+
 
   public void sendText200(HttpExchange h, String text) throws IOException {
     sendResponse(h, text, 200);
@@ -45,7 +87,6 @@ public class BaseHttpHandler {
   public void sendNotAllowed405(HttpExchange h) throws IOException {
     sendResponse(h, 405);
   }
-
 
   public void sendHasInteractions406(HttpExchange h) throws IOException {
     sendResponse(h, 406);

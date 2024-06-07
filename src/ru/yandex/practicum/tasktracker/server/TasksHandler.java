@@ -17,7 +17,7 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
 /**
  * HTTP handler class for the path "/tasks"
  */
-public class TasksHandler extends BaseHttpHandler implements HttpHandler {
+public class TasksHandler extends BaseHttpHandler {
 
   private static final String TASKS_PATH = "^/tasks$";
   private static final String TASKS_ID_PATH = "^/tasks/\\d+$";
@@ -32,47 +32,112 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
   }
 
   @Override
-  public void handle(HttpExchange exchange) {
-    try {
-      final String path = exchange.getRequestURI().getPath();
-      final String requestMethod = exchange.getRequestMethod();
-
-      switch (requestMethod) {
-        case "GET": {
-          handleGET(exchange, path);
-          break;
-        }
-        case "POST": {
-          handlePOST(exchange, path);
-          break;
-        }
-        case "DELETE": {
-          handleDelete(exchange, path);
-          break;
-        }
-        default: {
-          System.out.println(
-              "Only GET, PUT or DELETE methods can be accepted but received: " + requestMethod);
-          sendNotAllowed405(exchange);
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      exchange.close();
+  protected void handleGET(HttpExchange exchange, String path) throws IOException {
+//    if (Pattern.matches(TASKS_PATH, path)) {
+//      handleGetTasks(exchange, path);
+//    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
+//      handleGetTaskById(exchange, path);
+//    } else {
+//      System.out.println("Wrong path - 400");
+//      sendBadRequest400(exchange);
+//    }
+    Endpoint endpoint = Endpoint.getEndpoint("GET", path);
+    if (Endpoint.GET_TASKS.equals(endpoint)) {
+      handleGetTasks(exchange, path);
+    } else if (Endpoint.GET_TASKS_ID.equals(endpoint)) {
+      handleGetTaskById(exchange, path);
+    } else {
+      System.out.println("Wrong path - 400");
+      sendBadRequest400(exchange);
     }
 
 
   }
 
-  private void handlePOST(HttpExchange exchange, String path) throws IOException {
-    if (Pattern.matches(TASKS_PATH, path)) {
+  @Override
+  protected void handlePOST(HttpExchange exchange, String path) throws IOException {
+//    if (Pattern.matches(TASKS_PATH, path)) {
+//      handleAddTask(exchange);
+//    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
+//      handleUpdateTask(exchange, path);
+//    } else {
+//      System.out.println("Wrong path - 400");
+//      sendBadRequest400(exchange);
+//    }
+//
+    Endpoint endpoint = Endpoint.getEndpoint("POST", path);
+    if (Endpoint.POST_TASKS.equals(endpoint)) {
       handleAddTask(exchange);
-    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
+    } else if (Endpoint.POST_TASKS_ID.equals(endpoint)) {
       handleUpdateTask(exchange, path);
     } else {
       System.out.println("Wrong path - 400");
       sendBadRequest400(exchange);
+    }
+
+  }
+
+  @Override
+  protected void handleDelete(HttpExchange exchange, String path) throws IOException {
+    Endpoint endpoint = Endpoint.getEndpoint("DELETE", path);
+    if (!Endpoint.DELETE_TASKS_ID.equals(endpoint)) {
+      System.out.println("Wrong path - 400");
+      sendBadRequest400(exchange);
+      return;
+    }
+//    final int id = HandlersHelper.parsePathID(path);
+    final String pathId = path.replaceFirst("/tasks/", "");
+    final int id = parsePathID(pathId);
+//
+    if (id <= 0) {
+      sendNotAllowed405(exchange);
+      System.out.println("Invalid Id format - 405");
+      return;
+    }
+    taskManager.deleteTask(id);
+    System.out.println("Task was deleted, id =" + id);
+    sendSuccess200(exchange);
+//    if (!Pattern.matches(TASKS_ID_PATH, path)) {
+//      System.out.println("Wrong path - 400");
+//      sendBadRequest400(exchange);
+//      return;
+//    }
+//    final String pathId = path.replaceFirst("/tasks/", "");
+//    final int id = parsePathID(pathId);
+//    if (id <= 0) {
+//      System.out.println("Invalid Id format - 405");
+//      sendNotAllowed405(exchange);
+//      return;
+//    }
+//    taskManager.deleteTask(id);
+//    System.out.println("Task was deleted, id =" + id);
+//    sendSuccess200(exchange);
+  }
+
+  private void handleGetTasks(HttpExchange exchange, String path) throws IOException {
+    String response = gson.toJson(taskManager.getTasks());
+    sendText200(exchange, response);
+    System.out.println("Get Task List - 200");
+  }
+
+  private void handleGetTaskById(HttpExchange exchange, String path) throws IOException {
+//    final int id = HandlersHelper.parsePathID(path);
+    final String pathId = path.replaceFirst("/tasks/", "");
+    final int id = parsePathID(pathId);
+//
+    if (id <= 0) {
+      sendNotAllowed405(exchange);
+      System.out.println("Invalid Id format - 405");
+      return;
+    }
+    try {
+      String response = gson.toJson(taskManager.getTaskById(id));
+      System.out.println("Viewed Task with id =" + id);
+      sendText200(exchange, response);
+      System.out.println("get task by id - 200 ");
+    } catch (TaskNotFoundException e) {
+      sendNotFound404(exchange);
+      System.out.println("Not found task with id " + id + "- 404");
     }
   }
 
@@ -97,11 +162,13 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
   }
 
   private void handleUpdateTask(HttpExchange exchange, String path) throws IOException {
+//    final int id = HandlersHelper.parsePathID(path);
     final String pathId = path.replaceFirst("/tasks/", "");
     final int id = parsePathID(pathId);
+//
     if (id <= 0) {
       sendNotAllowed405(exchange);
-      System.out.println("Wrong Id format - 405");
+      System.out.println("Invalid Id format - 405");
       return;
     }
 
@@ -140,62 +207,7 @@ public class TasksHandler extends BaseHttpHandler implements HttpHandler {
         jsonObject.has("startTime");
   }
 
-  private void handleGET(HttpExchange exchange, String path) throws IOException {
-   if (Pattern.matches(TASKS_PATH, path)) {
-     handleGetTasks(exchange,path);
-   } else if (Pattern.matches(TASKS_ID_PATH, path)) {
-     handleGetTaskById(exchange,path);
-   } else {
-     System.out.println("Wrong path - 400");
-     sendBadRequest400(exchange);
-   }
-  }
-
-  private void handleGetTasks(HttpExchange exchange, String path) throws IOException {
-    String response = gson.toJson(taskManager.getTasks());
-    sendText200(exchange, response);
-    System.out.println("Get Task List - 200");
-  }
-
-  private void handleGetTaskById(HttpExchange exchange, String path) throws IOException {
-    final String pathId = path.replaceFirst("/tasks/", "");
-    final int id = parsePathID(pathId);
-    if (id <= 0) {
-      sendNotAllowed405(exchange);
-      System.out.println("Wrong Id format - 405");
-      return;
-    }
-    try {
-      String response = gson.toJson(taskManager.getTaskById(id));
-      System.out.println("Viewed Task with id =" + id);
-      sendText200(exchange, response);
-      System.out.println("get task by id - 200 ");
-    } catch (TaskNotFoundException e) {
-      sendNotFound404(exchange);
-      System.out.println("Not found task with id - 404");
-    }
-  }
-
-  //TODO should we handle case when id is valid but not exist in TM?
-  private void handleDelete(HttpExchange exchange, String path) throws IOException {
-    if (!Pattern.matches(TASKS_ID_PATH, path)) {
-      System.out.println("Wrong path - 400");
-      sendBadRequest400(exchange);
-      return;
-    }
-    final String pathId = path.replaceFirst("/tasks/", "");
-    final int id = parsePathID(pathId);
-    if (id <= 0) {
-      System.out.println("Invalid Id format - 405");
-      sendNotAllowed405(exchange);
-      return;
-    }
-    taskManager.deleteTask(id);
-    System.out.println("Task was deleted, id =" + id);
-    sendSuccess200(exchange);
-  }
-
-  //  TODO make PathHandler class?
+//  TODO use HandlersHelper.parsePathID(path);
   private int parsePathID(String path) {
     try {
       return Integer.parseInt(path);
