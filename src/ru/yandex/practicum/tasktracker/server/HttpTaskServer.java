@@ -33,9 +33,9 @@ public class HttpTaskServer {
     this.taskManager = taskManager;
     gson = Managers.getGson();
     server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
-    server.createContext("/tasks", new TasksHandler(this.taskManager, this.gson ));
+    server.createContext("/tasks", new TasksHandler(this.taskManager, this.gson));
 //    server.createContext("/subtasks",new SubtaskHandler());
-//    server.createContext("/epics",new EpicHandler());
+    server.createContext("/epics",new EpicHandler(this.taskManager, this.gson));
 //    server.createContext("/history",new HistoryHandler());
 //    server.createContext("/prioritized",new PrioritizedHandler());
   }

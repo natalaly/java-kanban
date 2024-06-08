@@ -7,27 +7,33 @@ public enum Endpoint {
   /* GET endpoints */
   GET_TASKS("^/tasks$") ,
   GET_TASKS_ID("^/tasks/\\d+$"),
-  GET_SUBTASKS(""),
-  GET_SUBTASKS_ID(""),
-  GET_EPICS(""),
-  GET_EPICS_ID(""),
-  GET_EPICS_ID_SUBTASKS(""),
-  GET_HISTORY(""),
-  GET_PRIORITIZED(""),
+
+  GET_SUBTASKS("^/subtasks$"),
+  GET_SUBTASKS_ID("^/subtasks/\\d+$"),
+
+  GET_EPICS("^/epics$"),
+  GET_EPICS_ID("^/epics/\\d+$"),
+  GET_EPICS_ID_SUBTASKS("^/epics/\\d+/subtasks$"),
+
+  GET_HISTORY("^/history$"),
+  GET_PRIORITIZED("^/prioritized$"),
 
   /* POST endpoints */
   POST_TASKS("^/tasks$"),
   POST_TASKS_ID("^/tasks/\\d+$"),
-  POST_SUBTASKS(""),
-  POST_SUBTASKS_ID(""),
-  POST_EPIC(""),
+
+  POST_SUBTASKS("^/subtasks$"),
+  POST_SUBTASKS_ID("^/subtasks/\\d+$"),
+
+  POST_EPIC("^/epics$"),
 
   /* DELETE endpoints */
   DELETE_TASKS_ID("^/tasks/\\d+$"),
-  DELETE_SUBTASKS_ID(""),
-  DELETE_EPICS_ID(""),
+  DELETE_SUBTASKS_ID("^/subtasks/\\d+$"),
+  DELETE_EPICS_ID("^/epics/\\d+$"),
 
-  UNKNOWN("");
+  UNKNOWN("^(?!/tasks(?:$|/.*))^(?!/epics(?:$|/.*))^(?!/subtasks(?:$|/.*)).*^(?!/history(?:$|/.*))^(?!/prioritized(?:$|/.*)).*"
+  );
 
   private String path;
 

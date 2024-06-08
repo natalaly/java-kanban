@@ -33,11 +33,11 @@ abstract public class BaseHttpHandler implements HttpHandler {
 
       switch (requestMethod) {
         case "GET": {
-          handleGET(exchange, path);
+          handleGet(exchange, path);
           break;
         }
         case "POST": {
-          handlePOST(exchange, path);
+          handlePost(exchange, path);
           break;
         }
         case "DELETE": {
@@ -59,9 +59,9 @@ abstract public class BaseHttpHandler implements HttpHandler {
 
   protected abstract  void handleDelete(HttpExchange exchange, String path) throws IOException;
 
-  protected abstract void handlePOST(HttpExchange exchange, String path) throws IOException;
+  protected abstract void handlePost(HttpExchange exchange, String path) throws IOException;
 
-  protected abstract void handleGET(HttpExchange exchange, String path) throws IOException;
+  protected abstract void handleGet(HttpExchange exchange, String path) throws IOException;
 
 
   public void sendText200(HttpExchange h, String text) throws IOException {

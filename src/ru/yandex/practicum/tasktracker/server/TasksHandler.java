@@ -32,7 +32,7 @@ public class TasksHandler extends BaseHttpHandler {
   }
 
   @Override
-  protected void handleGET(HttpExchange exchange, String path) throws IOException {
+  protected void handleGet(HttpExchange exchange, String path) throws IOException {
 //    if (Pattern.matches(TASKS_PATH, path)) {
 //      handleGetTasks(exchange, path);
 //    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
@@ -55,7 +55,7 @@ public class TasksHandler extends BaseHttpHandler {
   }
 
   @Override
-  protected void handlePOST(HttpExchange exchange, String path) throws IOException {
+  protected void handlePost(HttpExchange exchange, String path) throws IOException {
 //    if (Pattern.matches(TASKS_PATH, path)) {
 //      handleAddTask(exchange);
 //    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
