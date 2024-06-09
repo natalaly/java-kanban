@@ -41,7 +41,6 @@ public class EpicHandler extends BaseHttpHandler {
     }
   }
 
-
   @Override
   protected void handlePost(HttpExchange exchange, String path) throws IOException {
     Endpoint endpoint = Endpoint.getEndpoint("POST", path);
