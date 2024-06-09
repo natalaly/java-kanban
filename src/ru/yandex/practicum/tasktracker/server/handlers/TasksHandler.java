@@ -1,17 +1,16 @@
-package ru.yandex.practicum.tasktracker.server;
+package ru.yandex.practicum.tasktracker.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Pattern;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.server.Endpoint;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
@@ -33,14 +32,6 @@ public class TasksHandler extends BaseHttpHandler {
 
   @Override
   protected void handleGet(HttpExchange exchange, String path) throws IOException {
-//    if (Pattern.matches(TASKS_PATH, path)) {
-//      handleGetTasks(exchange, path);
-//    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
-//      handleGetTaskById(exchange, path);
-//    } else {
-//      System.out.println("Wrong path - 400");
-//      sendBadRequest400(exchange);
-//    }
     Endpoint endpoint = Endpoint.getEndpoint("GET", path);
     if (Endpoint.GET_TASKS.equals(endpoint)) {
       handleGetTasks(exchange, path);
@@ -56,15 +47,6 @@ public class TasksHandler extends BaseHttpHandler {
 
   @Override
   protected void handlePost(HttpExchange exchange, String path) throws IOException {
-//    if (Pattern.matches(TASKS_PATH, path)) {
-//      handleAddTask(exchange);
-//    } else if (Pattern.matches(TASKS_ID_PATH, path)) {
-//      handleUpdateTask(exchange, path);
-//    } else {
-//      System.out.println("Wrong path - 400");
-//      sendBadRequest400(exchange);
-//    }
-//
     Endpoint endpoint = Endpoint.getEndpoint("POST", path);
     if (Endpoint.POST_TASKS.equals(endpoint)) {
       handleAddTask(exchange);
@@ -97,21 +79,6 @@ public class TasksHandler extends BaseHttpHandler {
     taskManager.deleteTask(id);
     System.out.println("Task was deleted, id =" + id);
     sendSuccess200(exchange);
-//    if (!Pattern.matches(TASKS_ID_PATH, path)) {
-//      System.out.println("Wrong path - 400");
-//      sendBadRequest400(exchange);
-//      return;
-//    }
-//    final String pathId = path.replaceFirst("/tasks/", "");
-//    final int id = parsePathID(pathId);
-//    if (id <= 0) {
-//      System.out.println("Invalid Id format - 405");
-//      sendNotAllowed405(exchange);
-//      return;
-//    }
-//    taskManager.deleteTask(id);
-//    System.out.println("Task was deleted, id =" + id);
-//    sendSuccess200(exchange);
   }
 
   private void handleGetTasks(HttpExchange exchange, String path) throws IOException {

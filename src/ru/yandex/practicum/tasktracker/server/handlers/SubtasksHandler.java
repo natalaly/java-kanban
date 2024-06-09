@@ -1,17 +1,15 @@
-package ru.yandex.practicum.tasktracker.server;
+package ru.yandex.practicum.tasktracker.server.handlers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Subtask;
-import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.server.Endpoint;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**

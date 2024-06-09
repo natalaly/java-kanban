@@ -44,7 +44,7 @@ public enum Endpoint {
     return path;
   }
 
-  static Endpoint getEndpoint(String method, String path) {
+  public static Endpoint getEndpoint(String method, String path) {
    return  Arrays.stream(Endpoint.values())
        .filter(e -> e.matches(method, path))
        .findFirst()

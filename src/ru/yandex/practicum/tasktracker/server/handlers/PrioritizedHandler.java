@@ -1,8 +1,9 @@
-package ru.yandex.practicum.tasktracker.server;
+package ru.yandex.practicum.tasktracker.server.handlers;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
+import ru.yandex.practicum.tasktracker.server.Endpoint;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**

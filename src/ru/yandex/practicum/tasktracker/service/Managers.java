@@ -5,8 +5,8 @@ import com.google.gson.GsonBuilder;
 import java.io.File;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import ru.yandex.practicum.tasktracker.adapter.DurationAdapter;
-import ru.yandex.practicum.tasktracker.adapter.LocaleDateTimeAdapter;
+import ru.yandex.practicum.tasktracker.server.adapter.DurationAdapter;
+import ru.yandex.practicum.tasktracker.server.adapter.LocaleDateTimeAdapter;
 
 /**
  * Utility class, is used for getting default implementations of various managers. Provides methods
