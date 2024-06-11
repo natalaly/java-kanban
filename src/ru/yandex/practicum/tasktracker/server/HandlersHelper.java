@@ -10,10 +10,10 @@ public class HandlersHelper {
     String toExclude;
     if (path.contains("/tasks")) {
       toExclude = "/tasks/";
-    } else if (path.contains("/subtasks")) {
-      toExclude = "/subtasks/";
     } else if (path.contains("/epics")) {
       toExclude = "/epics/";
+    } else if (path.contains("/subtasks")) {
+      toExclude = "/subtasks/";
     } else {
       toExclude ="";
     }

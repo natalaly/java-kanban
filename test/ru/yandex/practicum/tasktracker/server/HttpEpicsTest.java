@@ -1,9 +1,13 @@
 package ru.yandex.practicum.tasktracker.server;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
+import ru.yandex.practicum.tasktracker.model.Subtask;
 
 public class HttpEpicsTest extends HttpTaskManagerTest{
 
@@ -80,6 +85,29 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     Epic actual = parseTaskFromResponse(response, epicTypeToken);
     Assertions.assertEquals(expected, actual, "Returned task is not correct.");
 
+  }
+
+  @Test
+  @DisplayName("GET /epics/{id}/subtasks should return List Of Subtasks by by valid Epic ID from TaskManager")
+  public void getWithIdAndSubtasksReturnsAnValidListOfSubtasksForEpic()
+      throws IOException, InterruptedException {
+    /* Given */
+    final int epicId = TestDataBuilder.addTaskDataToTheTaskManager(manager).get(0);
+    final List<Subtask> expected = new ArrayList<>(manager.getSubtasksByEpicId(epicId));
+    expected.sort(Comparator.comparingInt(Subtask::getId));
+    System.out.println(expected);
+    final HttpRequest request = createGetRequest(BASE_ENDPOINT + "/" + epicId + "/subtasks");
+    /* When */
+    final HttpResponse<String> response = sendRequest(request);
+    /* Then */
+    assertStatusCode(response, 200);
+    assertResponseBodyIsJsonArray(response);
+    JsonArray jsonArray = JsonParser.parseString(response.body()).getAsJsonArray();
+
+    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>(){};
+    final List<Subtask> actual = parseTasksFromResponse(response,listTypeToken);
+    actual.sort(Comparator.comparing(Subtask::getId));
+    Assertions.assertIterableEquals(expected,actual,"Returned list should be same.");
   }
 
   /* POST */
