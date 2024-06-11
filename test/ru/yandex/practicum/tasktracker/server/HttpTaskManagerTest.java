@@ -1,7 +1,9 @@
 package ru.yandex.practicum.tasktracker.server;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
@@ -9,6 +11,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -242,6 +245,35 @@ public abstract class HttpTaskManagerTest {
   protected <T extends Task> T parseTaskFromResponse(HttpResponse<String> response, TypeToken<T> typeToken) {
     JsonElement jsonElement = JsonParser.parseString(response.body());
     return gson.fromJson(jsonElement, typeToken.getType());
+  }
+  protected List<Task> parseAllTaskTypesFromResponse(HttpResponse<String> response) {
+    System.out.println("Response:" + response);
+    JsonElement jsonElement = JsonParser.parseString(response.body());
+    List<Task> result = new ArrayList<>();
+    if (jsonElement.isJsonArray()) {
+      JsonArray jsonArray =  jsonElement.getAsJsonArray();
+      jsonArray.forEach(eachElement -> {
+        Task task = parseTaskFromJson(eachElement);
+        if (task != null) {
+          result.add(task);
+        }
+      });
+    }
+    return result;
+  }
+
+  protected Task parseTaskFromJson(JsonElement element) {
+    if (!element.isJsonObject()) {
+      return null;
+    }
+    final JsonObject jsonObject = element.getAsJsonObject();
+    if (jsonObject.has("epicId")) {
+      return gson.fromJson(element, Subtask.class);
+    } else if (jsonObject.has("subtasks")) {
+      return gson.fromJson(element, Epic.class);
+    } else {
+      return gson.fromJson(element, Task.class);
+    }
   }
 }
 
