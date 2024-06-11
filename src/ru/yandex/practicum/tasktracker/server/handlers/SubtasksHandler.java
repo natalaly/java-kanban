@@ -113,7 +113,7 @@ public class SubtasksHandler extends BaseHttpHandler {
     Subtask subtask = gson.fromJson(requestBody, Subtask.class);
     try {
       String response = gson.toJson(taskManager.addSubtask(subtask));
-      sendCreated201(exchange);
+      sendCreated201(exchange,response);
       System.out.println("Subtask was added to the TM");
     } catch (TaskValidationException e) {
       sendNotFound404(exchange);
