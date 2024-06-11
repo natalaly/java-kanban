@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -8,12 +9,20 @@ import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
+import ru.yandex.practicum.tasktracker.server.HttpTaskServer;
 import ru.yandex.practicum.tasktracker.service.FileBackedTaskManager;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
+import ru.yandex.practicum.tasktracker.service.Managers;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 
 public class Main {
+
+  private static final String PATH_CASE_2 = "resources/tasksDataFiles/useCaseFile.csv";
+  private static final String PATH_CASE_3 = "resources/tasksDataFiles/httpTasksData.csv";
+
+  private static final LocalDateTime TIME_1 = LocalDateTime.now();
+  private static final LocalDateTime TIME_2 = TIME_1.plusMinutes(20);
 
   private static TaskManager tm;
   private static Task task1;
@@ -24,18 +33,23 @@ public class Main {
   private static Subtask sb2;
   private static Subtask sb3;
   private static Epic epic2;
-  private static LocalDateTime time1 = LocalDateTime.now();
-  private static LocalDateTime time2 = time1.plusMinutes(20);
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
 
-    int choice = 2;
+    int choice = 0;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
       case 2 -> useCaseFile(); /* File saving / restoring */
+      case 3 -> useCaseHttpServer(); /* Http server */
     }
 
+  }
+
+  private static void useCaseHttpServer() throws IOException {
+    HttpTaskServer taskServer = new HttpTaskServer(
+        Managers.getFileBackedTaskManager(Path.of(PATH_CASE_3).toFile()));
+    taskServer.start();
   }
 
   /**
@@ -52,7 +66,7 @@ public class Main {
     createTasksData();
 
     /* An empty old manager */
-    Path path = Path.of("resources/test/useCaseFile.csv");
+    Path path = Path.of(PATH_CASE_2);
     File temp = path.toFile();
     TaskManager oldManager = FileBackedTaskManager.loadFromFile(temp);
 
@@ -70,7 +84,7 @@ public class Main {
     /* Update Subtask */
     sb2.setStatus(TaskStatus.DONE);
     sb2.setDuration(Duration.ofMinutes(15));
-    sb2.setStartTime(time2);
+    sb2.setStartTime(TIME_2);
     oldManager.updateSubtask(sb2); // update subtask2 of epic
 
     oldManager.getEpicById(2);
@@ -115,6 +129,7 @@ public class Main {
 //    newManage.addTask(t);
 
   }
+
   private static void createTasksData() {
     task1 = new Task();
     task1.setTitle("task");

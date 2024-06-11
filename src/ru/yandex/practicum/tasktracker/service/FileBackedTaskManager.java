@@ -165,8 +165,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   private void load() {
     try (final BufferedReader br = new BufferedReader(
         new FileReader(file, StandardCharsets.UTF_8))) {
-      loadSection(br, TASKS_CSV_HEADER,HISTORY_HEADER);
-      loadSection(br,HISTORY_HEADER,PRIORITIZED_HEADER);
+      loadSection(br, TASKS_CSV_HEADER, HISTORY_HEADER);
+      loadSection(br, HISTORY_HEADER, PRIORITIZED_HEADER);
       loadSection(br, PRIORITIZED_HEADER, "");
     } catch (IOException e) {
       throw new ManagerLoadException("An Error occurred during reading the file", e);
@@ -184,7 +184,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
   }
 
-  private void saveSection(final Writer fileWriter, final String header, final List<Task> tasksToSave) throws IOException {
+  private void saveSection(final Writer fileWriter, final String header,
+      final List<Task> tasksToSave) throws IOException {
     fileWriter.write(header + System.lineSeparator());
     tasksToSave.forEach(task -> {
       try {
@@ -196,7 +197,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     });
   }
 
-  private void loadSection(final BufferedReader br,final String start, final String end) throws IOException {
+  private void loadSection(final BufferedReader br, final String start, final String end)
+      throws IOException {
     final List<String> taskData = new ArrayList<>();
 
     while (br.ready()) {
@@ -214,8 +216,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
   private void restore(final List<String> tasks, final String header) {
     switch (header) {
       case TASKS_CSV_HEADER -> restoreByTaskType(tasks);
-      case HISTORY_HEADER -> restoreTasks(tasks,header, historyManager::add);
-      case PRIORITIZED_HEADER -> restoreTasks(tasks,header, prioritizedTasks::add);
+      case HISTORY_HEADER -> restoreTasks(tasks, header, historyManager::add);
+      case PRIORITIZED_HEADER -> restoreTasks(tasks, header, prioritizedTasks::add);
     }
   }
 
@@ -240,7 +242,8 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
   }
 
-  private void restoreTasks(final List<String> tasksLines, final String header, Consumer<Task> action) {
+  private void restoreTasks(final List<String> tasksLines, final String header,
+      Consumer<Task> action) {
     for (String eachLine : tasksLines) {
       if (eachLine.equals(header) || eachLine.isBlank()) {
         continue;

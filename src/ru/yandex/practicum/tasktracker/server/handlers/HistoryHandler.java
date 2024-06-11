@@ -7,23 +7,21 @@ import ru.yandex.practicum.tasktracker.server.Endpoint;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * HTTP handler class for the path "/tasks"
+ * HTTP handler class for the path "/history"
  */
 public class HistoryHandler extends BaseHttpHandler {
-
-  private final TaskManager taskManager;
-  private final Gson gson;
+  protected Endpoint endpoint;
 
   public HistoryHandler(final TaskManager taskManager, final Gson gson) {
-    this.taskManager = taskManager;
-    this.gson = gson;
+    super(taskManager,gson);
+    endpoint = Endpoint.GET_HISTORY;
   }
 
   @Override
   protected void handleGet(HttpExchange exchange, String path) throws IOException {
     Endpoint endpoint = Endpoint.getEndpoint("GET", path);
-    if (Endpoint.GET_HISTORY.equals(endpoint)) {
-      handleGetHistory(exchange);
+    if (this.endpoint.equals(endpoint)) {
+      handleGetPath(exchange);
     } else {
       System.out.println("Wrong path - 400");
       sendBadRequest400(exchange);
@@ -32,17 +30,17 @@ public class HistoryHandler extends BaseHttpHandler {
 
   @Override
   protected void handlePost(HttpExchange exchange, String path) throws IOException {
-    System.out.println("Unsupported method for History");
+    System.out.println("Unsupported method ");
     sendNotAllowed405(exchange);
   }
 
   @Override
   protected void handleDelete(HttpExchange exchange, String path) throws IOException {
-    System.out.println("Unsupported method for History");
+    System.out.println("Unsupported method ");
     sendNotAllowed405(exchange);
   }
 
-  private void handleGetHistory(HttpExchange exchange) throws IOException {
+  protected void handleGetPath(HttpExchange exchange) throws IOException {
     String response = gson.toJson(taskManager.getHistory());
     sendText200(exchange, response);
     System.out.println("Get History List - 200");

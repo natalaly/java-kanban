@@ -1,22 +1,21 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
-import java.util.function.Consumer;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The {@code InMemoryTaskManager} class implements the {@link TaskManager} interface and provides
@@ -222,7 +221,8 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public void updateTask(final Task taskToUpdate) throws TaskNotFoundException, TaskPrioritizationException{
+  public void updateTask(final Task taskToUpdate)
+      throws TaskNotFoundException, TaskPrioritizationException {
     final Task taskInMemory = tasks.get(taskToUpdate.getId());
     if (taskInMemory == null) {
       throw new TaskNotFoundException(

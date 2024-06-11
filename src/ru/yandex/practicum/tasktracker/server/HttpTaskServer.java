@@ -4,8 +4,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.nio.file.Path;
-import ru.yandex.practicum.tasktracker.server.handlers.EpicHandler;
+import ru.yandex.practicum.tasktracker.server.handlers.EpicsHandler;
 import ru.yandex.practicum.tasktracker.server.handlers.HistoryHandler;
 import ru.yandex.practicum.tasktracker.server.handlers.PrioritizedHandler;
 import ru.yandex.practicum.tasktracker.server.handlers.SubtasksHandler;
@@ -20,34 +19,26 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
  */
 public class HttpTaskServer {
 
-  // Listens to 8080 port
   public static final int PORT = 8080;
 
-  private HttpServer server;
-  private Gson gson;
+  private final HttpServer server;
+  private final Gson gson;
 
-  private TaskManager taskManager;
+  private final TaskManager taskManager;
 
   public HttpTaskServer() throws IOException {
     this(Managers.getDefault());
   }
 
-  //TODO
   public HttpTaskServer(final TaskManager taskManager) throws IOException {
     this.taskManager = taskManager;
     gson = Managers.getGson();
     server = HttpServer.create(new InetSocketAddress("localhost", PORT), 0);
     server.createContext("/tasks", new TasksHandler(this.taskManager, this.gson));
-    server.createContext("/subtasks",new SubtasksHandler(this.taskManager, this.gson));
-    server.createContext("/epics",new EpicHandler(this.taskManager, this.gson));
-    server.createContext("/history",new HistoryHandler(this.taskManager, this.gson));
-    server.createContext("/prioritized",new PrioritizedHandler(this.taskManager, this.gson));
-  }
-
-  public static void main(String[] args) throws IOException {
-    HttpTaskServer taskServer = new HttpTaskServer(Managers.getFileBackedTaskManager(Path.of("resources/test/httpTasksData.csv").toFile()));
-    taskServer.start();
-//    taskServer.stop();
+    server.createContext("/subtasks", new SubtasksHandler(this.taskManager, this.gson));
+    server.createContext("/epics", new EpicsHandler(this.taskManager, this.gson));
+    server.createContext("/history", new HistoryHandler(this.taskManager, this.gson));
+    server.createContext("/prioritized", new PrioritizedHandler(this.taskManager, this.gson));
   }
 
   public void start() throws IOException {

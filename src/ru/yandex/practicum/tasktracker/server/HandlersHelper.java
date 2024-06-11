@@ -1,5 +1,9 @@
 package ru.yandex.practicum.tasktracker.server;
 
+import com.google.gson.JsonObject;
+import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskType;
+
 public class HandlersHelper {
 
   public static  int parsePathID(String path) {
@@ -19,6 +23,50 @@ public class HandlersHelper {
     } catch (NumberFormatException e) {
       return -1;
     }
+  }
+
+  public static <T extends Task> boolean isValidJsonBody(JsonObject jsonObject, TaskType type) {
+    switch (type) {
+      case TASK -> {
+        return isValidJsonTaskBody(jsonObject);
+      }
+      case EPIC-> {
+        return isValidJsonEpicBody(jsonObject);
+      }
+      case SUBTASK -> {
+        return isValidJsonSubtaskBody(jsonObject);
+      }
+      default -> {
+        return false;
+      }
+    }
+
+
+  }
+
+  private static boolean isValidJsonSubtaskBody(JsonObject jsonObject) {    return jsonObject.has("epicId") &&
+      jsonObject.has("id") &&
+      jsonObject.has("title") &&
+      jsonObject.has("description") &&
+      jsonObject.has("status") &&
+      jsonObject.has("duration") &&
+      jsonObject.has("startTime");
+
+  }
+
+  private static boolean isValidJsonEpicBody(JsonObject jsonObject) {
+    return jsonObject.has("id") &&
+        jsonObject.has("title") &&
+        jsonObject.has("description");
+  }
+
+  private static boolean isValidJsonTaskBody(JsonObject jsonObject) {
+    return jsonObject.has("id") &&
+        jsonObject.has("title") &&
+        jsonObject.has("description") &&
+        jsonObject.has("status") &&
+        jsonObject.has("duration") &&
+        jsonObject.has("startTime");
   }
 
 

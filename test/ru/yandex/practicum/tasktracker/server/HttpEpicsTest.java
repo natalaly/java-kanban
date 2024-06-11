@@ -4,8 +4,6 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
-import ru.yandex.practicum.tasktracker.model.Task;
-import ru.yandex.practicum.tasktracker.model.TaskStatus;
 
 public class HttpEpicsTest extends HttpTaskManagerTest{
 

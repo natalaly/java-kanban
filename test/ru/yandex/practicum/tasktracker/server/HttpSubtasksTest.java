@@ -14,7 +14,6 @@ import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
-import ru.yandex.practicum.tasktracker.model.Task;
 
 public class HttpSubtasksTest extends HttpTaskManagerTest{
 

@@ -1,10 +1,10 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.List;
 import java.util.Set;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import java.util.List;
 
 /**
  * The {@code TaskManager} interface manages tasks of different types including {@link Task},
@@ -67,7 +67,6 @@ public interface TaskManager {
   void deleteEpic(final int id);
 
   void deleteSubtask(final int id);
-
 
 
 }

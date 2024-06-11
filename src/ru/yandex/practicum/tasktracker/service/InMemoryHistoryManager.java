@@ -1,10 +1,10 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import ru.yandex.practicum.tasktracker.model.Task;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import ru.yandex.practicum.tasktracker.model.Task;
 
 /**
  * The {@code InMemoryHistoryManager} class implements the {@link HistoryManager} interface and

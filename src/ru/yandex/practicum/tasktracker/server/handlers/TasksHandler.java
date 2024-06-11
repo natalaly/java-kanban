@@ -5,12 +5,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.model.Task;
+import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.server.Endpoint;
+import ru.yandex.practicum.tasktracker.server.HandlersHelper;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
@@ -18,30 +18,21 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
  */
 public class TasksHandler extends BaseHttpHandler {
 
-  private static final String TASKS_PATH = "^/tasks$";
-  private static final String TASKS_ID_PATH = "^/tasks/\\d+$";
-  private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
-  private final TaskManager taskManager;
-  private final Gson gson;
-
   public TasksHandler(final TaskManager taskManager, final Gson gson) {
-    this.taskManager = taskManager;
-    this.gson = gson;
+    super(taskManager, gson);
   }
 
   @Override
   protected void handleGet(HttpExchange exchange, String path) throws IOException {
     Endpoint endpoint = Endpoint.getEndpoint("GET", path);
     if (Endpoint.GET_TASKS.equals(endpoint)) {
-      handleGetTasks(exchange, path);
+      handleGetTasks(exchange);
     } else if (Endpoint.GET_TASKS_ID.equals(endpoint)) {
       handleGetTaskById(exchange, path);
     } else {
       System.out.println("Wrong path - 400");
       sendBadRequest400(exchange);
     }
-
 
   }
 
@@ -56,7 +47,6 @@ public class TasksHandler extends BaseHttpHandler {
       System.out.println("Wrong path - 400");
       sendBadRequest400(exchange);
     }
-
   }
 
   @Override
@@ -67,10 +57,7 @@ public class TasksHandler extends BaseHttpHandler {
       sendBadRequest400(exchange);
       return;
     }
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/tasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -81,17 +68,14 @@ public class TasksHandler extends BaseHttpHandler {
     sendSuccess200(exchange);
   }
 
-  private void handleGetTasks(HttpExchange exchange, String path) throws IOException {
+  private void handleGetTasks(HttpExchange exchange) throws IOException {
     String response = gson.toJson(taskManager.getTasks());
     sendText200(exchange, response);
     System.out.println("Get Task List - 200");
   }
 
   private void handleGetTaskById(HttpExchange exchange, String path) throws IOException {
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/tasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -111,7 +95,7 @@ public class TasksHandler extends BaseHttpHandler {
   private void handleAddTask(HttpExchange exchange) throws IOException {
     final String requestBody = readText(exchange);
     final JsonObject jsonBody = JsonParser.parseString(requestBody).getAsJsonObject();
-    if (!isValidJsonTask(jsonBody)) {
+    if (!HandlersHelper.isValidJsonBody(jsonBody, TaskType.TASK)) { //!isValidJsonTask(jsonBody)) {
       sendNotAllowed405(exchange);
       System.out.println("Wrong set of fields in req body -405");
       return;
@@ -120,7 +104,7 @@ public class TasksHandler extends BaseHttpHandler {
     Task task = gson.fromJson(requestBody, Task.class);
     try {
       String response = gson.toJson(taskManager.addTask(task));
-      sendCreated201(exchange,response);
+      sendCreated201(exchange, response);
       System.out.println("task was added to the TM");
     } catch (Exception e) {
       sendHasInteractions406(exchange);
@@ -129,10 +113,7 @@ public class TasksHandler extends BaseHttpHandler {
   }
 
   private void handleUpdateTask(HttpExchange exchange, String path) throws IOException {
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/tasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -141,7 +122,7 @@ public class TasksHandler extends BaseHttpHandler {
 
     final String requestBody = readText(exchange);
     final JsonObject jsonBody = JsonParser.parseString(requestBody).getAsJsonObject();
-    if (!isValidJsonTask(jsonBody)) {
+    if (!HandlersHelper.isValidJsonBody(jsonBody, TaskType.TASK)) {
       sendNotAllowed405(exchange);
       System.out.println("Wrong set of fields in req body -405");
       return;
@@ -165,21 +146,4 @@ public class TasksHandler extends BaseHttpHandler {
     }
   }
 
-  private boolean isValidJsonTask(JsonObject jsonObject) {
-    return jsonObject.has("id") &&
-        jsonObject.has("title") &&
-        jsonObject.has("description") &&
-        jsonObject.has("status") &&
-        jsonObject.has("duration") &&
-        jsonObject.has("startTime");
-  }
-
-//  TODO use HandlersHelper.parsePathID(path);
-  private int parsePathID(String path) {
-    try {
-      return Integer.parseInt(path);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
 }

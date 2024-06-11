@@ -1,37 +1,62 @@
 package ru.yandex.practicum.tasktracker.server.handlers;
 
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import ru.yandex.practicum.tasktracker.server.Endpoint;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * Common to all HTTP handlers class. Contains general methods for reading and sending data:
+ * Common to all HTTP handlers class. Handles incoming HTTP requests by delegating and provides
+ * general methods for reading and sending data:
  * <ul>
- *   <li>{@link #sendText200(HttpExchange, String)} - to send a general response if successful;</li>
- *   <li>{@link #sendCreated201(HttpExchange)} - to send a response indicating that the resource was successfully created;</li>
- *   <li>{@link #sendNotFound404(HttpExchange)} - to send a response if the object was not found;</li>
- *   <li>{@link #sendNotAllowed405(HttpExchange)} - to send a response indicating that the method is not allowed;</li>
- *   <li>{@link #sendHasInteractions406(HttpExchange)} - to send a response if, during creation or update, a task has a time conflict with existing ones.</li>
+ *   <li>{@link #sendText200(HttpExchange, String)} - sends a general response with a 200 status code if successful;</li>
+ *   <li>{@link #sendSuccess200(HttpExchange)} - sends a response with a 200 status code indicating success;</li>
+ *   <li>{@link #sendCreated201(HttpExchange)} - sends a response with a 201 status code indicating that the resource was successfully created;</li>
+ *   <li>{@link #sendCreated201(HttpExchange, String)} - sends a response with a 201 status code and text indicating that the resource was successfully created;</li>
+ *   <li>{@link #sendBadRequest400(HttpExchange)} - sends a response with a 400 status code indicating a bad request;</li>
+ *   <li>{@link #sendNotFound404(HttpExchange)} - sends a response with a 404 status code if the object was not found;</li>
+ *   <li>{@link #sendNotAllowed405(HttpExchange)} - sends a response with a 405 status code indicating that the method is not allowed;</li>
+ *   <li>{@link #sendHasInteractions406(HttpExchange)} - sends a response with a 406 status code if a task has a time conflict with existing ones;</li>
+ *   <li>{@link #readText(HttpExchange)} - reads the request body as a string using the default charset.</li>
+ *   <li>{@link #handle(HttpExchange)} - handles incoming HTTP requests by delegating to appropriate method handlers based on the request method.</li>
  * </ul>
  *
  * @see TaskManager
+ * @see TasksHandler
+ * @see EpicsHandler
+ * @see SubtasksHandler
+ * @see HistoryHandler
+ * @see PrioritizedHandler
  */
 abstract public class BaseHttpHandler implements HttpHandler {
 
   private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+  protected final TaskManager taskManager;
+  protected final Gson gson;
+
+  protected BaseHttpHandler(TaskManager taskManager, Gson gson) {
+    this.taskManager = taskManager;
+    this.gson = gson;
+  }
+
+
+  /**
+   * Handles incoming HTTP requests by delegating to appropriate method handlers based on the
+   * request method. Supported methods are GET, POST, and DELETE.
+   *
+   * @param exchange the HttpExchange containing the request from the client and used to send the
+   *                 response
+   */
   @Override
   public void handle(HttpExchange exchange) {
     try {
       final String path = exchange.getRequestURI().getPath();
       final String requestMethod = exchange.getRequestMethod();
-      final Endpoint endpoint = Endpoint.getEndpoint(requestMethod,path);
-
       switch (requestMethod) {
         case "GET": {
           handleGet(exchange, path);
@@ -58,7 +83,7 @@ abstract public class BaseHttpHandler implements HttpHandler {
     }
   }
 
-  protected abstract  void handleDelete(HttpExchange exchange, String path) throws IOException;
+  protected abstract void handleDelete(HttpExchange exchange, String path) throws IOException;
 
   protected abstract void handlePost(HttpExchange exchange, String path) throws IOException;
 
@@ -74,10 +99,10 @@ abstract public class BaseHttpHandler implements HttpHandler {
   }
 
   public void sendCreated201(HttpExchange h) throws IOException {
-    sendResponse(h,  201);
+    sendResponse(h, 201);
   }
 
-  public void sendCreated201(HttpExchange h,String text) throws IOException {
+  public void sendCreated201(HttpExchange h, String text) throws IOException {
     sendResponse(h, text, 201);
   }
 

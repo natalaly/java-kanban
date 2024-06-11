@@ -7,20 +7,18 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
+import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.server.Endpoint;
+import ru.yandex.practicum.tasktracker.server.HandlersHelper;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
  * HTTP handler class for the path "/epics"
  */
-public class EpicHandler extends BaseHttpHandler {
+public class EpicsHandler extends BaseHttpHandler {
 
-  private final TaskManager taskManager;
-  private final Gson gson;
-
-  public EpicHandler(final TaskManager taskManager, final Gson gson) {
-    this.taskManager = taskManager;
-    this.gson = gson;
+  public EpicsHandler(final TaskManager taskManager, final Gson gson) {
+    super(taskManager,gson);
   }
 
   @Override
@@ -57,10 +55,7 @@ public class EpicHandler extends BaseHttpHandler {
       sendBadRequest400(exchange);
       return;
     }
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/epics/", "").replaceAll("/subtasks","");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -78,10 +73,7 @@ public class EpicHandler extends BaseHttpHandler {
   }
 
   private void handleGetEpicById(HttpExchange exchange, String path) throws IOException {
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/epics/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -99,10 +91,7 @@ public class EpicHandler extends BaseHttpHandler {
   }
 
   private void handleGetSubtasksByEpicId(HttpExchange exchange, String path) throws IOException {
-    //    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/epics/", "").replaceAll("/subtasks","");
-    final int id = parsePathID(pathId);
-//
+        final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -121,7 +110,7 @@ public class EpicHandler extends BaseHttpHandler {
   private void handleAddEpic(HttpExchange exchange) throws IOException {
     final String requestBody = readText(exchange);
     final JsonObject jsonBody = JsonParser.parseString(requestBody).getAsJsonObject();
-    if (!isValidJsonTask(jsonBody)) {
+    if (!HandlersHelper.isValidJsonBody(jsonBody, TaskType.EPIC)) {
       sendNotAllowed405(exchange);
       System.out.println("Wrong set of fields in req body - 405");
       return;
@@ -133,21 +122,5 @@ public class EpicHandler extends BaseHttpHandler {
       System.out.println("Epic was added to the TM");
   }
 
-  private boolean isValidJsonTask(JsonObject jsonObject) {
-    return jsonObject.has("id") &&
-        jsonObject.has("title") &&
-        jsonObject.has("description");// &&
-//        jsonObject.has("status") ;//&&
-//        jsonObject.has("duration") &&
-//        jsonObject.has("startTime");
-  }
 
-//  TODO use HandlersHelper.parsePathID(path);
-  private int parsePathID(String path) {
-    try {
-      return Integer.parseInt(path);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
 }

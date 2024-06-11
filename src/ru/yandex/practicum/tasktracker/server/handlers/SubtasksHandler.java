@@ -9,20 +9,18 @@ import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
 import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Subtask;
+import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.server.Endpoint;
+import ru.yandex.practicum.tasktracker.server.HandlersHelper;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
 /**
- * HTTP handler class for the path "/tasks"
+ * HTTP handler class for the path "/subtasks"
  */
 public class SubtasksHandler extends BaseHttpHandler {
 
-  private final TaskManager taskManager;
-  private final Gson gson;
-
   public SubtasksHandler(final TaskManager taskManager, final Gson gson) {
-    this.taskManager = taskManager;
-    this.gson = gson;
+    super(taskManager,gson);
   }
 
   @Override
@@ -60,10 +58,7 @@ public class SubtasksHandler extends BaseHttpHandler {
       sendBadRequest400(exchange);
       return;
     }
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/subtasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -81,10 +76,7 @@ public class SubtasksHandler extends BaseHttpHandler {
   }
 
   private void handleGetSubtaskById(HttpExchange exchange, String path) throws IOException {
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/subtasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -104,9 +96,9 @@ public class SubtasksHandler extends BaseHttpHandler {
   private void handleAddSubtask(HttpExchange exchange) throws IOException {
     final String requestBody = readText(exchange);
     final JsonObject jsonBody = JsonParser.parseString(requestBody).getAsJsonObject();
-    if (!isValidJsonTask(jsonBody)) {
+    if (!HandlersHelper.isValidJsonBody(jsonBody, TaskType.SUBTASK)) {
       sendNotAllowed405(exchange);
-      System.out.println("Wrong set of fields in req body -405");
+      System.out.println("Wrong set of fields in req body - 405");
       return;
     }
 
@@ -125,10 +117,7 @@ public class SubtasksHandler extends BaseHttpHandler {
   }
 
   private void handleUpdateSubtask(HttpExchange exchange, String path) throws IOException {
-//    final int id = HandlersHelper.parsePathID(path);
-    final String pathId = path.replaceFirst("/subtasks/", "");
-    final int id = parsePathID(pathId);
-//
+    final int id = HandlersHelper.parsePathID(path);
     if (id <= 0) {
       sendNotAllowed405(exchange);
       System.out.println("Invalid Id format - 405");
@@ -137,7 +126,7 @@ public class SubtasksHandler extends BaseHttpHandler {
 
     final String requestBody = readText(exchange);
     final JsonObject jsonBody = JsonParser.parseString(requestBody).getAsJsonObject();
-    if (!isValidJsonTask(jsonBody)) {
+    if (!HandlersHelper.isValidJsonBody(jsonBody, TaskType.SUBTASK)) {
       sendNotAllowed405(exchange);
       System.out.println("Wrong set of fields in req body -405");
       return;
@@ -164,22 +153,4 @@ public class SubtasksHandler extends BaseHttpHandler {
     }
   }
 
-  private boolean isValidJsonTask(JsonObject jsonObject) {
-    return jsonObject.has("epicId") &&
-        jsonObject.has("id") &&
-        jsonObject.has("title") &&
-        jsonObject.has("description") &&
-        jsonObject.has("status") &&
-        jsonObject.has("duration") &&
-        jsonObject.has("startTime");
-  }
-
-//  TODO use HandlersHelper.parsePathID(path);
-  private int parsePathID(String path) {
-    try {
-      return Integer.parseInt(path);
-    } catch (NumberFormatException e) {
-      return -1;
-    }
-  }
 }
