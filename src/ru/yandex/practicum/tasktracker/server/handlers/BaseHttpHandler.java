@@ -32,7 +32,7 @@ import ru.yandex.practicum.tasktracker.service.TaskManager;
  * @see HistoryHandler
  * @see PrioritizedHandler
  */
-abstract public class BaseHttpHandler implements HttpHandler {
+public abstract class BaseHttpHandler implements HttpHandler {
 
   private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
