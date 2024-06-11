@@ -1,21 +1,15 @@
 package ru.yandex.practicum.tasktracker.server;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
@@ -47,7 +41,7 @@ public class HttpHistoryTest extends HttpTaskManagerTest {
     TypeToken<List<Task>> listTypeToken = new TypeToken<List<Task>>() {
     };
     final List<Task> actualTasks = parseTasksFromResponse(response, listTypeToken);
-    Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty history list.");
+    Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty list of task objects.");
   }
 
   @Test
@@ -65,8 +59,8 @@ public class HttpHistoryTest extends HttpTaskManagerTest {
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
     final List<Task> actual = parseAllTaskTypesFromResponse(response);
-    Assertions.assertFalse(actual.isEmpty(), "Should not return an empty history list.");
-    Assertions.assertIterableEquals(expected, actual, "Should return same history list.");
+    Assertions.assertFalse(actual.isEmpty(), "Should not return an empty list of task objects.");
+    Assertions.assertIterableEquals(expected, actual, "Should return same list of task objects.");
   }
 
 
