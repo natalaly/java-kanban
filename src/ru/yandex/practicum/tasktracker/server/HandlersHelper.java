@@ -6,7 +6,7 @@ import ru.yandex.practicum.tasktracker.model.TaskType;
 
 public class HandlersHelper {
 
-  public static  int parsePathID(String path) {
+  public static int parsePathID(String path) {
     String toExclude;
     if (path.contains("/tasks")) {
       toExclude = "/tasks/";
@@ -15,9 +15,9 @@ public class HandlersHelper {
     } else if (path.contains("/subtasks")) {
       toExclude = "/subtasks/";
     } else {
-      toExclude ="";
+      toExclude = "";
     }
-    final String pathId = path.replaceFirst(toExclude, "").replaceAll("/subtasks","");
+    final String pathId = path.replaceFirst(toExclude, "").replaceAll("/subtasks", "");
     try {
       return Integer.parseInt(pathId);
     } catch (NumberFormatException e) {
@@ -30,7 +30,7 @@ public class HandlersHelper {
       case TASK -> {
         return isValidJsonTaskBody(jsonObject);
       }
-      case EPIC-> {
+      case EPIC -> {
         return isValidJsonEpicBody(jsonObject);
       }
       case SUBTASK -> {
@@ -44,13 +44,14 @@ public class HandlersHelper {
 
   }
 
-  private static boolean isValidJsonSubtaskBody(JsonObject jsonObject) {    return jsonObject.has("epicId") &&
-      jsonObject.has("id") &&
-      jsonObject.has("title") &&
-      jsonObject.has("description") &&
-      jsonObject.has("status") &&
-      jsonObject.has("duration") &&
-      jsonObject.has("startTime");
+  private static boolean isValidJsonSubtaskBody(JsonObject jsonObject) {
+    return jsonObject.has("epicId") &&
+        jsonObject.has("id") &&
+        jsonObject.has("title") &&
+        jsonObject.has("description") &&
+        jsonObject.has("status") &&
+        jsonObject.has("duration") &&
+        jsonObject.has("startTime");
 
   }
 
@@ -68,7 +69,6 @@ public class HandlersHelper {
         jsonObject.has("duration") &&
         jsonObject.has("startTime");
   }
-
 
 
 }

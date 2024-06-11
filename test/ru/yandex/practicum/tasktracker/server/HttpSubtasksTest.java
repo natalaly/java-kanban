@@ -15,7 +15,7 @@ import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 
-public class HttpSubtasksTest extends HttpTaskManagerTest{
+public class HttpSubtasksTest extends HttpTaskManagerTest {
 
   @BeforeEach
   @Override
@@ -39,7 +39,8 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>(){};
+    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>() {
+    };
     final List<Subtask> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty list of Subtasks.");
   }
@@ -58,7 +59,8 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>(){};
+    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>() {
+    };
     final List<Subtask> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertFalse(actualTasks.isEmpty(), "Should not return an empty list of Subatsks.");
     Assertions.assertIterableEquals(expected, actualTasks, "Should return same List of Subatsks.");
@@ -71,7 +73,8 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
       throws IOException, InterruptedException {
     /* Given */
     final Epic epic = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d e"));
-    final Subtask expected = manager.addSubtask(TestDataBuilder.buildSubtask("subtask","d", epic.getId()));
+    final Subtask expected = manager.addSubtask(
+        TestDataBuilder.buildSubtask("subtask", "d", epic.getId()));
     final int id = expected.getId();
     final HttpRequest request = createGetRequest(BASE_ENDPOINT + "/" + id);
     /* When */
@@ -79,7 +82,8 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonObject(response);
-    TypeToken<Subtask> subtaskTypeToken = new TypeToken<Subtask>() {};
+    final TypeToken<Subtask> subtaskTypeToken = new TypeToken<Subtask>() {
+    };
     Subtask actual = parseTaskFromResponse(response, subtaskTypeToken);
     Assertions.assertEquals(expected, actual, "Returned subtask is not correct.");
 
@@ -93,14 +97,15 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
       throws IOException, InterruptedException {
     /* Given */
     final Epic epic = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d e"));
-    final Subtask expected = TestDataBuilder.buildSubtask("subtask","d", epic.getId());
+    final Subtask expected = TestDataBuilder.buildSubtask("subtask", "d", epic.getId());
     int expectedNumberOfSubtasks = manager.getSubtasks().size() + 1;
     final HttpRequest request = createPostRequest(BASE_ENDPOINT, expected);
     /* When */
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 201);
-    TypeToken<Subtask> subtaskTypeToken = new TypeToken<Subtask>() {};
+    TypeToken<Subtask> subtaskTypeToken = new TypeToken<Subtask>() {
+    };
     final Subtask actual = gson.fromJson(response.body(), subtaskTypeToken.getType());
     assertTaskFieldsAreSame(expected, actual);
     Assertions.assertEquals(expectedNumberOfSubtasks, manager.getSubtasks().size(),
@@ -113,8 +118,9 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
   public void postWithIdCallsUpdateTaskObjectWithNewStartTime()
       throws IOException, InterruptedException {
     /* Given */
-    final Epic epic  = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d"));
-    final Subtask existed = manager.addSubtask(TestDataBuilder.buildSubtask("subtask","d", epic.getId()));
+    final Epic epic = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d"));
+    final Subtask existed = manager.addSubtask(
+        TestDataBuilder.buildSubtask("subtask", "d", epic.getId()));
     final int id = existed.getId();
     final Subtask expected = existed.copy();
     expected.setStartTime(LocalDateTime.now());
@@ -136,14 +142,16 @@ public class HttpSubtasksTest extends HttpTaskManagerTest{
     /* Given */
     final Epic epic = manager.addEpic(
         TestDataBuilder.buildEpic(1, "epic", "d e"));
-    final Subtask existed = manager.addSubtask(TestDataBuilder.buildSubtask("subtask","d", epic.getId()));
+    final Subtask existed = manager.addSubtask(
+        TestDataBuilder.buildSubtask("subtask", "d", epic.getId()));
     final int id = existed.getId();
     final HttpRequest request = createDeleteRequest(BASE_ENDPOINT + "/" + id);
     /* When */
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 200);
-    final TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+    final TaskNotFoundException actualException = Assertions.assertThrows(
+        TaskNotFoundException.class,
         () -> {
           manager.getSubtaskById(id);
         });

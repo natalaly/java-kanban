@@ -18,7 +18,7 @@ import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 
-public class HttpEpicsTest extends HttpTaskManagerTest{
+public class HttpEpicsTest extends HttpTaskManagerTest {
 
   @BeforeEach
   @Override
@@ -42,7 +42,8 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Epic>> listTypeToken = new TypeToken<List<Epic>>(){};
+    TypeToken<List<Epic>> listTypeToken = new TypeToken<List<Epic>>() {
+    };
     final List<Epic> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty list of Epics.");
   }
@@ -61,7 +62,8 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Epic>> listTypeToken = new TypeToken<List<Epic>>(){};
+    TypeToken<List<Epic>> listTypeToken = new TypeToken<List<Epic>>() {
+    };
     final List<Epic> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertFalse(actualTasks.isEmpty(), "Should not return an empty list of Epics.");
     Assertions.assertIterableEquals(expected, actualTasks, "Should return same List of Epics.");
@@ -81,7 +83,8 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonObject(response);
-    TypeToken<Epic> epicTypeToken = new TypeToken<Epic>() {};
+    TypeToken<Epic> epicTypeToken = new TypeToken<Epic>() {
+    };
     Epic actual = parseTaskFromResponse(response, epicTypeToken);
     Assertions.assertEquals(expected, actual, "Returned task is not correct.");
 
@@ -102,12 +105,11 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    JsonArray jsonArray = JsonParser.parseString(response.body()).getAsJsonArray();
-
-    TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>(){};
-    final List<Subtask> actual = parseTasksFromResponse(response,listTypeToken);
+    final TypeToken<List<Subtask>> listTypeToken = new TypeToken<List<Subtask>>() {
+    };
+    final List<Subtask> actual = parseTasksFromResponse(response, listTypeToken);
     actual.sort(Comparator.comparing(Subtask::getId));
-    Assertions.assertIterableEquals(expected,actual,"Returned list should be same.");
+    Assertions.assertIterableEquals(expected, actual, "Returned list should be same.");
   }
 
   /* POST */
@@ -124,7 +126,8 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 201);
-    TypeToken<Epic> epicTypeToken = new TypeToken<Epic>() {};
+    TypeToken<Epic> epicTypeToken = new TypeToken<Epic>() {
+    };
     final Epic actual = gson.fromJson(response.body(), epicTypeToken.getType());
     assertTaskFieldsAreSame(expected, actual);
     Assertions.assertEquals(expectedNumberOfEpics, manager.getEpics().size(),
@@ -137,7 +140,7 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
   public void postWithIdCallsUpdateTaskObjectWithNewStartTime()
       throws IOException, InterruptedException {
     /* Given */
-    final Epic expected  = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d"));
+    final Epic expected = manager.addEpic(TestDataBuilder.buildEpic(1, "epic", "d"));
     final int id = expected.getId();
     final Epic epicForUpdating = expected.copy();
     epicForUpdating.setDescription("Updated");
@@ -146,7 +149,7 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 400);
-    assertTaskFieldsAreSame(expected,manager.getEpicById(id));
+    assertTaskFieldsAreSame(expected, manager.getEpicById(id));
   }
 
   @Test
@@ -163,12 +166,12 @@ public class HttpEpicsTest extends HttpTaskManagerTest{
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 200);
-    final TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+    final TaskNotFoundException actualException = Assertions.assertThrows(
+        TaskNotFoundException.class,
         () -> {
           manager.getEpicById(id);
         });
   }
-
 
 }
 

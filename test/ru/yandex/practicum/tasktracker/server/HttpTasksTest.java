@@ -16,7 +16,7 @@ import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
 
-public class HttpTasksTest extends HttpTaskManagerTest{
+public class HttpTasksTest extends HttpTaskManagerTest {
 
   @BeforeEach
   @Override
@@ -40,7 +40,8 @@ public class HttpTasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Task>> listTypeToken = new TypeToken<List<Task>>(){};
+    TypeToken<List<Task>> listTypeToken = new TypeToken<List<Task>>() {
+    };
     final List<Task> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty list of Tasks");
   }
@@ -59,7 +60,8 @@ public class HttpTasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonArray(response);
-    TypeToken<List<Task>> listTypeToken = new TypeToken<List<Task>>(){};
+    TypeToken<List<Task>> listTypeToken = new TypeToken<List<Task>>() {
+    };
     final List<Task> actualTasks = parseTasksFromResponse(response, listTypeToken);
     Assertions.assertFalse(actualTasks.isEmpty(), "Should not return an empty list of Tasks.");
     Assertions.assertIterableEquals(expected, actualTasks, "Should return same List of tasks.");
@@ -82,8 +84,9 @@ public class HttpTasksTest extends HttpTaskManagerTest{
     /* Then */
     assertStatusCode(response, 200);
     assertResponseBodyIsJsonObject(response);
-    TypeToken<Task> taskTypeToken = new TypeToken<Task>() {};
-    final Task actualTask = parseTaskFromResponse(response, taskTypeToken  );
+    TypeToken<Task> taskTypeToken = new TypeToken<Task>() {
+    };
+    final Task actualTask = parseTaskFromResponse(response, taskTypeToken);
     Assertions.assertEquals(expectedTask, actualTask, "Returned task is not correct.");
 
   }
@@ -146,12 +149,12 @@ public class HttpTasksTest extends HttpTaskManagerTest{
     final HttpResponse<String> response = sendRequest(request);
     /* Then */
     assertStatusCode(response, 200);
-    final TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
+    final TaskNotFoundException actualException = Assertions.assertThrows(
+        TaskNotFoundException.class,
         () -> {
           manager.getTaskById(id);
         });
   }
-
 
 }
 

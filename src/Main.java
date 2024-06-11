@@ -36,7 +36,7 @@ public class Main {
 
   public static void main(String[] args) throws IOException {
 
-    int choice = 0;
+    int choice = 3;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
@@ -120,14 +120,6 @@ public class Main {
 
     System.out.println();
     System.out.println();
-//    ///////////      ///////////      ///////////          //////////       //////////
-//    Task t = new Task();
-//    t.setTitle("t");
-//    t.setDescription("d");
-//    t.setDuration(Duration.ofMinutes(7));
-//    t.setStartTime(LocalDateTime.of(2024, 5,21,12,20));
-//    newManage.addTask(t);
-
   }
 
   private static void createTasksData() {

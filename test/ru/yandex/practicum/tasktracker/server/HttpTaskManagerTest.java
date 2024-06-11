@@ -52,117 +52,36 @@ public abstract class HttpTaskManagerTest {
   @Test
   @DisplayName("GET should return an empty list from a new TaskManager")
   public abstract void getReturnsAnEmptyListFromNewTaskManager()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    final HttpRequest request = createGetRequest(BASE_ENDPOINT);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 200);
-//    assertResponseBodyIsJsonArray(response);
-//    final List<Task> actualTasks = parseTasksFromResponse(response);
-//    Assertions.assertTrue(actualTasks.isEmpty(), "Should return an empty list of Tasks");
-//  }
+      throws IOException, InterruptedException;
 
   @Test
   @DisplayName("GET should return list with  tasks from TaskManager")
   public abstract void getReturnsAnValidListFromTaskManager()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    TestDataBuilder.addTaskDataToTheTaskManager(manager);
-//    final List<Task> expected = manager.getTasks();
-//    final HttpRequest request = createGetRequest(BASE_ENDPOINT);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 200);
-//    assertResponseBodyIsJsonArray(response);
-//    final List<Task> actualTasks = parseTasksFromResponse(response);
-//    Assertions.assertFalse(actualTasks.isEmpty(), "Should return an empty list of Tasks.");
-//    Assertions.assertIterableEquals(expected, actualTasks, "Should return same List of tasks.");
-//
-//  }
+      throws IOException, InterruptedException;
 
   @Test
   @DisplayName("GET with /{id} should return task by valid ID from TaskManager")
   public abstract void getWithIdReturnsAnValidTaskObjectFromManager()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    final Task expectedTask = manager.addTask(
-//        TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW, Duration.ofMinutes(15),
-//            LocalDateTime.now()));
-//    final int id = expectedTask.getId();
-//    final HttpRequest request = createGetRequest(BASE_ENDPOINT + "/" + id);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 200);
-//    assertResponseBodyIsJsonObject(response);
-//    final Task actualTask = parseTaskFromResponse(response);
-//    Assertions.assertEquals(expectedTask, actualTask, "Returned task is not correct.");
-//
-//  }
+      throws IOException, InterruptedException;
 
   /* POST */
   @Test
   @DisplayName("POST should add task to the  TaskManager with start time defined")
   public abstract void postShouldAddTaskObjectToTheTaskManager()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    final Task expectedTask = TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW,
-//        Duration.ofMinutes(15), LocalDateTime.now());
-//    int expectedNumberOfTasks = manager.getTasks().size() + 1;
-//    final HttpRequest request = createPostRequest(BASE_ENDPOINT, expectedTask);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 201);
-//    final Task actual = gson.fromJson(response.body(), Task.class);
-//    assertTaskFieldsAreSame(expectedTask, actual);
-//    Assertions.assertEquals(expectedNumberOfTasks, manager.getTasks().size(),
-//        "The number of tasks should have increased by 1.");
-//  }
+      throws IOException, InterruptedException;
+
 
   @Test
   @DisplayName("POST  with /{id} should update existed in the TaskManager task with new start time")
   public abstract void postWithIdCallsUpdateTaskObjectWithNewStartTime()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    final Task existedTask = manager.addTask(
-//        TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW, Duration.ofMinutes(15),
-//            LocalDateTime.now()));
-//    final int id = existedTask.getId();
-//    final Task expected = existedTask.copy();
-//    expected.setStartTime(existedTask.getStartTime().plusYears(1));
-//    final HttpRequest request = createPostRequest(BASE_ENDPOINT + "/" + id, expected);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 201);
-//    final Task actual = manager.getTaskById(id);
-//    assertTaskFieldsAreSame(expected, actual);
-//    Assertions.assertEquals(expected, actual, "Id should be same.");
-//  }
+      throws IOException, InterruptedException;
 
+  /* DELETE  */
   @Test
   @DisplayName("DELETE  with /{id} should delete existed in the TaskManager Task")
   public abstract void deleteWithIdShouldDeleteTaskObjectFromTaskManager()
-      throws IOException, InterruptedException;//{
-//    /* Given */
-//    final Task existedTask = manager.addTask(
-//        TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW, Duration.ofMinutes(15),
-//            LocalDateTime.now()));
-//    final int id = existedTask.getId();
-//    final HttpRequest request = createDeleteRequest(BASE_ENDPOINT + "/" + id);
-//    /* When */
-//    final HttpResponse<String> response = sendRequest(request);
-//    /* Then */
-//    assertStatusCode(response, 200);
-//    final TaskNotFoundException actualException = Assertions.assertThrows(TaskNotFoundException.class,
-//        () -> {
-//          manager.getTaskById(id);
-//        });
-//  }
+      throws IOException, InterruptedException;
+
 
   protected HttpRequest createGetRequest(String uri) {
     return HttpRequest.newBuilder()
@@ -237,21 +156,24 @@ public abstract class HttpTaskManagerTest {
     Assertions.assertTrue(jsonElement.isJsonObject(), "Response body should be a JSON object.");
   }
 
-  protected <T extends List<?>> T parseTasksFromResponse(HttpResponse<String> response, TypeToken<T> typeToken ) {
+  protected <T extends List<?>> T parseTasksFromResponse(HttpResponse<String> response,
+      TypeToken<T> typeToken) {
     JsonElement jsonElement = JsonParser.parseString(response.body());
     return gson.fromJson(jsonElement, typeToken.getType());
   }
 
-  protected <T extends Task> T parseTaskFromResponse(HttpResponse<String> response, TypeToken<T> typeToken) {
+  protected <T extends Task> T parseTaskFromResponse(HttpResponse<String> response,
+      TypeToken<T> typeToken) {
     JsonElement jsonElement = JsonParser.parseString(response.body());
     return gson.fromJson(jsonElement, typeToken.getType());
   }
+
   protected List<Task> parseAllTaskTypesFromResponse(HttpResponse<String> response) {
     System.out.println("Response:" + response);
     JsonElement jsonElement = JsonParser.parseString(response.body());
     List<Task> result = new ArrayList<>();
     if (jsonElement.isJsonArray()) {
-      JsonArray jsonArray =  jsonElement.getAsJsonArray();
+      JsonArray jsonArray = jsonElement.getAsJsonArray();
       jsonArray.forEach(eachElement -> {
         Task task = parseTaskFromJson(eachElement);
         if (task != null) {

@@ -64,7 +64,6 @@ public class HttpHistoryTest extends HttpTaskManagerTest {
   }
 
 
-
   @Test
   @Override
   @DisplayName("GET /history/{id} should return 400 -wrong path")
