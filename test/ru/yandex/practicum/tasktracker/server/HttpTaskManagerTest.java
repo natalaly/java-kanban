@@ -9,20 +9,15 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import ru.yandex.practicum.tasktracker.model.TaskStatus;
 import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.service.Managers;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
@@ -53,7 +48,7 @@ public abstract class HttpTaskManagerTest {
 
   @Test
   @DisplayName("GET should return an empty list from a new TaskManager")
-  public abstract void getTasksReturnsAnEmptyListFromNewTaskManager()
+  public abstract void getReturnsAnEmptyListFromNewTaskManager()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    final HttpRequest request = createGetRequest(BASE_ENDPOINT);
@@ -68,7 +63,7 @@ public abstract class HttpTaskManagerTest {
 
   @Test
   @DisplayName("GET should return list with  tasks from TaskManager")
-  public abstract void getTasksReturnsAnValidListFromTaskManager()
+  public abstract void getReturnsAnValidListFromTaskManager()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    TestDataBuilder.addTaskDataToTheTaskManager(manager);
@@ -87,7 +82,7 @@ public abstract class HttpTaskManagerTest {
 
   @Test
   @DisplayName("GET with /{id} should return task by valid ID from TaskManager")
-  public abstract void getTasksByIdReturnsAnValidTaskFromManager()
+  public abstract void getWithIdReturnsAnValidTaskObjectFromManager()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    final Task expectedTask = manager.addTask(
@@ -107,8 +102,8 @@ public abstract class HttpTaskManagerTest {
 
   /* POST */
   @Test
-  @DisplayName("POST  should add task to the  TaskManager with start time defined")
-  public abstract void postTasksShouldAddTaskToTheTaskManager()
+  @DisplayName("POST should add task to the  TaskManager with start time defined")
+  public abstract void postShouldAddTaskObjectToTheTaskManager()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    final Task expectedTask = TestDataBuilder.buildTask(1, "task", "d", TaskStatus.NEW,
@@ -127,7 +122,7 @@ public abstract class HttpTaskManagerTest {
 
   @Test
   @DisplayName("POST  with /{id} should update existed in the TaskManager task with new start time")
-  public abstract void postTasksByIdShouldUpdateTaskWithNewStartTime()
+  public abstract void postWithIdCallsUpdateTaskObjectWithNewStartTime()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    final Task existedTask = manager.addTask(
@@ -148,7 +143,7 @@ public abstract class HttpTaskManagerTest {
 
   @Test
   @DisplayName("DELETE  with /{id} should delete existed in the TaskManager Task")
-  public abstract void deleteTasksByIdShouldDeleteTaskFromTaskManager()
+  public abstract void deleteWithIdShouldDeleteTaskObjectFromTaskManager()
       throws IOException, InterruptedException;//{
 //    /* Given */
 //    final Task existedTask = manager.addTask(
@@ -239,15 +234,14 @@ public abstract class HttpTaskManagerTest {
     Assertions.assertTrue(jsonElement.isJsonObject(), "Response body should be a JSON object.");
   }
 
-  protected List<Task> parseTasksFromResponse(HttpResponse<String> response) {
+  protected <T extends List<?>> T parseTasksFromResponse(HttpResponse<String> response, TypeToken<T> typeToken ) {
     JsonElement jsonElement = JsonParser.parseString(response.body());
-    return gson.fromJson(jsonElement, new TypeToken<List<Task>>() {
-    }.getType());
+    return gson.fromJson(jsonElement, typeToken.getType());
   }
 
-  protected Task parseTaskFromResponse(HttpResponse<String> response) {
+  protected <T extends Task> T parseTaskFromResponse(HttpResponse<String> response, TypeToken<T> typeToken) {
     JsonElement jsonElement = JsonParser.parseString(response.body());
-    return gson.fromJson(jsonElement, Task.class);
+    return gson.fromJson(jsonElement, typeToken.getType());
   }
 }
 

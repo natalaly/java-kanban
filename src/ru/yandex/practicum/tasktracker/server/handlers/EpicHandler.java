@@ -129,7 +129,7 @@ public class EpicHandler extends BaseHttpHandler {
 
     Epic epic = gson.fromJson(requestBody, Epic.class);
       String response = gson.toJson(taskManager.addEpic(epic));
-      sendCreated201(exchange);
+      sendCreated201(exchange,response);
       System.out.println("Epic was added to the TM");
   }
 
