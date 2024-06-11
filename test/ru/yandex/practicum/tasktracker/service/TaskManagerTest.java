@@ -134,8 +134,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   @Test
   @DisplayName("getPrioritized() - should return a list of tasks.")
   public void getPrioritizedTasksReturnsAllListOrPrioritizedTasks() {
-    final List<Task> taskData = TestDataBuilder.buildTasks();
-    final List<Integer> ids = addTaskDataToTheTaskManager(taskData);
+    final List<Integer> ids = TestDataBuilder.addTaskDataToTheTaskManager(taskManager);
     final List<Task> expected = List.of(taskManager.getTaskById(ids.get(1)),
         taskManager.getSubtaskById(ids.get(4)));
 
@@ -1049,32 +1048,10 @@ public abstract class TaskManagerTest<T extends TaskManager> {
   }
 
   private void buildHistoryInTaskManager() {
-    final List<Task> tasks = TestDataBuilder.buildTasks();
-    List<Integer> ids = addTaskDataToTheTaskManager(tasks);
-    for (Task t : tasks) {
-      if (t instanceof Epic) {
-        taskManager.getEpicById(t.getId());
-      } else if (t instanceof Subtask) {
-        taskManager.getSubtaskById(t.getId());
-      } else {
-        taskManager.getTaskById(t.getId());
-      }
-    }
-  }
-
-  private List<Integer> addTaskDataToTheTaskManager(List<Task> taskData) {
-    List<Integer> ids = new ArrayList<>();
-    for (Task t : taskData) {
-      if (t instanceof Epic) {
-        ids.add(taskManager.addEpic((Epic) t).getId());
-      } else if (t instanceof Subtask st) {
-        st.setEpicId(ids.get(0));
-        ids.add(taskManager.addSubtask(st).getId());
-      } else {
-        ids.add(taskManager.addTask(t).getId());
-      }
-    }
-    return ids;
+    TestDataBuilder.addTaskDataToTheTaskManager(taskManager);
+    taskManager.getTasks().stream().map(Task::getId).forEach(taskManager::getTaskById);
+    taskManager.getEpics().stream().map(Epic::getId).forEach(taskManager::getEpicById);
+    taskManager.getSubtasks().stream().map(Subtask::getId).forEach(taskManager::getSubtaskById);
   }
 
 }

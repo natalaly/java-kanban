@@ -77,6 +77,10 @@ abstract public class BaseHttpHandler implements HttpHandler {
     sendResponse(h,  201);
   }
 
+  public void sendCreated201(HttpExchange h,String text) throws IOException {
+    sendResponse(h, text, 201);
+  }
+
   public void sendBadRequest400(HttpExchange h) throws IOException {
     sendResponse(h, 400);
   }

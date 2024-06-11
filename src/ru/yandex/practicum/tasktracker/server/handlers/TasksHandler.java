@@ -120,7 +120,7 @@ public class TasksHandler extends BaseHttpHandler {
     Task task = gson.fromJson(requestBody, Task.class);
     try {
       String response = gson.toJson(taskManager.addTask(task));
-      sendCreated201(exchange);
+      sendCreated201(exchange,response);
       System.out.println("task was added to the TM");
     } catch (Exception e) {
       sendHasInteractions406(exchange);

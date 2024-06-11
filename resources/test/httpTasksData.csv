@@ -1,14 +1,15 @@
 id,type,name,status,description,duration,startTime,epic
-1,TASK,task,NEW,t description,0,null,/s
-6,TASK,task2,NEW,t2,20,2024-05-21T12:20,/s
-7,TASK,task3,NEW,t3,20,2024-05-21T12:00,/s
-2,EPIC,epic,IN_PROGRESS,null,15,2024-06-07T11:16:19.491863,/s
-4,EPIC,epic2,NEW,null,0,null,/s
+1,TASK,task,NEW,t description,0,null, 
+6,TASK,task2,NEW,t2,20,2024-05-21T12:20, 
+7,TASK,task3,NEW,t3,20,2024-05-21T12:00, 
+2,EPIC,epic,IN_PROGRESS,null,15,2024-06-07T11:16:19.491863, 
+4,EPIC,epic2,NEW,null,0,null, 
 3,SUBTASK,sbtask,NEW,st description,0,null,2
 5,SUBTASK,sbtask2,DONE,st2 description,15,2024-06-07T11:16:19.491863,2
 history
-2,EPIC,epic,IN_PROGRESS,null,15,2024-06-07T11:16:19.491863,/s
+2,EPIC,epic,IN_PROGRESS,null,15,2024-06-07T11:16:19.491863, 
+1,TASK,task,NEW,t description,0,null, 
 prioritized
-7,TASK,task3,NEW,t3,20,2024-05-21T12:00,/s
-6,TASK,task2,NEW,t2,20,2024-05-21T12:20,/s
+7,TASK,task3,NEW,t3,20,2024-05-21T12:00, 
+6,TASK,task2,NEW,t2,20,2024-05-21T12:20, 
 5,SUBTASK,sbtask2,DONE,st2 description,15,2024-06-07T11:16:19.491863,2
