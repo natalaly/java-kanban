@@ -54,7 +54,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
    */
   @Override
   public void handle(HttpExchange exchange) {
-    try {
+    try (exchange) {
       final String path = exchange.getRequestURI().getPath();
       final String requestMethod = exchange.getRequestMethod();
       switch (requestMethod) {
@@ -78,8 +78,6 @@ public abstract class BaseHttpHandler implements HttpHandler {
       }
     } catch (Exception e) {
       e.printStackTrace();
-    } finally {
-      exchange.close();
     }
   }
 

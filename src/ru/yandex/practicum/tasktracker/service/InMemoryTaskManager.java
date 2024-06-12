@@ -119,7 +119,6 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteTask(final int id) {
     Task removedTask = tasks.remove(id);
     if (removedTask == null) {
-//      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
       return;
     }
     historyManager.remove(id);
@@ -130,7 +129,7 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteEpic(final int id) {
     final Epic epic = epics.remove(id);
     if (epic == null) {
-      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
+      return;
     }
     epic.getSubtasks().forEach(s -> {
       subtasks.remove(s.getId());
@@ -144,7 +143,7 @@ public class InMemoryTaskManager implements TaskManager {
   public void deleteSubtask(final int id) {
     final Subtask subtask = subtasks.remove(id);
     if (subtask == null) {
-      throw new TaskNotFoundException("Task with Id " + id + " was not found.");
+      return;
     }
     final int epicId = subtask.getEpicId();
     epics.get(epicId).removeSubtask(subtask);

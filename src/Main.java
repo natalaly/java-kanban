@@ -34,14 +34,20 @@ public class Main {
   private static Subtask sb3;
   private static Epic epic2;
 
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args)  {
 
-    int choice = 3;
+    int choice = 0;
 
     switch (choice) {
       case 1 -> useCase1(); /* History Saving */
       case 2 -> useCaseFile(); /* File saving / restoring */
-      case 3 -> useCaseHttpServer(); /* Http server */
+      case 3 -> {
+        try {
+          useCaseHttpServer(); /* Http server */
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
     }
 
   }
@@ -50,6 +56,7 @@ public class Main {
     HttpTaskServer taskServer = new HttpTaskServer(
         Managers.getFileBackedTaskManager(Path.of(PATH_CASE_3).toFile()));
     taskServer.start();
+//    taskServer.stop();
   }
 
   /**
