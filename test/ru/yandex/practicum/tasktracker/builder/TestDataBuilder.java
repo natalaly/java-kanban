@@ -2,12 +2,14 @@ package ru.yandex.practicum.tasktracker.builder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
 import ru.yandex.practicum.tasktracker.model.TaskStatus;
+import ru.yandex.practicum.tasktracker.model.TaskType;
 import ru.yandex.practicum.tasktracker.service.InMemoryTaskManager;
 import ru.yandex.practicum.tasktracker.service.TaskManager;
 
@@ -144,6 +146,35 @@ public class TestDataBuilder {
             buildSubtask(5, "subtask2", "notes", 1, TaskStatus.IN_PROGRESS, Duration.ofMinutes(15),
                 LocalDateTime.now().plusMinutes(20)),
             buildTask(6, "task2", "d", TaskStatus.NEW)));
+  }
+
+  /**
+   * Method adds set of Task objects of different types, which includes:
+   * <ol>
+   *   <li> Two Tasks, one with startTime - indices 1, 5</li>
+   *   <li> One Epic with two Subtasks - index 0</li>
+   *   <li> Two Subtasks for Epic< second one with startTime - indices 2, 4</li>
+   *   <li> One Epic without Subtasks - index 3</li>
+   * </ol>
+   * All tasks have non-conflicting startTime and duration.
+   *
+   * @return {@code List<Task>}
+   */
+  public static List<Integer> addTaskDataToTheTaskManager(TaskManager taskManager) {
+    List<Task> taskData = buildTasks();
+    List<Integer> ids = new ArrayList<>();
+    for (Task t : taskData) {
+      TaskType type = t.getType();
+      switch (type) {
+        case EPIC -> ids.add(taskManager.addEpic((Epic) t).getId());
+        case SUBTASK -> {
+          ((Subtask) t).setEpicId(ids.get(0));
+          ids.add(taskManager.addSubtask((Subtask) t).getId());
+        }
+        case TASK -> ids.add(taskManager.addTask(t).getId());
+      }
+    }
+    return ids;
   }
 
 }

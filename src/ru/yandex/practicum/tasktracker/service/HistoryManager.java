@@ -1,7 +1,7 @@
 package ru.yandex.practicum.tasktracker.service;
 
-import ru.yandex.practicum.tasktracker.model.Task;
 import java.util.List;
+import ru.yandex.practicum.tasktracker.model.Task;
 
 /**
  * The {@code HistoryManager} interface defines methods for managing the history of viewed tasks.

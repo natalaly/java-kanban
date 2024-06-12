@@ -1,8 +1,8 @@
 package ru.yandex.practicum.tasktracker.model;
 
-import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import ru.yandex.practicum.tasktracker.builder.TestDataBuilder;
 
 class TaskTest {
 

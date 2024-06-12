@@ -56,8 +56,8 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
   @Test
   void loadFromFileCreatesNewObjectFromEmptyFile() {
     final int totalTasksNumber =
-        taskManager.getAllTasks().size() + taskManager.getAllEpics().size()
-            + taskManager.getAllSubtasks()
+        taskManager.getTasks().size() + taskManager.getEpics().size()
+            + taskManager.getSubtasks()
             .size() + taskManager.getHistory().size();
 
     Assertions.assertAll(
@@ -78,11 +78,11 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     final Map<TaskType, Integer> lastIds = getLastUsedIdsByType(taskManager);
     generateHistory(taskManager, lastIds);
 
-    final List<Task> expectedTasks = taskManager.getAllTasks();
+    final List<Task> expectedTasks = taskManager.getTasks();
     expectedTasks.sort(Comparator.comparing(Task::getId));
-    final List<Epic> expectedEpics = taskManager.getAllEpics();
+    final List<Epic> expectedEpics = taskManager.getEpics();
     expectedEpics.sort(Comparator.comparing(Epic::getId));
-    final List<Subtask> expectedSubtasks = taskManager.getAllSubtasks();
+    final List<Subtask> expectedSubtasks = taskManager.getSubtasks();
     expectedSubtasks.sort(Comparator.comparing(Subtask::getId));
     final List<Task> expectedHistory = new ArrayList<>(taskManager.getHistory());
     expectedHistory.sort(Comparator.comparing(Task::getId));
@@ -90,11 +90,11 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
     /* AND a new taskManager created from the file of previous one */
     final TaskManager newManager = FileBackedTaskManager.loadFromFile(file);
-    final List<Task> actualTasks = newManager.getAllTasks();
+    final List<Task> actualTasks = newManager.getTasks();
     actualTasks.sort(Comparator.comparing(Task::getId));
-    final List<Epic> actualEpics = newManager.getAllEpics();
+    final List<Epic> actualEpics = newManager.getEpics();
     actualEpics.sort(Comparator.comparing(Epic::getId));
-    final List<Subtask> actualSubtasks = newManager.getAllSubtasks();
+    final List<Subtask> actualSubtasks = newManager.getSubtasks();
     actualSubtasks.sort(Comparator.comparing(Subtask::getId));
     final List<Task> actualHistory = new ArrayList<>(newManager.getHistory());
     actualHistory.sort(Comparator.comparing(Task::getId));
@@ -143,7 +143,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
         int epicId = epicForId.getId();
         s.setEpicId(epicId);
         taskManager.addSubtask(s);
-        epicForId = taskManager.getAllEpics().stream().filter((e) -> e.getId() == epicId)
+        epicForId = taskManager.getEpics().stream().filter((e) -> e.getId() == epicId)
             .findFirst()
             .orElse(null);
         epic = String.valueOf(epicId);
@@ -220,11 +220,11 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
 
   private Map<TaskType, Integer> getLastUsedIdsByType(final TaskManager manager) {
     final Map<TaskType, Integer> lastIds = new HashMap<>();
-    final int maxTask = manager.getAllTasks().stream().map(Task::getId)
+    final int maxTask = manager.getTasks().stream().map(Task::getId)
         .max(Comparator.naturalOrder()).orElse(0);
-    final int maxEpic = manager.getAllEpics().stream().map(Epic::getId)
+    final int maxEpic = manager.getEpics().stream().map(Epic::getId)
         .max(Comparator.naturalOrder()).orElse(0);
-    final int maxSubtask = manager.getAllSubtasks().stream().map(Subtask::getId)
+    final int maxSubtask = manager.getSubtasks().stream().map(Subtask::getId)
         .max(Comparator.naturalOrder()).orElse(0);
     lastIds.put(TaskType.TASK, maxTask);
     lastIds.put(TaskType.EPIC, maxEpic);

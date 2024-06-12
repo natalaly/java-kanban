@@ -1,10 +1,10 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.List;
 import java.util.Set;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import java.util.List;
 
 /**
  * The {@code TaskManager} interface manages tasks of different types including {@link Task},
@@ -26,27 +26,15 @@ import java.util.List;
  */
 public interface TaskManager {
 
-  List<Task> getAllTasks();
+  List<Task> getTasks();
 
-  List<Epic> getAllEpics();
+  List<Epic> getEpics();
 
-  List<Subtask> getAllSubtasks();
+  List<Subtask> getSubtasks();
 
   List<Task> getPrioritizedTasks();
 
   List<Task> getHistory();
-
-  void clearTasks();
-
-  void clearEpics();
-
-  void clearSubtasks();
-
-  void deleteTask(final int id);
-
-  void deleteEpic(final int id);
-
-  void deleteSubtask(final int id);
 
   Task getTaskById(final int id);
 
@@ -67,5 +55,18 @@ public interface TaskManager {
   void updateEpic(final Epic epic);
 
   void updateSubtask(final Subtask subtask);
+
+  void clearTasks();
+
+  void clearEpics();
+
+  void clearSubtasks();
+
+  void deleteTask(final int id);
+
+  void deleteEpic(final int id);
+
+  void deleteSubtask(final int id);
+
 
 }

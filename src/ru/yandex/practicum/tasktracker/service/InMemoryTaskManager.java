@@ -1,8 +1,14 @@
 package ru.yandex.practicum.tasktracker.service;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import ru.yandex.practicum.tasktracker.exception.TaskNotFoundException;
 import ru.yandex.practicum.tasktracker.exception.TaskPrioritizationException;
@@ -10,12 +16,6 @@ import ru.yandex.practicum.tasktracker.exception.TaskValidationException;
 import ru.yandex.practicum.tasktracker.model.Epic;
 import ru.yandex.practicum.tasktracker.model.Subtask;
 import ru.yandex.practicum.tasktracker.model.Task;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The {@code InMemoryTaskManager} class implements the {@link TaskManager} interface and provides
@@ -48,17 +48,17 @@ public class InMemoryTaskManager implements TaskManager {
       Comparator.comparing(Task::getStartTime));
 
   @Override
-  public List<Task> getAllTasks() {
+  public List<Task> getTasks() {
     return new ArrayList<>(tasks.values());
   }
 
   @Override
-  public List<Epic> getAllEpics() {
+  public List<Epic> getEpics() {
     return new ArrayList<>(epics.values());
   }
 
   @Override
-  public List<Subtask> getAllSubtasks() {
+  public List<Subtask> getSubtasks() {
     return new ArrayList<>(subtasks.values());
   }
 
@@ -67,6 +67,13 @@ public class InMemoryTaskManager implements TaskManager {
     return new ArrayList<>(prioritizedTasks);
   }
 
+  /**
+   * Retrieves the history of tasks from the history manager. This method fetches the history list
+   * from the history manager, resolves each task to its corresponding object from the appropriate
+   * collection.
+   *
+   * @return a list of tasks in the history
+   */
   @Override
   public List<Task> getHistory() {
     return historyManager.getHistory().stream()
@@ -80,18 +87,20 @@ public class InMemoryTaskManager implements TaskManager {
 
   @Override
   public void clearTasks() {
-    tasks.values().stream().peek(t -> historyManager.remove(t.getId()))
-        .filter(t -> t.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
+    tasks.values().forEach(t -> {
+      historyManager.remove(t.getId());
+      removePrioritized(t);
+    });
     tasks.clear();
   }
 
   @Override
   public void clearEpics() {
-    subtasks.values().stream().peek(st -> historyManager.remove(st.getId()))
-        .filter(st -> st.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
-    epics.values().forEach(e -> historyManager.remove(e.getId()));
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      removePrioritized(st);
+    });
+    epics.keySet().forEach(historyManager::remove);
     subtasks.clear();
     epics.clear();
   }
@@ -99,36 +108,34 @@ public class InMemoryTaskManager implements TaskManager {
   @Override
   public void clearSubtasks() {
     epics.values().forEach(Epic::clearSubtasks);
-    subtasks.values().stream()
-        .peek(st -> historyManager.remove(st.getId()))
-        .filter(st -> st.getStartTime() != null)
-        .forEach(prioritizedTasks::remove);
+    subtasks.values().forEach(st -> {
+      historyManager.remove(st.getId());
+      removePrioritized(st);
+    });
     subtasks.clear();
   }
 
   @Override
   public void deleteTask(final int id) {
-    Optional.ofNullable(tasks.remove(id))
-        .ifPresent(removedTask -> {
-          historyManager.remove(id);
-          if (removedTask.getStartTime() != null) {
-            prioritizedTasks.remove(removedTask);
-          }
-        });
+    Task removedTask = tasks.remove(id);
+    if (removedTask == null) {
+      return;
+    }
+    historyManager.remove(id);
+    removePrioritized(removedTask);
   }
 
   @Override
   public void deleteEpic(final int id) {
     final Epic epic = epics.remove(id);
-    if (epic != null) {
-      epic.getSubtasks().forEach(s -> {
-        subtasks.remove(s.getId());
-        historyManager.remove(s.getId());
-        if (s.getStartTime() != null) {
-          prioritizedTasks.remove(s);
-        }
-      });
+    if (epic == null) {
+      return;
     }
+    epic.getSubtasks().forEach(s -> {
+      subtasks.remove(s.getId());
+      historyManager.remove(s.getId());
+      removePrioritized(s);
+    });
     historyManager.remove(id);
   }
 
@@ -141,13 +148,11 @@ public class InMemoryTaskManager implements TaskManager {
     final int epicId = subtask.getEpicId();
     epics.get(epicId).removeSubtask(subtask);
     historyManager.remove(id);
-    if (subtask.getStartTime() != null) {
-      prioritizedTasks.remove(subtask);
-    }
+    removePrioritized(subtask);
   }
 
   @Override
-  public Task getTaskById(final int id) {
+  public Task getTaskById(final int id) throws TaskNotFoundException {
     final Optional<Task> t = Optional.ofNullable(tasks.get(id));
     t.ifPresent(historyManager::add);
     return t.orElseThrow(() -> new TaskNotFoundException("Task with Id " + id + " was not found."))
@@ -180,7 +185,7 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public Task addTask(final Task task) {
+  public Task addTask(final Task task) throws TaskPrioritizationException {
     task.setId(generateId());
     addPrioritized(task);
     tasks.put(task.getId(), task.copy());
@@ -215,15 +220,14 @@ public class InMemoryTaskManager implements TaskManager {
   }
 
   @Override
-  public void updateTask(final Task taskToUpdate) {
+  public void updateTask(final Task taskToUpdate)
+      throws TaskNotFoundException, TaskPrioritizationException {
     final Task taskInMemory = tasks.get(taskToUpdate.getId());
     if (taskInMemory == null) {
       throw new TaskNotFoundException(
           "The task " + taskToUpdate + "does not exist in the TaskManager");
     }
-    if (taskInMemory.getStartTime() != null) {
-      prioritizedTasks.remove(taskInMemory);
-    }
+    removePrioritized(taskInMemory);
     addPrioritized(taskToUpdate.copy());
     tasks.put(taskToUpdate.getId(), taskToUpdate.copy());
   }
@@ -254,9 +258,7 @@ public class InMemoryTaskManager implements TaskManager {
       throw new TaskNotFoundException(
           "The subtask " + subtask + "does not exist in the TaskManager");
     }
-    if (subtaskInMemory.getStartTime() != null) {
-      prioritizedTasks.remove(subtaskInMemory);
-    }
+    removePrioritized(subtaskInMemory);
     final Subtask subtaskToUpdate = subtask.copy();
     addPrioritized(subtaskToUpdate);
     subtasks.put(subtask.getId(), subtaskToUpdate);
@@ -277,7 +279,7 @@ public class InMemoryTaskManager implements TaskManager {
    * @param taskToAdd
    * @throws TaskValidationException if the task has a time conflict with an existing task.
    */
-  private void addPrioritized(final Task taskToAdd) {
+  private void addPrioritized(final Task taskToAdd) throws TaskPrioritizationException {
     if (!canBePrioritized(taskToAdd)) {
       return;
     }
@@ -292,7 +294,7 @@ public class InMemoryTaskManager implements TaskManager {
    * @return {@Code true} if {@code taskToCheck} meets above requirements
    * @throws TaskPrioritizationException if the task has a time conflict with an existing task.
    */
-  private boolean canBePrioritized(final Task taskToCheck) {
+  private boolean canBePrioritized(final Task taskToCheck) throws TaskPrioritizationException {
     Objects.requireNonNull(taskToCheck);
     if (taskToCheck.getStartTime() == null) {
       return false;
@@ -314,6 +316,12 @@ public class InMemoryTaskManager implements TaskManager {
   private boolean hasTimeConflict(final Task task1, final Task task2) {
     return task2 != null && task1.getStartTime().isBefore(task2.getEndTime()) &&
         task1.getEndTime().isAfter(task2.getStartTime());
+  }
+
+  private void removePrioritized(Task task) {
+    if (task != null && task.getStartTime() != null) {
+      prioritizedTasks.remove(task);
+    }
   }
 
 }
